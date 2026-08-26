@@ -1,0 +1,3009 @@
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Send, Lightbulb } from "lucide-react";
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, ReferenceLine, ResponsiveContainer, Tooltip } from "recharts";
+import {
+  safeGet,
+  safeSet,
+  verificarStorage,
+  listRegistroKeysForMonth,
+  ensureReferralCode,
+  redeemReferralCode,
+  claimReferralBonus,
+  soyAdmin,
+  crearCodigoPremium,
+  listarCodigosPremium,
+  redeemPremiumCode,
+  crearPreferenciaPago,
+  llamarCoach,
+} from "./lib/storage";
+import { cerrarSesion } from "./lib/auth.jsx";
+
+// ---------- tokens ----------
+const C = {
+  bg: "#0F1712",
+  panel: "#16211B",
+  panelAlt: "#1E2C24",
+  border: "#2B3B32",
+  text: "#F2EEE3",
+  muted: "#8FA396",
+  train: "#FF6B4A",
+  trainDim: "#4A2C22",
+  food: "#FFC145",
+  foodDim: "#4A3D1E",
+  danger: "#E8503A",
+};
+
+const TRACKS = {
+  empuje: {
+    nombre: "Empuje",
+    ejercicios: [
+      { nombre: "Flexiones de rodillas", tip: "Apoyá las rodillas, espalda recta y bajá el pecho cerca del piso sin arquear la zona lumbar." },
+      { nombre: "Flexiones completas", tip: "Cuerpo en línea recta de cabeza a talones, codos a 45° del torso, no dejes caer la cadera." },
+      { nombre: "Flexiones con manos juntas", tip: "Manos juntas formando un diamante bajo el pecho; sumás trabajo de tríceps, controlá la bajada." },
+      { nombre: "Fondos en banco o paralelas", tip: "Bajá hasta que los hombros queden a la altura de los codos, no más, para cuidar el hombro." },
+      { nombre: "Flexiones con un brazo extendido", tip: "Un brazo se extiende al costado mientras el otro empuja; alterná lados en cada repetición." },
+      { nombre: "Flexión a un solo brazo (asistida)", tip: "La mano libre apoya solo de sostén, el peso real lo lleva el brazo de trabajo." },
+    ],
+  },
+  traccion: {
+    nombre: "Tracción",
+    ejercicios: [
+      { nombre: "Remo con el cuerpo inclinado", tip: "Cuerpo recto, tirá con los codos pegados al torso y apretá los omóplatos arriba." },
+      { nombre: "Dominadas asistidas (con banda)", tip: "Usá banda o apoyo en los pies, priorizá el rango completo antes que la velocidad." },
+      { nombre: "Dominadas completas", tip: "Arrancá desde brazos extendidos, subí hasta que el mentón pase la barra, sin hamacarte." },
+      { nombre: "Dominadas con peso extra", tip: "Sumá peso extra solo cuando puedas hacer 8-10 dominadas limpias sin lastre." },
+      { nombre: "Subida completa a la barra, asistida", tip: "Usá banda para el impulso; practicá primero el tirón alto y el agarre girado." },
+      { nombre: "Subida completa a la barra", tip: "Sin impulso de piernas: tirón explosivo y transición rápida de muñeca sobre la barra." },
+    ],
+  },
+  piernas: {
+    nombre: "Piernas",
+    ejercicios: [
+      { nombre: "Sentadilla con las dos piernas", tip: "Rodillas en línea con los pies, bajá hasta que los muslos queden paralelos al piso." },
+      { nombre: "Sentadilla con una pierna atrás elevada", tip: "Pie trasero elevado, bajá recto, sin que la rodilla delantera pase mucho la punta del pie." },
+      { nombre: "Zancada con salto", tip: "Aterrizá suave, controlá la rodilla y alterná piernas en el aire." },
+      { nombre: "Sentadilla a una pierna, asistida", tip: "Sostenete de algo (marco de puerta, barra) para trabajar equilibrio y rango completo." },
+      { nombre: "Sentadilla a una pierna completa", tip: "Pierna libre extendida al frente, bajá controlado, sin rebotar abajo." },
+      { nombre: "Sentadilla a una pierna con peso", tip: "Sumá una mancuerna solo cuando te salga limpia varias veces seguidas sin peso." },
+    ],
+  },
+  core: {
+    nombre: "Core",
+    ejercicios: [
+      { nombre: "Plancha abdominal", tip: "Cuerpo en línea recta, abdomen contraído, no dejes caer la cadera.", porTiempo: true },
+      { nombre: "Subir las piernas colgado de la barra", tip: "Colgado de la barra, subí las piernas sin balancearte, controlá la bajada." },
+      { nombre: "Sostenerse con las piernas rectas al frente", tip: "Piernas extendidas al frente en forma de L, hombros activos empujando hacia abajo.", porTiempo: true },
+      { nombre: "Rueda abdominal desde rodillas", tip: "Rodillas apoyadas, extendé controlado y sin arquear la zona lumbar." },
+      { nombre: "Bajada controlada del cuerpo, recto", tip: "Solo los hombros apoyados, bajá el cuerpo recto lo más lento posible.", porTiempo: true },
+      { nombre: "Cuerpo horizontal colgado, piernas encogidas", tip: "Colgado, llevá las rodillas al pecho con el cuerpo horizontal, activando dorsales y core.", porTiempo: true },
+    ],
+  },
+};
+
+const ALIMENTOS = [
+  { nombre: "Milanesa (150g)", kcal: 380, prot: 32, carb: 12, grasa: 22 },
+  { nombre: "Arroz cocido (100g)", kcal: 130, prot: 2.7, carb: 28, grasa: 0.3 },
+  { nombre: "Pollo a la plancha (150g)", kcal: 248, prot: 46, carb: 0, grasa: 6 },
+  { nombre: "Huevo (1 unidad)", kcal: 78, prot: 6, carb: 0.6, grasa: 5 },
+  { nombre: "Banana", kcal: 105, prot: 1.3, carb: 27, grasa: 0.4 },
+  { nombre: "Yogur natural (1 pote)", kcal: 100, prot: 6, carb: 8, grasa: 5 },
+  { nombre: "Pan (1 rebanada)", kcal: 80, prot: 3, carb: 15, grasa: 1 },
+  { nombre: "Ensalada mixta", kcal: 60, prot: 2, carb: 10, grasa: 1.5 },
+  { nombre: "Asado (150g)", kcal: 400, prot: 35, carb: 0, grasa: 28 },
+  { nombre: "Batata al horno (150g)", kcal: 150, prot: 2, carb: 35, grasa: 0.2 },
+];
+
+const HELADERA_ITEMS = [
+  "Huevo", "Pollo", "Carne picada", "Carne de cerdo", "Atún", "Pescado", "Queso", "Queso untable", "Yogur", "Leche",
+  "Arroz", "Fideos", "Quinoa", "Pan", "Avena", "Batata", "Choclo", "Zapallo", "Lentejas", "Garbanzos",
+  "Palta", "Tomate", "Lechuga", "Zanahoria", "Espinaca", "Cebolla", "Champiñones",
+  "Banana", "Manzana", "Frutos secos", "Miel",
+];
+
+const RECETAS = [
+  { nombre: "Tortilla de huevo con tomate", ingredientes: ["Huevo", "Tomate"], kcal: 220, prot: 16, carb: 4, grasa: 15 },
+  { nombre: "Pollo con arroz y lechuga", ingredientes: ["Pollo", "Arroz", "Lechuga"], kcal: 420, prot: 42, carb: 45, grasa: 8 },
+  { nombre: "Ensalada de atún con palta", ingredientes: ["Atún", "Palta", "Tomate"], kcal: 310, prot: 26, carb: 8, grasa: 20 },
+  { nombre: "Bowl de avena, banana y yogur", ingredientes: ["Avena", "Banana", "Yogur"], kcal: 340, prot: 14, carb: 55, grasa: 7 },
+  { nombre: "Carne picada con batata al horno", ingredientes: ["Carne picada", "Batata"], kcal: 460, prot: 30, carb: 40, grasa: 20 },
+  { nombre: "Sandwich de pollo y queso", ingredientes: ["Pollo", "Pan", "Queso"], kcal: 380, prot: 32, carb: 30, grasa: 14 },
+  { nombre: "Lentejas con arroz", ingredientes: ["Lentejas", "Arroz"], kcal: 350, prot: 18, carb: 60, grasa: 3 },
+  { nombre: "Huevos revueltos con palta", ingredientes: ["Huevo", "Palta"], kcal: 300, prot: 18, carb: 6, grasa: 24 },
+  { nombre: "Ensalada de pollo, lechuga y tomate", ingredientes: ["Pollo", "Lechuga", "Tomate"], kcal: 260, prot: 38, carb: 6, grasa: 8 },
+  { nombre: "Yogur con banana", ingredientes: ["Yogur", "Banana"], kcal: 205, prot: 7, carb: 35, grasa: 5 },
+  { nombre: "Atún con arroz", ingredientes: ["Atún", "Arroz"], kcal: 290, prot: 28, carb: 35, grasa: 4 },
+  { nombre: "Tostadas con queso y tomate", ingredientes: ["Pan", "Queso", "Tomate"], kcal: 270, prot: 14, carb: 28, grasa: 11 },
+  { nombre: "Cerdo salteado con zanahoria y cebolla", ingredientes: ["Carne de cerdo", "Zanahoria", "Cebolla"], kcal: 400, prot: 34, carb: 12, grasa: 22 },
+  { nombre: "Pescado al horno con zapallo", ingredientes: ["Pescado", "Zapallo"], kcal: 280, prot: 32, carb: 14, grasa: 9 },
+  { nombre: "Fideos con champiñones y queso", ingredientes: ["Fideos", "Champiñones", "Queso"], kcal: 430, prot: 18, carb: 55, grasa: 15 },
+  { nombre: "Quinoa con garbanzos y espinaca", ingredientes: ["Quinoa", "Garbanzos", "Espinaca"], kcal: 380, prot: 16, carb: 58, grasa: 8 },
+  { nombre: "Tostadas con queso untable y manzana", ingredientes: ["Pan", "Queso untable", "Manzana"], kcal: 260, prot: 9, carb: 38, grasa: 8 },
+  { nombre: "Choclo con pollo y espinaca", ingredientes: ["Choclo", "Pollo", "Espinaca"], kcal: 350, prot: 34, carb: 30, grasa: 9 },
+  { nombre: "Yogur con frutos secos y miel", ingredientes: ["Yogur", "Frutos secos", "Miel"], kcal: 280, prot: 10, carb: 30, grasa: 13 },
+  { nombre: "Omelette de queso, cebolla y champiñones", ingredientes: ["Huevo", "Queso", "Cebolla", "Champiñones"], kcal: 340, prot: 22, carb: 6, grasa: 25 },
+  { nombre: "Licuado de banana, leche y avena", ingredientes: ["Banana", "Leche", "Avena"], kcal: 290, prot: 11, carb: 50, grasa: 6 },
+  { nombre: "Ensalada de garbanzos, tomate y cebolla", ingredientes: ["Garbanzos", "Tomate", "Cebolla"], kcal: 250, prot: 12, carb: 38, grasa: 6 },
+];
+
+function sugerirDesdeHeladera(seleccion, misMenus = []) {
+  const todasRecetas = [...RECETAS, ...misMenus];
+  const set = new Set(seleccion);
+  const completas = todasRecetas.filter((r) => r.ingredientes.every((i) => set.has(i)));
+  if (completas.length > 0) return { completas, casiCompletas: [] };
+  const casiCompletas = todasRecetas.map((r) => ({ ...r, falta: r.ingredientes.filter((i) => !set.has(i)) }))
+    .filter((r) => r.falta.length === 1 && seleccion.length > 0)
+    .slice(0, 3);
+  return { completas: [], casiCompletas };
+}
+
+const CONSEJOS_BASE = [
+  "Tomá al menos 2 litros de agua por día, más si entrenás fuerte o hace calor.",
+  "No saltees comidas para 'ahorrar' calorías: llegás con más hambre y comés peor a la noche.",
+  "Un plato equilibrado: mitad vegetales, un cuarto proteína, un cuarto carbohidrato.",
+  "Dormí bien: la falta de sueño afecta tanto la recuperación muscular como el apetito.",
+];
+
+const CONSEJOS_POR_OBJETIVO = {
+  bajar: [
+    "Priorizá alimentos que dan saciedad con pocas calorías: vegetales, proteína magra, legumbres.",
+    "No bajes de golpe muchas calorías: un déficit moderado se sostiene, uno extremo te hace comer mal a los pocos días.",
+    "El hambre entre comidas suele ser sed o ansiedad, no siempre calorías de menos: tomá agua antes de sumar un snack.",
+  ],
+  mantener: [
+    "Priorizá proteína en cada comida (carne, pollo, huevo, yogur) para acompañar la calistenia.",
+    "Elegí carbohidratos con fibra (arroz, batata, avena, frutas) en vez de harinas refinadas.",
+    "Dejá espacio para grasas buenas: palta, frutos secos, aceite de oliva.",
+  ],
+  subir: [
+    "No le tengas miedo a las calorías extra: sumá un puñado de frutos secos o una fruta más si te cuesta llegar al objetivo.",
+    "Priorizá carbohidratos y grasas de calidad para llegar a las calorías sin sentirte 'lleno' todo el día.",
+    "Comé más seguido en el día (5 comidas chicas) si te cuesta llegar al objetivo en 3 comidas grandes.",
+  ],
+};
+
+const NOMBRE_OBJETIVO = { bajar: "bajar de peso", mantener: "mantener tu peso", subir: "subir de peso" };
+
+function consejosPersonalizados(objetivo) {
+  const especificos = CONSEJOS_POR_OBJETIVO[objetivo] || CONSEJOS_POR_OBJETIVO.mantener;
+  return [...especificos, ...CONSEJOS_BASE];
+}
+
+const COMIDAS_DEL_DIA = [
+  { nombre: "Desayuno", pct: 0.25 },
+  { nombre: "Almuerzo", pct: 0.35 },
+  { nombre: "Merienda", pct: 0.1 },
+  { nombre: "Cena", pct: 0.3 },
+];
+
+function recomendarComida(totales, perfil) {
+  const objetivo = perfil.objetivo || "mantener";
+  const restanteKcal = perfil.kcal - totales.kcal;
+  if (restanteKcal <= 50) {
+    const mensajeLimite =
+      objetivo === "subir"
+        ? "Ya llegaste a tu objetivo de calorías de hoy. Si te queda margen, sumar algo más te ayuda a subir de peso más rápido."
+        : "Ya llegaste a tu objetivo de calorías de hoy. Si tenés hambre, priorizá algo liviano en vegetales o proteína magra.";
+    return { mensaje: mensajeLimite, sugerencias: [] };
+  }
+  const pctCubierto = {
+    prot: totales.prot / perfil.prot,
+    carb: totales.carb / perfil.carb,
+    grasa: totales.grasa / perfil.grasa,
+  };
+  const macroFaltante = Object.keys(pctCubierto).sort((a, b) => pctCubierto[a] - pctCubierto[b])[0];
+  let candidatos = ALIMENTOS.filter((a) => a.kcal <= restanteKcal * 1.3);
+  if (objetivo === "subir") {
+    candidatos = candidatos.sort((a, b) => b.kcal - a.kcal);
+  } else if (objetivo === "bajar") {
+    candidatos = candidatos.sort(
+      (a, b) => b[macroFaltante] / b.kcal - a[macroFaltante] / a.kcal || a.kcal - b.kcal
+    );
+  } else {
+    candidatos = candidatos.sort((a, b) => b[macroFaltante] / b.kcal - a[macroFaltante] / a.kcal);
+  }
+  candidatos = candidatos.slice(0, 3);
+  const etiqueta = { prot: "proteína", carb: "carbohidratos", grasa: "grasas" }[macroFaltante];
+  const intro =
+    objetivo === "subir"
+      ? `Te quedan ${Math.round(restanteKcal)} kcal para llegar a tu objetivo de subir de peso. Sumá algo con energía:`
+      : objetivo === "bajar"
+      ? `Te quedan ${Math.round(restanteKcal)} kcal hoy y estás más atrasado en ${etiqueta}. Opciones livianas que suman lo que falta:`
+      : `Te quedan ${Math.round(restanteKcal)} kcal hoy y estás más atrasado en ${etiqueta}. Buenas opciones:`;
+  return { mensaje: intro, sugerencias: candidatos };
+}
+
+const DIAS_PRUEBA = 7;
+const NIVEL_LIMITE_FREE = 3;
+const UMBRAL_SUBIR_NIVEL = 8;
+const PRECIO_PREMIUM = "$250";
+const BONUS_DIAS_REFERIDO = 3;
+
+const PLAN_FREE = [
+  "Registro diario de entrenamiento y comidas",
+  "Progresión de calistenia hasta el nivel 3 de cada grupo",
+  "Alimentos rápidos y barras de macros",
+  "Consejos saludables generales",
+];
+const PLAN_PREMIUM = [
+  "Progresiones completas (niveles 4 a 6): muscle-up, pistol, front lever y más",
+  "'En la heladera tengo...': recetas armadas con lo que tenés a mano",
+  "Recomendación 'Qué comer ahora' según tus macros restantes",
+  "Coach virtual: consultá dudas de técnica y nutrición al toque",
+  "Carga de alimentos personalizados ilimitada",
+  "Seguimiento de peso corporal con gráfico de evolución",
+  "Logros e insignias por constancia y progresión",
+  "Gráfico de progreso semanal y racha de entrenamiento",
+];
+
+const diasEntre = (desde, hasta) => Math.floor((new Date(hasta) - new Date(desde)) / 86400000);
+
+const NIVELES_ACTIVIDAD = [
+  { id: "sedentario", label: "Sedentario (poco o nada de ejercicio)", factor: 1.2 },
+  { id: "ligero", label: "Ligero (1-3 días/semana)", factor: 1.375 },
+  { id: "moderado", label: "Moderado (3-5 días/semana)", factor: 1.55 },
+  { id: "activo", label: "Activo (6-7 días/semana)", factor: 1.725 },
+];
+const OBJETIVOS = [
+  { id: "bajar", label: "Bajar de peso", ajuste: -0.15 },
+  { id: "mantener", label: "Mantener peso", ajuste: 0 },
+  { id: "subir", label: "Subir de peso / ganar músculo", ajuste: 0.15 },
+];
+
+function calcularObjetivoDiario({ peso, altura, edad, sexo, actividad, objetivo }) {
+  const p = Number(peso), a = Number(altura), e = Number(edad);
+  if (!p || !a || !e) return null;
+  const bmr = sexo === "mujer" ? 10 * p + 6.25 * a - 5 * e - 161 : 10 * p + 6.25 * a - 5 * e + 5;
+  const factorAct = NIVELES_ACTIVIDAD.find((n) => n.id === actividad)?.factor || 1.375;
+  const ajusteObj = OBJETIVOS.find((o) => o.id === objetivo)?.ajuste || 0;
+  const kcal = Math.round(bmr * factorAct * (1 + ajusteObj));
+  const prot = Math.round(p * 2);
+  const grasa = Math.round(p * 0.8);
+  const carb = Math.max(Math.round((kcal - prot * 4 - grasa * 9) / 4), 0);
+  return { kcal, prot, carb, grasa };
+}
+
+const NIVELES_ACTIVIDAD_MAP = NIVELES_ACTIVIDAD;
+
+const hoy = () => new Date().toISOString().slice(0, 10);
+
+const fechaLegible = (iso) => {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("es-UY", { weekday: "short", day: "2-digit", month: "short" });
+};
+const ultimosDias = (n) => {
+  const arr = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    arr.push(d.toISOString().slice(0, 10));
+  }
+  return arr;
+};
+const pad2 = (n) => String(n).padStart(2, "0");
+const NOMBRES_MES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+export default function App() {
+  const [tab, setTab] = useState("hoy");
+  const [cargando, setCargando] = useState(true);
+  const [perfil, setPerfil] = useState({ kcal: 2200, prot: 150, carb: 220, grasa: 70, objetivo: "mantener", nombre: "" });
+  const [progresion, setProgresion] = useState({ empuje: 1, traccion: 1, piernas: 1, core: 1 });
+  const [registro, setRegistro] = useState({ entrenamiento: [], comidas: [] });
+  const [semana, setSemana] = useState(null);
+  const [editandoPerfil, setEditandoPerfil] = useState(false);
+  const [suscripcion, setSuscripcion] = useState(null);
+  const [mostrarPlanes, setMostrarPlanes] = useState(false);
+  const [mostrarTerminos, setMostrarTerminos] = useState(false);
+  const [mostrarChat, setMostrarChat] = useState(false);
+  const [onboarding, setOnboarding] = useState(null);
+  const [mostrarAdmin, setMostrarAdmin] = useState(false);
+  const [tapsLogo, setTapsLogo] = useState(0);
+  const [referido, setReferido] = useState(null);
+  const [progresoSeries, setProgresoSeries] = useState({ empuje: 0, traccion: 0, piernas: 0, core: 0 });
+  const [sugerenciaNivel, setSugerenciaNivel] = useState(null);
+  const [storageDisponible, setStorageDisponible] = useState(null);
+  const fecha = hoy();
+
+  const tocarLogo = () => {
+    const n = tapsLogo + 1;
+    setTapsLogo(n);
+    if (n >= 5) {
+      setMostrarAdmin(true);
+      setTapsLogo(0);
+    } else {
+      setTimeout(() => setTapsLogo(0), 1500);
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      const disponible = await verificarStorage();
+      setStorageDisponible(disponible);
+
+      const [p, pr, reg, sus, onb, ps, refLocal] = await Promise.all([
+        safeGet("perfil"),
+        safeGet("progresion"),
+        safeGet(`registro:${fecha}`),
+        safeGet("suscripcion"),
+        safeGet("onboarding"),
+        safeGet("progresoSeries"),
+        safeGet("referido"),
+      ]);
+      if (p) setPerfil(p);
+      if (pr) setProgresion(pr);
+      if (reg) setRegistro(reg);
+      if (ps) setProgresoSeries(ps);
+
+      let susActual = sus;
+      if (!susActual) {
+        susActual = { trialStart: fecha, premium: false, diasBonus: 0 };
+        await safeSet("suscripcion", susActual);
+      }
+      setSuscripcion(susActual);
+      setOnboarding(onb || { completo: false });
+
+      const miCodigo = await ensureReferralCode();
+      setReferido({ miCodigo, codigoUsado: refLocal?.codigoUsado || null });
+
+      const nuevosCanjes = await claimReferralBonus();
+      if (nuevosCanjes > 0) {
+        const susFresca = await safeGet("suscripcion");
+        if (susFresca) setSuscripcion(susFresca);
+      }
+
+      setCargando(false);
+    })();
+  }, []);
+
+  const completarOnboarding = async ({ perfilNuevo, progresionNueva, codigoInvitacion }) => {
+    setPerfil(perfilNuevo);
+    safeSet("perfil", perfilNuevo);
+    setProgresion(progresionNueva);
+    safeSet("progresion", progresionNueva);
+    const onb = { completo: true };
+    setOnboarding(onb);
+    safeSet("onboarding", onb);
+
+    if (codigoInvitacion && codigoInvitacion.trim()) {
+      const res = await redeemReferralCode(codigoInvitacion);
+      if (res.ok) {
+        const refNuevo = { ...referido, codigoUsado: codigoInvitacion.trim().toUpperCase() };
+        setReferido(refNuevo);
+        safeSet("referido", { codigoUsado: refNuevo.codigoUsado });
+        const susFresca = await safeGet("suscripcion");
+        if (susFresca) setSuscripcion(susFresca);
+      }
+    }
+  };
+
+  const diasTrialUsados = suscripcion ? diasEntre(suscripcion.trialStart, fecha) : 0;
+  const diasTrialRestantes = Math.max(DIAS_PRUEBA + (suscripcion?.diasBonus || 0) - diasTrialUsados, 0);
+  const enTrial = !suscripcion?.premium && diasTrialRestantes > 0;
+  const accesoPremium = Boolean(suscripcion?.premium) || enTrial;
+
+  // Vuelve a leer la suscripción desde el servidor: la usan tanto el canje de
+  // código como el botón "Ya pagué, verificar" (el webhook de Mercado Pago
+  // activa Premium del lado del servidor, no hay push al cliente).
+  const revisarSuscripcion = async () => {
+    const fresca = await safeGet("suscripcion");
+    if (fresca) setSuscripcion(fresca);
+    return Boolean(fresca?.premium);
+  };
+
+  const canjearInvitacion = async (codigoIngresado) => {
+    const res = await redeemReferralCode(codigoIngresado);
+    if (res.ok) {
+      const refNuevo = { ...referido, codigoUsado: codigoIngresado.trim().toUpperCase() };
+      setReferido(refNuevo);
+      safeSet("referido", { codigoUsado: refNuevo.codigoUsado });
+      await revisarSuscripcion();
+    }
+    return res;
+  };
+
+  const guardarRegistro = useCallback(
+    (nuevo) => {
+      setRegistro(nuevo);
+      safeSet(`registro:${fecha}`, nuevo);
+    },
+    [fecha]
+  );
+
+  const agregarComida = (comida) => {
+    guardarRegistro({ ...registro, comidas: [...registro.comidas, { ...comida, id: uid() }] });
+  };
+  const quitarComida = (id) => {
+    guardarRegistro({ ...registro, comidas: registro.comidas.filter((c) => c.id !== id) });
+  };
+  const agregarEjercicio = (ej) => {
+    guardarRegistro({ ...registro, entrenamiento: [...registro.entrenamiento, { ...ej, id: uid() }] });
+    const nuevoConteo = { ...progresoSeries, [ej.track]: (progresoSeries[ej.track] || 0) + Number(ej.series || 1) };
+    setProgresoSeries(nuevoConteo);
+    safeSet("progresoSeries", nuevoConteo);
+    const nivelActualTrack = progresion[ej.track];
+    if (nuevoConteo[ej.track] >= UMBRAL_SUBIR_NIVEL && nivelActualTrack < TRACKS[ej.track].ejercicios.length) {
+      setSugerenciaNivel({ track: ej.track, nivelActual: nivelActualTrack });
+    }
+  };
+  const quitarEjercicio = (id) => {
+    guardarRegistro({ ...registro, entrenamiento: registro.entrenamiento.filter((e) => e.id !== id) });
+  };
+  const setNivel = (track, nivel) => {
+    const nueva = { ...progresion, [track]: nivel };
+    setProgresion(nueva);
+    safeSet("progresion", nueva);
+    const nuevoConteo = { ...progresoSeries, [track]: 0 };
+    setProgresoSeries(nuevoConteo);
+    safeSet("progresoSeries", nuevoConteo);
+  };
+  const aceptarSugerenciaNivel = () => {
+    const { track, nivelActual } = sugerenciaNivel;
+    const siguienteNivel = nivelActual + 1;
+    if (siguienteNivel > NIVEL_LIMITE_FREE && !accesoPremium) {
+      setSugerenciaNivel(null);
+      setMostrarPlanes(true);
+      return;
+    }
+    setNivel(track, siguienteNivel);
+    setSugerenciaNivel(null);
+  };
+  const descartarSugerenciaNivel = () => {
+    const { track } = sugerenciaNivel;
+    const nuevoConteo = { ...progresoSeries, [track]: 0 };
+    setProgresoSeries(nuevoConteo);
+    safeSet("progresoSeries", nuevoConteo);
+    setSugerenciaNivel(null);
+  };
+  const guardarPerfil = (nuevo) => {
+    setPerfil(nuevo);
+    safeSet("perfil", nuevo);
+    setEditandoPerfil(false);
+  };
+
+  const cargarSemana = useCallback(async () => {
+    const dias = ultimosDias(7);
+    const regs = await Promise.all(dias.map((d) => safeGet(`registro:${d}`)));
+    setSemana(
+      dias.map((d, i) => {
+        const r = regs[i] || { entrenamiento: [], comidas: [] };
+        const kcal = r.comidas.reduce((s, c) => s + Number(c.kcal || 0), 0);
+        return { fecha: d, dia: fechaLegible(d), kcal, entreno: r.entrenamiento.length > 0 };
+      })
+    );
+  }, []);
+
+  useEffect(() => {
+    if (tab === "progreso" && !semana) cargarSemana();
+  }, [tab, semana, cargarSemana]);
+
+  const totales = registro.comidas.reduce(
+    (acc, c) => ({
+      kcal: acc.kcal + Number(c.kcal || 0),
+      prot: acc.prot + Number(c.prot || 0),
+      carb: acc.carb + Number(c.carb || 0),
+      grasa: acc.grasa + Number(c.grasa || 0),
+    }),
+    { kcal: 0, prot: 0, carb: 0, grasa: 0 }
+  );
+
+  if (cargando) {
+    return (
+      <div style={{ background: C.bg, color: C.muted }} className="min-h-screen flex items-center justify-center font-sans">
+        Cargando...
+      </div>
+    );
+  }
+
+  if (onboarding && !onboarding.completo) {
+    return <Onboarding onCompletar={completarOnboarding} storageDisponible={storageDisponible} />;
+  }
+
+  return (
+    <div style={{ background: C.bg, color: C.text, fontFamily: "'Inter', sans-serif" }} className="min-h-screen pb-20">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+        .display { font-family: 'Oswald', sans-serif; letter-spacing: 0.02em; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+        ::-webkit-scrollbar { height: 6px; }
+        ::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 4px; }
+      `}</style>
+
+      <header className="px-4 pt-6 pb-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${C.border}` }}>
+        <div onClick={tocarLogo}>
+          <div className="display text-xs uppercase" style={{ color: C.muted, letterSpacing: "0.15em" }}>Rutina + Plato</div>
+          <h1 className="display text-2xl font-bold" style={{ color: C.text }}>CALISTENIA <span style={{ color: C.train }}>/</span> NUTRICIÓN</h1>
+        </div>
+        <button onClick={() => setEditandoPerfil(true)} aria-label="Configurar objetivos">
+          <Settings size={20} color={C.muted} />
+        </button>
+      </header>
+
+      <div className="px-4">
+        {storageDisponible === false && <BannerStorage />}
+        <BannerPlan suscripcion={suscripcion} enTrial={enTrial} diasTrialRestantes={diasTrialRestantes} onVerPlanes={() => setMostrarPlanes(true)} />
+      </div>
+
+      <main className="px-4 mt-4">
+        {tab === "hoy" && (
+          <VistaHoy
+            totales={totales}
+            perfil={perfil}
+            registro={registro}
+            onQuitarComida={quitarComida}
+            onQuitarEjercicio={quitarEjercicio}
+            onAgregarComida={agregarComida}
+            onAgregarEjercicio={agregarEjercicio}
+            progresion={progresion}
+            accesoPremium={accesoPremium}
+            onBloqueado={() => setMostrarPlanes(true)}
+            referido={referido}
+            onCanjearInvitacion={canjearInvitacion}
+          />
+        )}
+        {tab === "entrenamiento" && (
+          <VistaEntrenamiento
+            progresion={progresion}
+            progresoSeries={progresoSeries}
+            setNivel={setNivel}
+            registro={registro}
+            onAgregar={agregarEjercicio}
+            onQuitar={quitarEjercicio}
+            accesoPremium={accesoPremium}
+            onBloqueado={() => setMostrarPlanes(true)}
+          />
+        )}
+        {tab === "nutricion" && (
+          <VistaNutricion
+            totales={totales}
+            perfil={perfil}
+            registro={registro}
+            onAgregar={agregarComida}
+            onQuitar={quitarComida}
+            accesoPremium={accesoPremium}
+            onBloqueado={() => setMostrarPlanes(true)}
+          />
+        )}
+        {tab === "progreso" && (
+          <VistaProgreso semana={semana} perfil={perfil} progresion={progresion} accesoPremium={accesoPremium} onBloqueado={() => setMostrarPlanes(true)} />
+        )}
+        {tab === "consejos" && <VistaConsejos perfil={perfil} />}
+      </main>
+
+      {editandoPerfil && <ModalPerfil perfil={perfil} onGuardar={guardarPerfil} onCerrar={() => setEditandoPerfil(false)} onVerTerminos={() => setMostrarTerminos(true)} />}
+      {mostrarPlanes && (
+        <ModalPlanes
+          esPremium={Boolean(suscripcion?.premium)}
+          diasTrialRestantes={diasTrialRestantes}
+          onPagoConfirmado={revisarSuscripcion}
+          onCerrar={() => setMostrarPlanes(false)}
+          onVerTerminos={() => setMostrarTerminos(true)}
+        />
+      )}
+      {mostrarTerminos && <ModalTerminos onCerrar={() => setMostrarTerminos(false)} />}
+      {mostrarChat && (
+        <ChatCoach
+          accesoPremium={accesoPremium}
+          onBloqueado={() => {
+            setMostrarChat(false);
+            setMostrarPlanes(true);
+          }}
+          onCerrar={() => setMostrarChat(false)}
+        />
+      )}
+
+      {mostrarAdmin && <AdminCodigos onCerrar={() => setMostrarAdmin(false)} />}
+      {sugerenciaNivel && (
+        <ModalSugerenciaNivel
+          track={sugerenciaNivel.track}
+          nivelActual={sugerenciaNivel.nivelActual}
+          onAceptar={aceptarSugerenciaNivel}
+          onDescartar={descartarSugerenciaNivel}
+        />
+      )}
+
+      <button
+        onClick={() => setMostrarChat(true)}
+        aria-label="Consultar al coach"
+        className="fixed flex items-center justify-center"
+        style={{
+          bottom: 74,
+          right: 16,
+          width: 48,
+          height: 48,
+          borderRadius: "50%",
+          background: C.train,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+          zIndex: 40,
+        }}
+      >
+        <MessageCircle size={22} color={C.panel} />
+      </button>
+
+      <nav
+        className="fixed bottom-0 left-0 right-0 flex justify-around py-2"
+        style={{ background: C.panel, borderTop: `1px solid ${C.border}` }}
+      >
+        <NavBtn icon={Home} label="Hoy" activo={tab === "hoy"} onClick={() => setTab("hoy")} />
+        <NavBtn icon={Dumbbell} label="Entreno" activo={tab === "entrenamiento"} onClick={() => setTab("entrenamiento")} color={C.train} />
+        <NavBtn icon={Apple} label="Nutrición" activo={tab === "nutricion"} onClick={() => setTab("nutricion")} color={C.food} />
+        <NavBtn icon={TrendingUp} label="Progreso" activo={tab === "progreso"} onClick={() => setTab("progreso")} />
+        <NavBtn icon={Lightbulb} label="Consejos" activo={tab === "consejos"} onClick={() => setTab("consejos")} color={C.food} />
+      </nav>
+    </div>
+  );
+}
+
+function NavBtn({ icon: Icon, label, activo, onClick, color }) {
+  const c = activo ? color || C.text : C.muted;
+  return (
+    <button onClick={onClick} className="flex flex-col items-center gap-1 px-3 py-1">
+      <Icon size={20} color={c} />
+      <span className="text-[10px] mono" style={{ color: c }}>{label.toUpperCase()}</span>
+    </button>
+  );
+}
+
+function Panel({ children, style }) {
+  return (
+    <div style={{ background: C.panel, border: `1px solid ${C.border}`, ...style }} className="rounded-md p-4 mb-4">
+      {children}
+    </div>
+  );
+}
+
+function BannerStorage() {
+  return (
+    <div className="rounded-md px-3 py-2 mt-3 text-xs" style={{ background: C.trainDim, border: `1px solid ${C.train}`, color: C.text }}>
+      <span style={{ color: C.train }}>⚠ Tu progreso no se está guardando.</span> Revisá tu conexión a internet. Si el problema sigue, cerrá sesión y volvé a entrar.
+    </div>
+  );
+}
+
+function BannerPlan({ suscripcion, enTrial, diasTrialRestantes, onVerPlanes }) {
+  if (!suscripcion) return null;
+  if (suscripcion.premium) {
+    return (
+      <div className="flex items-center gap-2 rounded-md px-3 py-2 mt-3" style={{ background: C.foodDim, border: `1px solid ${C.food}` }}>
+        <Crown size={14} color={C.food} />
+        <span className="text-xs" style={{ color: C.food }}>Sos usuario Premium</span>
+      </div>
+    );
+  }
+  if (enTrial) {
+    return (
+      <button
+        onClick={onVerPlanes}
+        className="w-full flex items-center justify-between rounded-md px-3 py-2 mt-3"
+        style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}
+      >
+        <span className="text-xs" style={{ color: C.muted }}>
+          Prueba gratis: te quedan <span style={{ color: C.food }}>{diasTrialRestantes} día{diasTrialRestantes !== 1 ? "s" : ""}</span>
+        </span>
+        <span className="text-xs mono" style={{ color: C.food }}>Ver planes</span>
+      </button>
+    );
+  }
+  return (
+    <button
+      onClick={onVerPlanes}
+      className="w-full flex items-center justify-between rounded-md px-3 py-2 mt-3"
+      style={{ background: C.trainDim, border: `1px solid ${C.train}` }}
+    >
+      <span className="text-xs" style={{ color: C.text }}>Tu prueba gratis terminó</span>
+      <span className="text-xs mono" style={{ color: C.train }}>Activar Premium</span>
+    </button>
+  );
+}
+
+function Locked({ titulo, onBloqueado }) {
+  return (
+    <button onClick={onBloqueado} className="w-full flex flex-col items-center gap-2 py-6 rounded" style={{ background: C.panelAlt, border: `1px dashed ${C.food}` }}>
+      <Lock size={20} color={C.muted} />
+      <span className="text-sm" style={{ color: C.text }}>{titulo}</span>
+      <ChipPro texto="Desbloquear con Premium" />
+    </button>
+  );
+}
+
+function ChipPro({ texto = "PREMIUM" }) {
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[10px] mono px-2 py-0.5 rounded-full"
+      style={{ background: C.food, color: C.bg }}
+    >
+      <Crown size={10} /> {texto}
+    </span>
+  );
+}
+
+function ModalSugerenciaNivel({ track, nivelActual, onAceptar, onDescartar }) {
+  const trackInfo = TRACKS[track];
+  const siguiente = trackInfo.ejercicios[nivelActual];
+  return (
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", zIndex: 65 }}>
+      <div style={{ background: C.panel, border: `1px solid ${C.food}` }} className="rounded-md p-5 w-full max-w-sm text-center">
+        <div className="text-4xl mb-2">🎉</div>
+        <div className="display text-lg font-bold mb-1">¡Nivel superado!</div>
+        <p className="text-sm mb-4" style={{ color: C.muted }}>
+          Ya hiciste {UMBRAL_SUBIR_NIVEL} series de {trackInfo.ejercicios[nivelActual - 1].nombre} en {trackInfo.nombre}. Estás listo para el siguiente paso:
+        </p>
+        <div className="rounded-md p-3 mb-4" style={{ background: C.panelAlt }}>
+          <div className="text-xs mb-1" style={{ color: C.muted }}>Nivel {nivelActual + 1}</div>
+          <div className="text-sm font-medium">{siguiente.nombre}</div>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={onDescartar} className="flex-1 py-2 rounded text-sm" style={{ background: C.panelAlt, color: C.muted, border: `1px solid ${C.border}` }}>
+            Seguir en este nivel
+          </button>
+          <button onClick={onAceptar} className="flex-1 py-2 rounded text-sm font-medium" style={{ background: C.food, color: C.bg }}>
+            Subir de nivel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ModalPlanes({ esPremium, diasTrialRestantes, onPagoConfirmado, onCerrar, onVerTerminos }) {
+  const [codigo, setCodigo] = useState("");
+  const [estado, setEstado] = useState(null);
+  const [canjeando, setCanjeando] = useState(false);
+  const [pagando, setPagando] = useState(false);
+  const [verificando, setVerificando] = useState(false);
+  const [avisoVerificacion, setAvisoVerificacion] = useState(null);
+
+  const enviarCodigo = async () => {
+    if (!codigo.trim() || canjeando) return;
+    setCanjeando(true);
+    const res = await redeemPremiumCode(codigo);
+    setEstado(res);
+    setCanjeando(false);
+    if (res.ok) {
+      await onPagoConfirmado();
+      setTimeout(() => onCerrar(), 900);
+    }
+  };
+
+  const irAPagar = async () => {
+    setPagando(true);
+    setAvisoVerificacion(null);
+    try {
+      const url = await crearPreferenciaPago();
+      if (!url) throw new Error("Sin link de pago");
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      console.error(e);
+      setAvisoVerificacion({ ok: false, texto: "No pudimos iniciar el pago. Probá de nuevo en un momento." });
+    } finally {
+      setPagando(false);
+    }
+  };
+
+  const verificarPago = async () => {
+    setVerificando(true);
+    const yaEsPremium = await onPagoConfirmado();
+    setVerificando(false);
+    if (yaEsPremium) {
+      setAvisoVerificacion({ ok: true, texto: "¡Pago confirmado! Premium activado." });
+      setTimeout(() => onCerrar(), 900);
+    } else {
+      setAvisoVerificacion({ ok: false, texto: "Todavía no detectamos el pago. Esperá unos segundos después de pagar y volvé a intentar." });
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 50 }}>
+      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <span className="display text-sm" style={{ color: C.muted }}>PLANES</span>
+          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+
+        <div className="rounded-md p-3 mb-3" style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}>
+          <div className="display text-sm mb-2">Gratis</div>
+          <div className="flex flex-col gap-1">
+            {PLAN_FREE.map((f) => (
+              <div key={f} className="flex gap-2 text-xs" style={{ color: C.muted }}>
+                <Check size={13} color={C.muted} className="flex-shrink-0 mt-0.5" />
+                <span>{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-md p-3 mb-4" style={{ background: C.foodDim, border: `1px solid ${C.food}` }}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1">
+              <Crown size={14} color={C.food} />
+              <span className="display text-sm" style={{ color: C.food }}>Premium</span>
+            </div>
+            <span className="mono text-sm" style={{ color: C.food }}>{PRECIO_PREMIUM}/mes</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            {PLAN_PREMIUM.map((f) => (
+              <div key={f} className="flex gap-2 text-xs" style={{ color: C.text }}>
+                <Check size={13} color={C.food} className="flex-shrink-0 mt-0.5" />
+                <span>{f}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] mt-2" style={{ color: C.muted }}>
+            {DIAS_PRUEBA} días de prueba gratis para usuarios nuevos, después se factura mensual. Cancelás cuando quieras.
+          </p>
+        </div>
+
+        {esPremium ? (
+          <div className="text-center text-sm" style={{ color: C.food }}>Ya tenés Premium activo ✓</div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={irAPagar}
+              disabled={pagando}
+              className="block text-center w-full py-2 rounded font-medium"
+              style={{ background: C.food, color: C.bg, opacity: pagando ? 0.6 : 1 }}
+            >
+              {pagando ? "Generando link de pago..." : "Pagar con Mercado Pago"}
+            </button>
+            <button onClick={verificarPago} disabled={verificando} className="text-xs mono underline" style={{ color: C.muted }}>
+              {verificando ? "Verificando..." : "Ya pagué, verificar estado"}
+            </button>
+            {avisoVerificacion && (
+              <p className="text-xs" style={{ color: avisoVerificacion.ok ? C.food : C.danger }}>{avisoVerificacion.texto}</p>
+            )}
+
+            <div className="text-center text-[10px] mt-1" style={{ color: C.muted }}>— ¿Tenés un código de activación? —</div>
+            <div className="flex gap-2">
+              <input
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value)}
+                placeholder="Ingresá tu código"
+                className="flex-1 rounded px-3 py-2 text-sm mono"
+                style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
+              />
+              <button onClick={enviarCodigo} disabled={canjeando} className="px-4 py-2 rounded text-sm font-medium" style={{ background: C.train, color: C.panel, opacity: canjeando ? 0.5 : 1 }}>
+                Canjear
+              </button>
+            </div>
+            {estado && (
+              <p className="text-xs" style={{ color: estado.ok ? C.food : C.danger }}>{estado.mensaje}</p>
+            )}
+          </div>
+        )}
+        <button onClick={onVerTerminos} className="w-full text-center text-[10px] mt-3 underline" style={{ color: C.muted }}>
+          Términos y Privacidad
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const NIVEL_OPCIONES = [
+  {
+    id: "principiante",
+    label: "Principiante",
+    desc: "Recién arranco o hago poco entrenamiento de fuerza",
+    progresion: { empuje: 1, traccion: 1, piernas: 1, core: 1 },
+  },
+  {
+    id: "intermedio",
+    label: "Intermedio",
+    desc: "Entreno hace un tiempo, hago flexiones y algo de dominadas",
+    progresion: { empuje: 3, traccion: 2, piernas: 3, core: 2 },
+  },
+  {
+    id: "avanzado",
+    label: "Avanzado",
+    desc: "Domino los básicos y busco progresiones más difíciles",
+    progresion: { empuje: 5, traccion: 4, piernas: 5, core: 4 },
+  },
+];
+
+// ---------- HOY ----------
+function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, referido, onCanjearInvitacion }) {
+  const pct = Math.min(totales.kcal / perfil.kcal, 1) * 360;
+  const restante = Math.max(perfil.kcal - totales.kcal, 0);
+  const [quickComida, setQuickComida] = useState(false);
+  const [quickEjercicio, setQuickEjercicio] = useState(false);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-lg font-semibold">Hola{perfil.nombre ? `, ${perfil.nombre}` : ""} 👋</span>
+      </div>
+
+      <Panel style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div
+          style={{
+            width: 96,
+            height: 96,
+            borderRadius: "50%",
+            background: `conic-gradient(${C.train} ${pct}deg, ${C.panelAlt} 0deg)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 74, height: 74, borderRadius: "50%", background: C.panel }} className="flex flex-col items-center justify-center">
+            <span className="mono text-lg font-semibold">{Math.round(totales.kcal)}</span>
+            <span className="text-[9px]" style={{ color: C.muted }}>kcal</span>
+          </div>
+        </div>
+        <div className="flex-1">
+          <div className="display text-sm" style={{ color: C.muted }}>COMBUSTIBLE DE HOY</div>
+          <div className="text-lg font-semibold mt-1">
+            {restante > 0 ? `Quedan ${Math.round(restante)} kcal` : "Objetivo alcanzado"}
+          </div>
+          <div className="flex gap-3 mt-2 text-xs mono" style={{ color: C.muted }}>
+            <span>P {Math.round(totales.prot)}/{perfil.prot}g</span>
+            <span>C {Math.round(totales.carb)}/{perfil.carb}g</span>
+            <span>G {Math.round(totales.grasa)}/{perfil.grasa}g</span>
+          </div>
+        </div>
+      </Panel>
+
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setQuickEjercicio(true)}
+          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-md font-medium text-sm"
+          style={{ background: C.trainDim, color: C.train, border: `1px solid ${C.train}` }}
+        >
+          <Plus size={14} /> Ejercicio
+        </button>
+        <button
+          onClick={() => setQuickComida(true)}
+          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-md font-medium text-sm"
+          style={{ background: C.foodDim, color: C.food, border: `1px solid ${C.food}` }}
+        >
+          <Plus size={14} /> Comida
+        </button>
+      </div>
+
+      <Panel>
+        <div className="flex items-center gap-2 mb-3">
+          <Dumbbell size={16} color={C.train} />
+          <span className="display text-sm" style={{ color: C.muted }}>ENTRENAMIENTO DE HOY</span>
+        </div>
+        {registro.entrenamiento.length === 0 ? (
+          <p className="text-sm" style={{ color: C.muted }}>Todavía no registraste ejercicios. Usá el botón "+ Ejercicio" de arriba.</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {registro.entrenamiento.map((e) => (
+              <FilaItem key={e.id} texto={`${e.ejercicio}`} sub={e.tipo === "tiempo" ? `${e.segundos}s sostenidos` : `${e.series}x${e.reps}`} onQuitar={() => onQuitarEjercicio(e.id)} />
+            ))}
+          </div>
+        )}
+      </Panel>
+
+      <Panel>
+        <div className="flex items-center gap-2 mb-3">
+          <Apple size={16} color={C.food} />
+          <span className="display text-sm" style={{ color: C.muted }}>COMIDAS DE HOY</span>
+        </div>
+        {registro.comidas.length === 0 ? (
+          <p className="text-sm" style={{ color: C.muted }}>Todavía no cargaste comidas. Usá el botón "+ Comida" de arriba.</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {registro.comidas.map((c) => (
+              <FilaItem key={c.id} texto={c.nombre} sub={`${c.kcal} kcal`} onQuitar={() => onQuitarComida(c.id)} />
+            ))}
+          </div>
+        )}
+      </Panel>
+
+      <PanelHeladera restanteKcal={restante} onAgregarComida={onAgregarComida} accesoPremium={accesoPremium} onBloqueado={onBloqueado} />
+
+      <PanelReferidos referido={referido} onCanjear={onCanjearInvitacion} />
+
+      {quickEjercicio && (
+        <QuickAddEjercicio progresion={progresion} onAgregar={onAgregarEjercicio} onCerrar={() => setQuickEjercicio(false)} />
+      )}
+      {quickComida && (
+        <QuickAddComida onAgregar={onAgregarComida} onCerrar={() => setQuickComida(false)} />
+      )}
+    </div>
+  );
+}
+
+function QuickAddEjercicio({ progresion, onAgregar, onCerrar }) {
+  const [trackSel, setTrackSel] = useState("empuje");
+  const [series, setSeries] = useState(3);
+  const [reps, setReps] = useState(10);
+  const ejercicioActual = TRACKS[trackSel].ejercicios[progresion[trackSel] - 1];
+
+  const [modoTiempo, setModoTiempo] = useState(Boolean(ejercicioActual.porTiempo));
+  const [segundosEj, setSegundosEj] = useState(0);
+  const [cronoCorriendo, setCronoCorriendo] = useState(false);
+  const cronoRef = useRef(null);
+
+  useEffect(() => {
+    setModoTiempo(Boolean(ejercicioActual.porTiempo));
+    setSegundosEj(0);
+    setCronoCorriendo(false);
+  }, [ejercicioActual.nombre]);
+
+  useEffect(() => {
+    if (cronoCorriendo) {
+      cronoRef.current = setInterval(() => setSegundosEj((s) => s + 1), 1000);
+    }
+    return () => clearInterval(cronoRef.current);
+  }, [cronoCorriendo]);
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 55 }}>
+      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm">
+        <div className="flex justify-between items-center mb-4">
+          <span className="display text-sm" style={{ color: C.muted }}>REGISTRAR EJERCICIO</span>
+          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+        <div className="flex gap-2 mb-3 flex-wrap">
+          {Object.entries(TRACKS).map(([key, t]) => (
+            <button
+              key={key}
+              onClick={() => setTrackSel(key)}
+              className="px-3 py-1 rounded text-xs mono"
+              style={{ background: trackSel === key ? C.train : C.panelAlt, color: trackSel === key ? C.panel : C.muted }}
+            >
+              {t.nombre}
+            </button>
+          ))}
+        </div>
+        <div className="text-sm mb-3">{ejercicioActual.nombre}</div>
+
+        <div className="flex gap-2 mb-3">
+          <button
+            onClick={() => setModoTiempo(false)}
+            className="px-3 py-1 rounded text-xs"
+            style={{ background: !modoTiempo ? C.train : C.panelAlt, color: !modoTiempo ? C.panel : C.muted }}
+          >
+            Repeticiones
+          </button>
+          <button
+            onClick={() => setModoTiempo(true)}
+            className="px-3 py-1 rounded text-xs"
+            style={{ background: modoTiempo ? C.train : C.panelAlt, color: modoTiempo ? C.panel : C.muted }}
+          >
+            Por tiempo
+          </button>
+        </div>
+
+        {!modoTiempo ? (
+          <>
+            <div className="flex gap-3 items-end mb-4">
+              <label className="flex flex-col text-xs" style={{ color: C.muted }}>
+                Series
+                <input type="number" min={1} value={series} onChange={(e) => setSeries(e.target.value)} className="mt-1 w-16 rounded px-2 py-1 mono" style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }} />
+              </label>
+              <label className="flex flex-col text-xs" style={{ color: C.muted }}>
+                Reps
+                <input type="number" min={1} value={reps} onChange={(e) => setReps(e.target.value)} className="mt-1 w-16 rounded px-2 py-1 mono" style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }} />
+              </label>
+            </div>
+            <button
+              onClick={() => {
+                onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, series, reps });
+                onCerrar();
+              }}
+              className="w-full py-2 rounded font-medium"
+              style={{ background: C.train, color: C.panel }}
+            >
+              Agregar
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="mono text-2xl font-semibold" style={{ minWidth: 64 }}>
+                {Math.floor(segundosEj / 60)}:{pad2(segundosEj % 60)}
+              </div>
+              <button
+                onClick={() => setCronoCorriendo((c) => !c)}
+                className="flex-1 py-2 rounded text-sm font-medium"
+                style={{ background: cronoCorriendo ? C.panelAlt : C.train, color: cronoCorriendo ? C.text : C.panel, border: cronoCorriendo ? `1px solid ${C.border}` : "none" }}
+              >
+                {cronoCorriendo ? "Pausar" : segundosEj > 0 ? "Reanudar" : "Iniciar"}
+              </button>
+            </div>
+            <button
+              onClick={() => {
+                if (segundosEj <= 0) return;
+                onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, tipo: "tiempo", segundos: segundosEj });
+                onCerrar();
+              }}
+              disabled={segundosEj <= 0}
+              className="w-full py-2 rounded font-medium disabled:opacity-40"
+              style={{ background: C.food, color: C.bg }}
+            >
+              Agregar
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function QuickAddComida({ onAgregar, onCerrar }) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 55 }}>
+      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <span className="display text-sm" style={{ color: C.muted }}>REGISTRAR COMIDA</span>
+          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {ALIMENTOS.map((a) => (
+            <button
+              key={a.nombre}
+              onClick={() => {
+                onAgregar(a);
+                onCerrar();
+              }}
+              className="text-left p-2 rounded"
+              style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}
+            >
+              <div className="text-xs">{a.nombre}</div>
+              <div className="text-[10px] mono" style={{ color: C.food }}>{a.kcal} kcal</div>
+            </button>
+          ))}
+        </div>
+        <p className="text-[10px] mt-3 text-center" style={{ color: C.muted }}>¿No está lo que buscás? Cargalo desde la pestaña Nutrición.</p>
+      </div>
+    </div>
+  );
+}
+
+function PanelReferidos({ referido, onCanjear }) {
+  const [codigoInput, setCodigoInput] = useState("");
+  const [estado, setEstado] = useState(null);
+  const [enviando, setEnviando] = useState(false);
+  const [copiado, setCopiado] = useState(false);
+
+  if (!referido) return null;
+
+  const mensaje = `Estoy usando esta app de calistenia + nutrición 💪🥗 Sumate con mi código ${referido.miCodigo} y los dos ganamos ${BONUS_DIAS_REFERIDO} días gratis de Premium.`;
+  const linkWhatsapp = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+
+  const copiar = async () => {
+    try {
+      await navigator.clipboard.writeText(referido.miCodigo);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 1500);
+    } catch {
+      // silencioso: si el navegador no permite clipboard, el usuario puede copiarlo a mano
+    }
+  };
+
+  const canjear = async () => {
+    if (!codigoInput.trim() || enviando) return;
+    setEnviando(true);
+    const res = await onCanjear(codigoInput);
+    setEstado(res);
+    setEnviando(false);
+  };
+
+  return (
+    <Panel>
+      <div className="flex items-center gap-2 mb-1">
+        <Flame size={16} color={C.train} />
+        <span className="display text-sm" style={{ color: C.muted }}>INVITÁ Y GANÁ DÍAS GRATIS</span>
+      </div>
+      <p className="text-xs mb-3" style={{ color: C.muted }}>
+        Compartí tu código. Cuando alguien lo use, ambos suman {BONUS_DIAS_REFERIDO} días extra de Premium.
+      </p>
+
+      <div className="flex items-center justify-between rounded px-3 py-2 mb-2" style={{ background: C.panelAlt }}>
+        <span className="mono text-lg" style={{ color: C.food }}>{referido.miCodigo}</span>
+        <button onClick={copiar} className="text-xs mono px-2 py-1 rounded" style={{ background: C.border, color: C.text }}>
+          {copiado ? "Copiado ✓" : "Copiar"}
+        </button>
+      </div>
+
+      <a
+        href={linkWhatsapp}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-center w-full py-2 rounded font-medium mb-3"
+        style={{ background: C.food, color: C.bg }}
+      >
+        Compartir por WhatsApp
+      </a>
+
+      {referido.codigoUsado ? (
+        <p className="text-xs" style={{ color: C.food }}>Ya usaste un código de invitación ✓</p>
+      ) : (
+        <div className="flex gap-2">
+          <input
+            value={codigoInput}
+            onChange={(e) => setCodigoInput(e.target.value)}
+            placeholder="¿Alguien te invitó? Ingresá su código"
+            className="flex-1 rounded px-3 py-2 text-xs mono"
+            style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
+          />
+          <button onClick={canjear} disabled={enviando} className="px-3 py-2 rounded text-xs font-medium" style={{ background: C.train, color: C.panel, opacity: enviando ? 0.5 : 1 }}>
+            Canjear
+          </button>
+        </div>
+      )}
+      {estado && <p className="text-xs mt-2" style={{ color: estado.ok ? C.food : C.danger }}>{estado.mensaje}</p>}
+    </Panel>
+  );
+}
+
+function PanelHeladera({ restanteKcal, onAgregarComida, accesoPremium, onBloqueado }) {
+  const [seleccion, setSeleccion] = useState([]);
+  const [agregado, setAgregado] = useState(null);
+  const [misMenus, setMisMenus] = useState(null);
+  const [creando, setCreando] = useState(false);
+  const [nuevoMenu, setNuevoMenu] = useState({ nombre: "", ingredientes: [], kcal: "", prot: "", carb: "", grasa: "" });
+
+  const toggle = (item) => {
+    setSeleccion((prev) => (prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item]));
+  };
+
+  useEffect(() => {
+    if (!accesoPremium) return;
+    (async () => {
+      const guardados = await safeGet("misMenus");
+      setMisMenus(guardados || []);
+    })();
+  }, [accesoPremium]);
+
+  if (!accesoPremium) {
+    return (
+      <Panel>
+        <div className="display text-sm mb-3" style={{ color: C.muted }}>EN LA HELADERA TENGO...</div>
+        <Locked titulo="Recetas armadas con lo que tenés en tu heladera" onBloqueado={onBloqueado} />
+      </Panel>
+    );
+  }
+
+  const { completas, casiCompletas } = sugerirDesdeHeladera(seleccion, misMenus || []);
+
+  const agregar = (r) => {
+    onAgregarComida({ nombre: r.nombre, kcal: r.kcal, prot: r.prot, carb: r.carb, grasa: r.grasa });
+    setAgregado(r.nombre);
+    setTimeout(() => setAgregado(null), 2000);
+  };
+
+  const toggleIngredienteNuevo = (item) => {
+    setNuevoMenu((prev) => ({
+      ...prev,
+      ingredientes: prev.ingredientes.includes(item) ? prev.ingredientes.filter((x) => x !== item) : [...prev.ingredientes, item],
+    }));
+  };
+
+  const guardarMenu = async () => {
+    if (!nuevoMenu.nombre.trim() || nuevoMenu.ingredientes.length === 0 || !nuevoMenu.kcal) return;
+    const menu = {
+      nombre: nuevoMenu.nombre.trim(),
+      ingredientes: nuevoMenu.ingredientes,
+      kcal: Number(nuevoMenu.kcal) || 0,
+      prot: Number(nuevoMenu.prot) || 0,
+      carb: Number(nuevoMenu.carb) || 0,
+      grasa: Number(nuevoMenu.grasa) || 0,
+    };
+    const nuevaLista = [...(misMenus || []), menu];
+    setMisMenus(nuevaLista);
+    await safeSet("misMenus", nuevaLista);
+    setNuevoMenu({ nombre: "", ingredientes: [], kcal: "", prot: "", carb: "", grasa: "" });
+    setCreando(false);
+  };
+
+  const borrarMenu = async (nombre) => {
+    const nuevaLista = (misMenus || []).filter((m) => m.nombre !== nombre);
+    setMisMenus(nuevaLista);
+    await safeSet("misMenus", nuevaLista);
+  };
+
+  return (
+    <Panel style={{ borderColor: C.food }}>
+      <div className="flex items-center gap-2 mb-1">
+        <Apple size={16} color={C.food} />
+        <span className="display text-sm" style={{ color: C.food }}>EN LA HELADERA TENGO...</span>
+      </div>
+      <p className="text-xs mb-3" style={{ color: C.muted }}>Marcá lo que tenés y te digo qué podés preparar sin pasarte de tus calorías de hoy.</p>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        {HELADERA_ITEMS.map((item) => {
+          const activo = seleccion.includes(item);
+          return (
+            <button
+              key={item}
+              onClick={() => toggle(item)}
+              className="px-3 py-1 rounded-full text-xs"
+              style={{
+                background: activo ? C.food : C.panelAlt,
+                color: activo ? C.bg : C.muted,
+                border: `1px solid ${activo ? C.food : C.border}`,
+              }}
+            >
+              {item}
+            </button>
+          );
+        })}
+      </div>
+
+      {seleccion.length === 0 && (
+        <p className="text-xs" style={{ color: C.muted }}>Elegí al menos un ingrediente para ver sugerencias.</p>
+      )}
+
+      {completas.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {completas.map((r) => {
+            const cabe = r.kcal <= restanteKcal;
+            return (
+              <div key={r.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">{r.nombre}</span>
+                  <span className="text-xs mono" style={{ color: cabe ? C.food : C.danger }}>{r.kcal} kcal</span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-[10px]" style={{ color: cabe ? C.muted : C.danger }}>
+                    {cabe ? "Entra en tus calorías de hoy" : "Se pasa de lo que te queda hoy"}
+                  </span>
+                  <button onClick={() => agregar(r)} className="text-[10px] mono px-2 py-1 rounded" style={{ background: C.food, color: C.bg }}>
+                    {agregado === r.nombre ? "Agregado ✓" : "Agregar"}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {completas.length === 0 && casiCompletas.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs" style={{ color: C.muted }}>Con lo que tenés no llega a ninguna receta completa, pero te falta poco para estas:</p>
+          {casiCompletas.map((r) => (
+            <div key={r.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
+              <div className="text-sm">{r.nombre}</div>
+              <div className="text-[10px]" style={{ color: C.food }}>Te falta: {r.falta.join(", ")}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {seleccion.length > 0 && completas.length === 0 && casiCompletas.length === 0 && (
+        <p className="text-xs" style={{ color: C.muted }}>No encontré una receta con esa combinación. Probá agregar algún ingrediente más.</p>
+      )}
+
+      <div className="mt-4 pt-3" style={{ borderTop: `1px solid ${C.border}` }}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-medium" style={{ color: C.muted }}>MIS MENÚS</span>
+          <button onClick={() => setCreando(!creando)} className="text-xs mono" style={{ color: C.food }}>
+            {creando ? "Cancelar" : "+ Crear menú"}
+          </button>
+        </div>
+
+        {misMenus && misMenus.length > 0 && (
+          <div className="flex flex-col gap-2 mb-2">
+            {misMenus.map((m) => (
+              <div key={m.nombre} className="flex items-center justify-between rounded px-3 py-2" style={{ background: C.panelAlt }}>
+                <div>
+                  <div className="text-sm">{m.nombre}</div>
+                  <div className="text-[10px]" style={{ color: C.muted }}>{m.ingredientes.join(", ")} · {m.kcal} kcal</div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => agregar(m)} className="text-[10px] mono px-2 py-1 rounded" style={{ background: C.food, color: C.bg }}>
+                    Agregar
+                  </button>
+                  <button onClick={() => borrarMenu(m.nombre)}><X size={14} color={C.muted} /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {creando && (
+          <div className="rounded-md p-3 flex flex-col gap-2" style={{ background: C.panelAlt }}>
+            <input
+              value={nuevoMenu.nombre}
+              onChange={(e) => setNuevoMenu({ ...nuevoMenu, nombre: e.target.value })}
+              placeholder="Nombre del menú"
+              className="rounded px-2 py-2 text-xs"
+              style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}
+            />
+            <div className="flex flex-wrap gap-1">
+              {HELADERA_ITEMS.map((item) => {
+                const activo = nuevoMenu.ingredientes.includes(item);
+                return (
+                  <button
+                    key={item}
+                    onClick={() => toggleIngredienteNuevo(item)}
+                    className="px-2 py-1 rounded-full text-[10px]"
+                    style={{
+                      background: activo ? C.food : C.panel,
+                      color: activo ? C.bg : C.muted,
+                      border: `1px solid ${activo ? C.food : C.border}`,
+                    }}
+                  >
+                    {item}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex gap-2">
+              {["kcal", "prot", "carb", "grasa"].map((campo) => (
+                <input
+                  key={campo}
+                  type="number"
+                  placeholder={campo}
+                  value={nuevoMenu[campo]}
+                  onChange={(e) => setNuevoMenu({ ...nuevoMenu, [campo]: e.target.value })}
+                  className="rounded px-2 py-2 text-xs w-full mono"
+                  style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}
+                />
+              ))}
+            </div>
+            <button
+              onClick={guardarMenu}
+              disabled={!nuevoMenu.nombre.trim() || nuevoMenu.ingredientes.length === 0 || !nuevoMenu.kcal}
+              className="py-2 rounded text-sm font-medium disabled:opacity-40"
+              style={{ background: C.food, color: C.bg }}
+            >
+              Guardar menú
+            </button>
+          </div>
+        )}
+      </div>
+    </Panel>
+  );
+}
+
+function FilaItem({ texto, sub, onQuitar }) {
+  return (
+    <div className="flex items-center justify-between rounded px-3 py-2" style={{ background: C.panelAlt }}>
+      <div>
+        <div className="text-sm">{texto}</div>
+        <div className="text-xs mono" style={{ color: C.muted }}>{sub}</div>
+      </div>
+      <button onClick={onQuitar}><X size={16} color={C.muted} /></button>
+    </div>
+  );
+}
+
+function reproducirBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.4);
+  } catch {
+    // el navegador puede bloquear audio sin interacción previa; no rompe el resto del timer
+  }
+}
+
+const DURACIONES_DESCANSO = [30, 60, 90, 120];
+
+function PanelDescanso({ total, restante, corriendo, onElegirDuracion, onIniciar, onPausarReanudar, onReiniciar }) {
+  const min = Math.floor(restante / 60);
+  const seg = restante % 60;
+  const pct = total > 0 ? ((total - restante) / total) * 360 : 0;
+  const terminado = restante === 0 && total > 0;
+
+  return (
+    <Panel>
+      <div className="display text-sm mb-3" style={{ color: C.muted }}>DESCANSO ENTRE SERIES</div>
+      <div className="flex items-center gap-5">
+        <div
+          style={{
+            width: 84,
+            height: 84,
+            borderRadius: "50%",
+            background: `conic-gradient(${terminado ? C.food : C.train} ${pct}deg, ${C.panelAlt} 0deg)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 66, height: 66, borderRadius: "50%", background: C.panel }} className="flex items-center justify-center">
+            <span className="mono text-lg font-semibold">{min}:{pad2(seg)}</span>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col gap-2">
+          <div className="flex gap-1 flex-wrap">
+            {DURACIONES_DESCANSO.map((d) => (
+              <button
+                key={d}
+                onClick={() => onElegirDuracion(d)}
+                className="px-2 py-1 rounded text-xs mono"
+                style={{ background: total === d ? C.train : C.panelAlt, color: total === d ? C.panel : C.muted }}
+              >
+                {d}s
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            {!corriendo && restante === total ? (
+              <button onClick={onIniciar} className="flex-1 py-2 rounded text-sm font-medium" style={{ background: C.train, color: C.panel }}>
+                Iniciar
+              </button>
+            ) : (
+              <button onClick={onPausarReanudar} className="flex-1 py-2 rounded text-sm font-medium" style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}>
+                {corriendo ? "Pausar" : "Reanudar"}
+              </button>
+            )}
+            <button onClick={onReiniciar} className="px-3 py-2 rounded text-sm" style={{ background: C.panelAlt, color: C.muted, border: `1px solid ${C.border}` }}>
+              Reiniciar
+            </button>
+          </div>
+        </div>
+      </div>
+      {terminado && <p className="text-xs mt-2" style={{ color: C.food }}>¡Descanso terminado! A la próxima serie.</p>}
+      <p className="text-[10px] mt-2" style={{ color: C.muted }}>Se inicia solo cada vez que registrás una serie más abajo.</p>
+    </Panel>
+  );
+}
+
+// ---------- ENTRENAMIENTO ----------
+function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, onAgregar, onQuitar, accesoPremium, onBloqueado }) {
+  const [trackSel, setTrackSel] = useState("empuje");
+  const [series, setSeries] = useState(3);
+  const [reps, setReps] = useState(10);
+  const [tipsAbiertos, setTipsAbiertos] = useState({});
+  const nivelActual = progresion[trackSel];
+  const ejercicioActual = TRACKS[trackSel].ejercicios[nivelActual - 1];
+
+  const toggleTips = (key) => setTipsAbiertos((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const [modoTiempo, setModoTiempo] = useState(Boolean(ejercicioActual.porTiempo));
+  const [segundosEj, setSegundosEj] = useState(0);
+  const [cronoCorriendo, setCronoCorriendo] = useState(false);
+  const cronoRef = useRef(null);
+
+  useEffect(() => {
+    setModoTiempo(Boolean(ejercicioActual.porTiempo));
+    setSegundosEj(0);
+    setCronoCorriendo(false);
+  }, [ejercicioActual.nombre]);
+
+  useEffect(() => {
+    if (cronoCorriendo) {
+      cronoRef.current = setInterval(() => setSegundosEj((s) => s + 1), 1000);
+    }
+    return () => clearInterval(cronoRef.current);
+  }, [cronoCorriendo]);
+
+  const reiniciarCronoEj = () => {
+    setCronoCorriendo(false);
+    setSegundosEj(0);
+  };
+
+  const [descansoTotal, setDescansoTotal] = useState(60);
+  const [descansoRestante, setDescansoRestante] = useState(60);
+  const [corriendo, setCorriendo] = useState(false);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    if (corriendo) {
+      intervalRef.current = setInterval(() => {
+        setDescansoRestante((prev) => {
+          if (prev <= 1) {
+            clearInterval(intervalRef.current);
+            setCorriendo(false);
+            try { navigator.vibrate?.(300); } catch {}
+            reproducirBeep();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [corriendo]);
+
+  const elegirDuracion = (seg) => {
+    setDescansoTotal(seg);
+    setDescansoRestante(seg);
+    setCorriendo(false);
+  };
+  const iniciarDescanso = (seg) => {
+    const duracion = seg || descansoTotal;
+    setDescansoTotal(duracion);
+    setDescansoRestante(duracion);
+    setCorriendo(true);
+  };
+  const pausarReanudar = () => setCorriendo((c) => !c);
+  const reiniciarDescanso = () => {
+    setCorriendo(false);
+    setDescansoRestante(descansoTotal);
+  };
+
+  return (
+    <div>
+      <PanelDescanso
+        total={descansoTotal}
+        restante={descansoRestante}
+        corriendo={corriendo}
+        onElegirDuracion={elegirDuracion}
+        onIniciar={() => iniciarDescanso()}
+        onPausarReanudar={pausarReanudar}
+        onReiniciar={reiniciarDescanso}
+      />
+
+      {Object.entries(TRACKS).map(([key, track]) => (
+        <Panel key={key}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="display text-sm" style={{ color: C.text }}>{track.nombre.toUpperCase()}</span>
+            <span className="text-xs mono" style={{ color: C.muted }}>Nivel {progresion[key]}/{track.ejercicios.length}</span>
+          </div>
+          {progresion[key] < track.ejercicios.length && (
+            <div className="mb-3">
+              <div style={{ height: 4, background: C.panelAlt, borderRadius: 2 }}>
+                <div
+                  style={{
+                    width: `${Math.min(((progresoSeries?.[key] || 0) / UMBRAL_SUBIR_NIVEL) * 100, 100)}%`,
+                    height: 4,
+                    background: C.train,
+                    borderRadius: 2,
+                  }}
+                />
+              </div>
+              <span className="text-[9px] mono" style={{ color: C.muted }}>
+                {Math.min(progresoSeries?.[key] || 0, UMBRAL_SUBIR_NIVEL)}/{UMBRAL_SUBIR_NIVEL} series para el próximo nivel
+              </span>
+            </div>
+          )}
+          <div className="flex overflow-x-auto gap-0 pb-1 items-center">
+            {track.ejercicios.map((ej, i) => {
+              const nivel = i + 1;
+              const activo = nivel === progresion[key];
+              const hecho = nivel < progresion[key];
+              const bloqueado = nivel > NIVEL_LIMITE_FREE && !accesoPremium;
+              const esCorteFreePremium = i === NIVEL_LIMITE_FREE && !accesoPremium;
+              return (
+                <div key={ej.nombre} className="flex items-center flex-shrink-0">
+                  {i > 0 && !esCorteFreePremium && (
+                    <div style={{ width: 16, height: 2, background: hecho || activo ? C.train : C.border }} />
+                  )}
+                  {esCorteFreePremium && (
+                    <div className="flex flex-col items-center flex-shrink-0" style={{ width: 34 }}>
+                      <ChipPro texto="PRO" />
+                      <div style={{ width: "100%", height: 0, borderTop: `2px dashed ${C.food}`, marginTop: 4 }} />
+                    </div>
+                  )}
+                  <button
+                    onClick={() => (bloqueado ? onBloqueado() : setNivel(key, nivel))}
+                    className="flex flex-col items-center gap-1"
+                    style={{ width: 76 }}
+                  >
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        background: hecho ? C.train : activo ? C.panelAlt : "transparent",
+                        border: `2px solid ${bloqueado ? C.border : hecho || activo ? C.train : C.border}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {bloqueado ? (
+                        <Lock size={12} color={C.muted} />
+                      ) : hecho ? (
+                        <Check size={14} color={C.panel} />
+                      ) : (
+                        <span className="mono text-[10px]" style={{ color: activo ? C.train : C.muted }}>{nivel}</span>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-center leading-tight" style={{ color: bloqueado ? C.muted : activo ? C.text : C.muted, height: 26 }}>{ej.nombre}</span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => toggleTips(key)}
+            className="text-xs mono mt-2"
+            style={{ color: C.food }}
+          >
+            {tipsAbiertos[key] ? "Ocultar consejos de técnica ▲" : "Ver consejos de técnica ▼"}
+          </button>
+          {tipsAbiertos[key] && (
+            <div className="flex flex-col gap-2 mt-2">
+              {track.ejercicios.map((ej, i) => (
+                <div key={ej.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
+                  <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
+                  <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Panel>
+      ))}
+
+      <Panel>
+        <div className="display text-sm mb-3" style={{ color: C.muted }}>REGISTRAR SERIE</div>
+        <div className="flex gap-2 mb-3 flex-wrap">
+          {Object.entries(TRACKS).map(([key, t]) => (
+            <button
+              key={key}
+              onClick={() => setTrackSel(key)}
+              className="px-3 py-1 rounded text-xs mono"
+              style={{ background: trackSel === key ? C.train : C.panelAlt, color: trackSel === key ? C.panel : C.muted }}
+            >
+              {t.nombre}
+            </button>
+          ))}
+        </div>
+        <div className="text-sm mb-1">{ejercicioActual.nombre}</div>
+        <p className="text-xs mb-3" style={{ color: C.muted }}>{ejercicioActual.tip}</p>
+
+        <div className="flex gap-2 mb-3">
+          <button
+            onClick={() => setModoTiempo(false)}
+            className="px-3 py-1 rounded text-xs"
+            style={{ background: !modoTiempo ? C.train : C.panelAlt, color: !modoTiempo ? C.panel : C.muted }}
+          >
+            Repeticiones
+          </button>
+          <button
+            onClick={() => setModoTiempo(true)}
+            className="px-3 py-1 rounded text-xs"
+            style={{ background: modoTiempo ? C.train : C.panelAlt, color: modoTiempo ? C.panel : C.muted }}
+          >
+            Por tiempo
+          </button>
+        </div>
+
+        {!modoTiempo ? (
+          <div className="flex gap-3 items-end mb-3">
+            <label className="flex flex-col text-xs" style={{ color: C.muted }}>
+              Series
+              <input type="number" min={1} value={series} onChange={(e) => setSeries(e.target.value)} className="mt-1 w-16 rounded px-2 py-1 mono" style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }} />
+            </label>
+            <label className="flex flex-col text-xs" style={{ color: C.muted }}>
+              Reps
+              <input type="number" min={1} value={reps} onChange={(e) => setReps(e.target.value)} className="mt-1 w-16 rounded px-2 py-1 mono" style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }} />
+            </label>
+            <button
+              onClick={() => {
+                onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, series, reps });
+                iniciarDescanso();
+              }}
+              className="flex items-center gap-1 px-4 py-2 rounded font-medium"
+              style={{ background: C.train, color: C.panel }}
+            >
+              <Plus size={16} /> Agregar
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-4 mb-3">
+            <div className="mono text-2xl font-semibold" style={{ minWidth: 64 }}>
+              {Math.floor(segundosEj / 60)}:{pad2(segundosEj % 60)}
+            </div>
+            <div className="flex gap-2 flex-1">
+              <button
+                onClick={() => setCronoCorriendo((c) => !c)}
+                className="flex-1 py-2 rounded text-sm font-medium"
+                style={{ background: cronoCorriendo ? C.panelAlt : C.train, color: cronoCorriendo ? C.text : C.panel, border: cronoCorriendo ? `1px solid ${C.border}` : "none" }}
+              >
+                {cronoCorriendo ? "Pausar" : segundosEj > 0 ? "Reanudar" : "Iniciar"}
+              </button>
+              <button
+                onClick={() => {
+                  if (segundosEj <= 0) return;
+                  onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, tipo: "tiempo", segundos: segundosEj });
+                  reiniciarCronoEj();
+                  iniciarDescanso();
+                }}
+                disabled={segundosEj <= 0}
+                className="flex items-center gap-1 px-4 py-2 rounded font-medium disabled:opacity-40"
+                style={{ background: C.food, color: C.bg }}
+              >
+                <Plus size={16} /> Agregar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {registro.entrenamiento.length > 0 && (
+          <div className="flex flex-col gap-2 mt-2">
+            {registro.entrenamiento.map((e) => (
+              <FilaItem
+                key={e.id}
+                texto={e.ejercicio}
+                sub={e.tipo === "tiempo" ? `${e.segundos}s sostenidos` : `${e.series}x${e.reps}`}
+                onQuitar={() => onQuitar(e.id)}
+              />
+            ))}
+          </div>
+        )}
+      </Panel>
+    </div>
+  );
+}
+
+function PanelComidasDia({ perfil }) {
+  const [plan, setPlan] = useState(null);
+  const [editando, setEditando] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const guardado = await safeGet("planComidas");
+      setPlan(guardado || COMIDAS_DEL_DIA.map((m) => ({ ...m })));
+    })();
+  }, []);
+
+  if (!plan) return null;
+
+  const totalPct = plan.reduce((s, m) => s + Number(m.pct || 0), 0);
+
+  const actualizar = (i, campo, valor) => {
+    const nuevo = plan.map((m, idx) => (idx === i ? { ...m, [campo]: campo === "pct" ? Number(valor) / 100 : valor } : m));
+    setPlan(nuevo);
+  };
+
+  const agregarComidaPlan = () => setPlan([...plan, { nombre: "Nueva comida", pct: 0 }]);
+  const quitarComidaPlan = (i) => setPlan(plan.filter((_, idx) => idx !== i));
+
+  const guardar = async () => {
+    await safeSet("planComidas", plan);
+    setEditando(false);
+  };
+
+  const restablecer = async () => {
+    const sugerido = COMIDAS_DEL_DIA.map((m) => ({ ...m }));
+    setPlan(sugerido);
+    await safeSet("planComidas", sugerido);
+  };
+
+  return (
+    <Panel>
+      <div className="flex items-center justify-between mb-1">
+        <div className="display text-sm" style={{ color: C.muted }}>CUÁNTO DEBÉS COMER POR DÍA</div>
+        <button onClick={() => setEditando(!editando)} className="text-xs mono" style={{ color: C.food }}>
+          {editando ? "Listo" : "Editar"}
+        </button>
+      </div>
+      <p className="text-xs mb-3" style={{ color: C.muted }}>
+        Objetivo diario: {perfil.kcal} kcal · P{perfil.prot}g · C{perfil.carb}g · G{perfil.grasa}g. Esto es una sugerencia, repartila como te quede más cómoda.
+      </p>
+
+      {!editando ? (
+        <div className="flex flex-col gap-2">
+          {plan.map((m, i) => (
+            <div key={i} className="flex items-center justify-between rounded px-3 py-2" style={{ background: C.panelAlt }}>
+              <span className="text-sm">{m.nombre}</span>
+              <span className="text-xs mono" style={{ color: C.muted }}>
+                {Math.round(perfil.kcal * m.pct)} kcal · P{Math.round(perfil.prot * m.pct)}g
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {plan.map((m, i) => (
+            <div key={i} className="flex items-center gap-2 rounded px-2 py-2" style={{ background: C.panelAlt }}>
+              <input
+                value={m.nombre}
+                onChange={(e) => actualizar(i, "nombre", e.target.value)}
+                className="flex-1 rounded px-2 py-1 text-xs"
+                style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}
+              />
+              <input
+                type="number"
+                value={Math.round(m.pct * 100)}
+                onChange={(e) => actualizar(i, "pct", e.target.value)}
+                className="w-14 rounded px-2 py-1 text-xs mono text-right"
+                style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}
+              />
+              <span className="text-xs" style={{ color: C.muted }}>%</span>
+              <button onClick={() => quitarComidaPlan(i)}><X size={14} color={C.muted} /></button>
+            </div>
+          ))}
+          <div className="text-[10px]" style={{ color: totalPct === 1 ? C.muted : C.danger }}>
+            Total: {Math.round(totalPct * 100)}%{totalPct !== 1 ? " (debería sumar 100%)" : ""}
+          </div>
+          <div className="flex gap-2 mt-1">
+            <button onClick={agregarComidaPlan} className="flex-1 flex items-center justify-center gap-1 py-2 rounded text-xs" style={{ background: C.panel, color: C.muted, border: `1px solid ${C.border}` }}>
+              <Plus size={12} /> Agregar comida
+            </button>
+            <button onClick={restablecer} className="flex-1 py-2 rounded text-xs" style={{ background: C.panel, color: C.muted, border: `1px solid ${C.border}` }}>
+              Usar sugerencia
+            </button>
+          </div>
+          <button onClick={guardar} className="w-full py-2 rounded font-medium mt-1" style={{ background: C.food, color: C.bg }}>
+            Guardar
+          </button>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+// ---------- NUTRICION ----------
+function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, accesoPremium, onBloqueado }) {
+  const [custom, setCustom] = useState({ nombre: "", kcal: "", prot: "", carb: "", grasa: "" });
+
+  const barra = (valor, objetivo, color) => (
+    <div className="mb-2">
+      <div className="flex justify-between text-xs mono mb-1" style={{ color: C.muted }}>
+        <span>{Math.round(valor)}g</span>
+        <span>{objetivo}g</span>
+      </div>
+      <div style={{ height: 6, background: C.panelAlt, borderRadius: 3 }}>
+        <div style={{ width: `${Math.min((valor / objetivo) * 100, 100)}%`, height: 6, background: color, borderRadius: 3 }} />
+      </div>
+    </div>
+  );
+
+  const rec = recomendarComida(totales, perfil);
+
+  return (
+    <div>
+      <Panel>
+        <div className="display text-sm mb-3" style={{ color: C.muted }}>MACROS DE HOY</div>
+        <div className="text-xs mb-1" style={{ color: C.muted }}>Proteína</div>
+        {barra(totales.prot, perfil.prot, C.food)}
+        <div className="text-xs mb-1" style={{ color: C.muted }}>Carbohidratos</div>
+        {barra(totales.carb, perfil.carb, C.train)}
+        <div className="text-xs mb-1" style={{ color: C.muted }}>Grasas</div>
+        {barra(totales.grasa, perfil.grasa, "#C9A24B")}
+      </Panel>
+
+      <Panel style={{ borderColor: accesoPremium ? C.food : C.border }}>
+        <div className="flex items-center gap-2 mb-2">
+          <Apple size={16} color={C.food} />
+          <span className="display text-sm" style={{ color: C.food }}>QUÉ COMER AHORA</span>
+        </div>
+        {accesoPremium ? (
+          <>
+            <p className="text-sm mb-2">{rec.mensaje}</p>
+            {rec.sugerencias.length > 0 && (
+              <div className="flex flex-col gap-2">
+                {rec.sugerencias.map((a) => (
+                  <div key={a.nombre} className="flex items-center justify-between rounded px-3 py-2" style={{ background: C.panelAlt }}>
+                    <span className="text-sm">{a.nombre}</span>
+                    <span className="text-xs mono" style={{ color: C.food }}>{a.kcal} kcal · P{a.prot}g</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <Locked titulo="Recomendación personalizada según tus macros" onBloqueado={onBloqueado} />
+        )}
+      </Panel>
+
+      <PanelComidasDia perfil={perfil} />
+
+      <Panel>
+        <div className="display text-sm mb-3" style={{ color: C.muted }}>AGREGAR RÁPIDO</div>
+        <div className="grid grid-cols-2 gap-2">
+          {ALIMENTOS.map((a) => (
+            <button
+              key={a.nombre}
+              onClick={() => onAgregar(a)}
+              className="text-left p-2 rounded"
+              style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}
+            >
+              <div className="text-xs">{a.nombre}</div>
+              <div className="text-[10px] mono" style={{ color: C.food }}>{a.kcal} kcal</div>
+            </button>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel>
+        <div className="display text-sm mb-3" style={{ color: C.muted }}>CARGAR ALIMENTO PERSONALIZADO</div>
+        {accesoPremium ? (
+          <div className="flex flex-col gap-2">
+            <input placeholder="Nombre" value={custom.nombre} onChange={(e) => setCustom({ ...custom, nombre: e.target.value })} className="rounded px-2 py-2 text-sm" style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }} />
+            <div className="flex gap-2">
+              {["kcal", "prot", "carb", "grasa"].map((campo) => (
+                <input
+                  key={campo}
+                  type="number"
+                  placeholder={campo}
+                  value={custom[campo]}
+                  onChange={(e) => setCustom({ ...custom, [campo]: e.target.value })}
+                  className="rounded px-2 py-2 text-sm w-full mono"
+                  style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
+                />
+              ))}
+            </div>
+            <button
+              disabled={!custom.nombre || !custom.kcal}
+              onClick={() => {
+                onAgregar({
+                  nombre: custom.nombre,
+                  kcal: Number(custom.kcal) || 0,
+                  prot: Number(custom.prot) || 0,
+                  carb: Number(custom.carb) || 0,
+                  grasa: Number(custom.grasa) || 0,
+                });
+                setCustom({ nombre: "", kcal: "", prot: "", carb: "", grasa: "" });
+              }}
+              className="flex items-center justify-center gap-1 py-2 rounded font-medium disabled:opacity-40"
+              style={{ background: C.food, color: C.bg }}
+            >
+              <Plus size={16} /> Agregar
+            </button>
+          </div>
+        ) : (
+          <Locked titulo="Alimentos personalizados ilimitados" onBloqueado={onBloqueado} />
+        )}
+      </Panel>
+
+      <Panel>
+        <div className="display text-sm mb-3" style={{ color: C.muted }}>COMIDAS CARGADAS</div>
+        {registro.comidas.length === 0 ? (
+          <p className="text-sm" style={{ color: C.muted }}>Sin comidas todavía.</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {registro.comidas.map((c) => (
+              <FilaItem key={c.id} texto={c.nombre} sub={`${c.kcal} kcal · P${c.prot} C${c.carb} G${c.grasa}`} onQuitar={() => onQuitar(c.id)} />
+            ))}
+          </div>
+        )}
+      </Panel>
+    </div>
+  );
+}
+
+// ---------- PROGRESO ----------
+// ---------- CONSEJOS ----------
+function VistaConsejos({ perfil }) {
+  const [trackAbierto, setTrackAbierto] = useState(null);
+  return (
+    <div>
+      <Panel>
+        <div className="flex items-center gap-2 mb-1">
+          <Lightbulb size={16} color={C.food} />
+          <span className="display text-sm" style={{ color: C.food }}>CONSEJOS SALUDABLES</span>
+        </div>
+        <p className="text-[10px] mb-3" style={{ color: C.muted }}>
+          Personalizados para tu objetivo: <span style={{ color: C.food }}>{NOMBRE_OBJETIVO[perfil.objetivo] || NOMBRE_OBJETIVO.mantener}</span>
+        </p>
+        <div className="flex flex-col gap-2">
+          {consejosPersonalizados(perfil.objetivo).map((c, i) => (
+            <div key={i} className="flex gap-2 text-sm">
+              <span className="mono" style={{ color: C.food }}>{String(i + 1).padStart(2, "0")}</span>
+              <span>{c}</span>
+            </div>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel>
+        <div className="flex items-center gap-2 mb-1">
+          <Dumbbell size={16} color={C.train} />
+          <span className="display text-sm" style={{ color: C.train }}>TÉCNICA POR GRUPO MUSCULAR</span>
+        </div>
+        <p className="text-[10px] mb-3" style={{ color: C.muted }}>Tocá un grupo para ver el consejo de cada ejercicio.</p>
+        <div className="flex flex-col gap-2">
+          {Object.entries(TRACKS).map(([key, track]) => (
+            <div key={key}>
+              <button
+                onClick={() => setTrackAbierto(trackAbierto === key ? null : key)}
+                className="w-full flex items-center justify-between rounded px-3 py-2"
+                style={{ background: C.panelAlt }}
+              >
+                <span className="text-sm font-medium">{track.nombre}</span>
+                <span className="text-xs mono" style={{ color: C.muted }}>{trackAbierto === key ? "▲" : "▼"}</span>
+              </button>
+              {trackAbierto === key && (
+                <div className="flex flex-col gap-2 mt-2">
+                  {track.ejercicios.map((ej, i) => (
+                    <div key={ej.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
+                      <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
+                      <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function VistaProgreso({ semana, perfil, progresion, accesoPremium, onBloqueado }) {
+  if (!accesoPremium) {
+    return (
+      <Panel>
+        <Locked titulo="Racha, gráfico semanal, peso corporal y logros" onBloqueado={onBloqueado} />
+      </Panel>
+    );
+  }
+  if (!semana) {
+    return <p className="text-sm" style={{ color: C.muted }}>Cargando semana...</p>;
+  }
+  const diasEntrenados = semana.filter((d) => d.entreno).length;
+  let racha = 0;
+  for (let i = semana.length - 1; i >= 0; i--) {
+    if (semana[i].entreno) racha++;
+    else break;
+  }
+  const nivelMaximo = Math.max(...Object.values(progresion || {}));
+
+  return (
+    <div>
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <Panel style={{ marginBottom: 0 }}>
+          <div className="flex items-center gap-2">
+            <Flame size={16} color={C.train} />
+            <span className="text-xs" style={{ color: C.muted }}>Racha actual</span>
+          </div>
+          <div className="display text-2xl mt-1">{racha} día{racha !== 1 ? "s" : ""}</div>
+        </Panel>
+        <Panel style={{ marginBottom: 0 }}>
+          <div className="flex items-center gap-2">
+            <Dumbbell size={16} color={C.train} />
+            <span className="text-xs" style={{ color: C.muted }}>Días entrenados (7d)</span>
+          </div>
+          <div className="display text-2xl mt-1">{diasEntrenados}/7</div>
+        </Panel>
+      </div>
+
+      <PanelLogros racha={racha} diasEntrenados={diasEntrenados} nivelMaximo={nivelMaximo} />
+
+      <PanelCalendario />
+
+      <PanelPeso objetivo={perfil.objetivo} />
+
+      <Panel>
+        <div className="display text-sm mb-3" style={{ color: C.muted }}>CALORÍAS ÚLTIMOS 7 DÍAS</div>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={semana}>
+            <XAxis dataKey="dia" tick={{ fill: C.muted, fontSize: 10 }} axisLine={{ stroke: C.border }} tickLine={false} />
+            <YAxis tick={{ fill: C.muted, fontSize: 10 }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ background: C.panelAlt, border: `1px solid ${C.border}`, fontSize: 12 }} labelStyle={{ color: C.text }} />
+            <ReferenceLine y={perfil.kcal} stroke={C.food} strokeDasharray="4 4" />
+            <Bar dataKey="kcal" fill={C.train} radius={[3, 3, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </Panel>
+
+      <Panel>
+        <div className="display text-sm mb-3" style={{ color: C.muted }}>ENTRENO POR DÍA</div>
+        <div className="flex justify-between">
+          {semana.map((d) => (
+            <div key={d.fecha} className="flex flex-col items-center gap-1">
+              <div
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: "50%",
+                  background: d.entreno ? C.train : C.panelAlt,
+                  border: `1px solid ${d.entreno ? C.train : C.border}`,
+                }}
+                className="flex items-center justify-center"
+              >
+                {d.entreno && <Check size={12} color={C.panel} />}
+              </div>
+              <span className="text-[9px]" style={{ color: C.muted }}>{d.dia.split(" ")[0]}</span>
+            </div>
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+const LOGROS_DEF = [
+  { id: "racha3", nombre: "Racha de 3 días", desc: "Entrenaste 3 días seguidos", cumple: (ctx) => ctx.racha >= 3 },
+  { id: "semana", nombre: "Semana perfecta", desc: "Entrenaste los 7 días de la semana", cumple: (ctx) => ctx.diasEntrenados >= 7 },
+  { id: "nivel3", nombre: "Salió de principiante", desc: "Llegaste al nivel 3 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 3 },
+  { id: "nivel5", nombre: "Nivel avanzado", desc: "Llegaste al nivel 5 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 5 },
+];
+
+function PanelLogros({ racha, diasEntrenados, nivelMaximo }) {
+  const ctx = { racha, diasEntrenados, nivelMaximo };
+  return (
+    <Panel>
+      <div className="display text-sm mb-3" style={{ color: C.muted }}>LOGROS</div>
+      <div className="grid grid-cols-2 gap-2">
+        {LOGROS_DEF.map((l) => {
+          const conseguido = l.cumple(ctx);
+          return (
+            <div
+              key={l.id}
+              className="rounded-md p-2 flex flex-col items-center text-center gap-1"
+              style={{ background: conseguido ? C.foodDim : C.panelAlt, border: `1px solid ${conseguido ? C.food : C.border}`, opacity: conseguido ? 1 : 0.5 }}
+            >
+              <Crown size={16} color={conseguido ? C.food : C.muted} />
+              <span className="text-[11px] font-medium">{l.nombre}</span>
+              <span className="text-[9px]" style={{ color: C.muted }}>{l.desc}</span>
+            </div>
+          );
+        })}
+      </div>
+    </Panel>
+  );
+}
+
+function PanelCalendario() {
+  const [cursor, setCursor] = useState(() => {
+    const d = new Date();
+    return { y: d.getFullYear(), m: d.getMonth() };
+  });
+  const [diasConDatos, setDiasConDatos] = useState(null);
+  const [diaSel, setDiaSel] = useState(null);
+  const [detalle, setDetalle] = useState(null);
+  const [cargandoDetalle, setCargandoDetalle] = useState(false);
+
+  const monthKey = `${cursor.y}-${pad2(cursor.m + 1)}`;
+
+  useEffect(() => {
+    (async () => {
+      setDiasConDatos(null);
+      setDiaSel(null);
+      setDetalle(null);
+      const dias = await listRegistroKeysForMonth(monthKey);
+      setDiasConDatos(dias);
+    })();
+  }, [monthKey]);
+
+  const verDia = async (fechaStr) => {
+    setDiaSel(fechaStr);
+    setCargandoDetalle(true);
+    const data = await safeGet(`registro:${fechaStr}`);
+    setDetalle(data || { entrenamiento: [], comidas: [] });
+    setCargandoDetalle(false);
+  };
+
+  const cambiarMes = (delta) => {
+    let m = cursor.m + delta;
+    let y = cursor.y;
+    if (m < 0) { m = 11; y--; }
+    if (m > 11) { m = 0; y++; }
+    setCursor({ y, m });
+  };
+
+  const diasEnMes = new Date(cursor.y, cursor.m + 1, 0).getDate();
+  const primerDiaSemana = (new Date(cursor.y, cursor.m, 1).getDay() + 6) % 7; // 0 = lunes
+  const celdas = [...Array(primerDiaSemana).fill(null), ...Array.from({ length: diasEnMes }, (_, i) => i + 1)];
+  const hoyStr = hoy();
+
+  return (
+    <Panel>
+      <div className="flex items-center justify-between mb-3">
+        <button onClick={() => cambiarMes(-1)} className="px-3 py-1 rounded" style={{ background: C.panelAlt, color: C.muted }}>‹</button>
+        <span className="display text-sm" style={{ color: C.muted }}>{NOMBRES_MES[cursor.m].toUpperCase()} {cursor.y}</span>
+        <button onClick={() => cambiarMes(1)} className="px-3 py-1 rounded" style={{ background: C.panelAlt, color: C.muted }}>›</button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 mb-1">
+        {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
+          <div key={i} className="text-center text-[9px]" style={{ color: C.muted }}>{d}</div>
+        ))}
+      </div>
+
+      {diasConDatos === null ? (
+        <p className="text-xs" style={{ color: C.muted }}>Cargando...</p>
+      ) : (
+        <div className="grid grid-cols-7 gap-1">
+          {celdas.map((dia, i) => {
+            if (!dia) return <div key={i} />;
+            const fechaStr = `${monthKey}-${pad2(dia)}`;
+            const tieneDatos = diasConDatos.has(fechaStr);
+            const esHoy = fechaStr === hoyStr;
+            const seleccionado = diaSel === fechaStr;
+            return (
+              <button
+                key={i}
+                onClick={() => tieneDatos && verDia(fechaStr)}
+                disabled={!tieneDatos}
+                className="aspect-square rounded flex flex-col items-center justify-center text-[10px]"
+                style={{
+                  background: seleccionado ? C.train : C.panelAlt,
+                  border: `1px solid ${esHoy ? C.train : C.border}`,
+                  opacity: tieneDatos ? 1 : 0.35,
+                  color: seleccionado ? C.panel : C.text,
+                }}
+              >
+                {dia}
+                {tieneDatos && <div style={{ width: 4, height: 4, borderRadius: 2, background: seleccionado ? C.panel : C.food, marginTop: 2 }} />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {diaSel && (
+        <div className="mt-3 rounded-md p-3" style={{ background: C.panelAlt }}>
+          <div className="text-xs mono mb-2" style={{ color: C.food }}>{fechaLegible(diaSel)}</div>
+          {cargandoDetalle ? (
+            <p className="text-xs" style={{ color: C.muted }}>Cargando...</p>
+          ) : (
+            <>
+              {detalle.entrenamiento.length > 0 && (
+                <div className="mb-2">
+                  <div className="text-[10px] mb-1" style={{ color: C.muted }}>Entrenamiento</div>
+                  {detalle.entrenamiento.map((e) => (
+                    <div key={e.id} className="text-xs">{e.ejercicio} — {e.tipo === "tiempo" ? `${e.segundos}s sostenidos` : `${e.series}x${e.reps}`}</div>
+                  ))}
+                </div>
+              )}
+              {detalle.comidas.length > 0 && (
+                <div>
+                  <div className="text-[10px] mb-1" style={{ color: C.muted }}>Comidas</div>
+                  {detalle.comidas.map((c) => (
+                    <div key={c.id} className="text-xs">{c.nombre} — {c.kcal} kcal</div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+function PanelPeso({ objetivo }) {
+  const [historial, setHistorial] = useState(null);
+  const [pesoHoy, setPesoHoy] = useState("");
+  const [guardando, setGuardando] = useState(false);
+  const [metaPeso, setMetaPeso] = useState(null);
+  const [editandoMeta, setEditandoMeta] = useState(false);
+  const [metaInput, setMetaInput] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const h = (await safeGet("peso")) || [];
+      setHistorial(h);
+      const m = await safeGet("metaPeso");
+      setMetaPeso(m);
+      if (m) setMetaInput(String(m.kg));
+    })();
+  }, []);
+
+  const registrar = async () => {
+    const kg = Number(pesoHoy);
+    if (!kg || guardando) return;
+    setGuardando(true);
+    const otros = (historial || []).filter((p) => p.fecha !== hoy());
+    const nuevo = [...otros, { fecha: hoy(), kg }].sort((a, b) => (a.fecha > b.fecha ? 1 : -1));
+    setHistorial(nuevo);
+    await safeSet("peso", nuevo);
+    setPesoHoy("");
+    setGuardando(false);
+  };
+
+  const guardarMeta = async () => {
+    const kg = Number(metaInput);
+    if (!kg) return;
+    const nueva = { kg };
+    setMetaPeso(nueva);
+    await safeSet("metaPeso", nueva);
+    setEditandoMeta(false);
+  };
+
+  if (historial === null) return null;
+
+  const ultimos = historial.slice(-10).map((p) => ({ ...p, dia: fechaLegible(p.fecha).split(" ")[0] }));
+  const diferencia = historial.length >= 2 ? historial[historial.length - 1].kg - historial[0].kg : 0;
+  const ultimoPeso = historial.length > 0 ? historial[historial.length - 1].kg : null;
+
+  let mensajeMeta = null;
+  if (metaPeso && ultimoPeso !== null) {
+    const faltante = ultimoPeso - metaPeso.kg;
+    const yaLlego = objetivo === "subir" ? faltante >= 0 : objetivo === "bajar" ? faltante <= 0 : Math.abs(faltante) < 0.5;
+    if (yaLlego) {
+      mensajeMeta = "¡Llegaste a tu meta de peso! 🎉";
+    } else {
+      mensajeMeta = `Te ${Math.abs(faltante) === 1 ? "falta" : "faltan"} ${Math.abs(faltante).toFixed(1)} kg para llegar a tu meta de ${metaPeso.kg} kg.`;
+    }
+  }
+
+  return (
+    <Panel>
+      <div className="flex items-center justify-between mb-1">
+        <span className="display text-sm" style={{ color: C.muted }}>PESO CORPORAL</span>
+        {historial.length >= 2 && (
+          <span className="text-xs mono" style={{ color: diferencia <= 0 ? C.food : C.train }}>
+            {diferencia > 0 ? "+" : ""}{diferencia.toFixed(1)} kg desde el registro
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between mb-3">
+        {metaPeso && !editandoMeta ? (
+          <button onClick={() => setEditandoMeta(true)} className="text-xs mono" style={{ color: C.food }}>
+            Meta: {metaPeso.kg} kg (editar)
+          </button>
+        ) : !editandoMeta ? (
+          <button onClick={() => setEditandoMeta(true)} className="text-xs mono underline" style={{ color: C.muted }}>
+            Definir meta de peso
+          </button>
+        ) : null}
+      </div>
+
+      {editandoMeta && (
+        <div className="flex gap-2 mb-3">
+          <input
+            type="number"
+            step="0.1"
+            placeholder="Meta (kg)"
+            value={metaInput}
+            onChange={(e) => setMetaInput(e.target.value)}
+            className="flex-1 rounded px-3 py-2 text-sm mono"
+            style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
+          />
+          <button onClick={guardarMeta} className="px-4 py-2 rounded text-sm font-medium" style={{ background: C.food, color: C.bg }}>
+            Guardar
+          </button>
+        </div>
+      )}
+
+      {mensajeMeta && (
+        <p className="text-xs mb-3" style={{ color: C.food }}>{mensajeMeta}</p>
+      )}
+
+      <div className="flex gap-2 mb-3">
+        <input
+          type="number"
+          step="0.1"
+          placeholder="Peso de hoy (kg)"
+          value={pesoHoy}
+          onChange={(e) => setPesoHoy(e.target.value)}
+          className="flex-1 rounded px-3 py-2 text-sm mono"
+          style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
+        />
+        <button onClick={registrar} disabled={guardando} className="px-4 py-2 rounded text-sm font-medium" style={{ background: C.food, color: C.bg, opacity: guardando ? 0.5 : 1 }}>
+          Registrar
+        </button>
+      </div>
+      {ultimos.length < 2 ? (
+        <p className="text-xs" style={{ color: C.muted }}>Registrá tu peso un par de veces para ver la evolución.</p>
+      ) : (
+        <ResponsiveContainer width="100%" height={160}>
+          <LineChart data={ultimos}>
+            <XAxis dataKey="dia" tick={{ fill: C.muted, fontSize: 10 }} axisLine={{ stroke: C.border }} tickLine={false} />
+            <YAxis
+              tick={{ fill: C.muted, fontSize: 10 }}
+              axisLine={false}
+              tickLine={false}
+              domain={[
+                (dataMin) => Math.min(dataMin - 1, metaPeso ? metaPeso.kg - 1 : dataMin - 1),
+                (dataMax) => Math.max(dataMax + 1, metaPeso ? metaPeso.kg + 1 : dataMax + 1),
+              ]}
+            />
+            <Tooltip contentStyle={{ background: C.panelAlt, border: `1px solid ${C.border}`, fontSize: 12 }} labelStyle={{ color: C.text }} />
+            {metaPeso && <ReferenceLine y={metaPeso.kg} stroke={C.food} strokeDasharray="4 4" label={{ value: "Meta", fill: C.food, fontSize: 10, position: "insideTopRight" }} />}
+            <Line type="monotone" dataKey="kg" stroke={C.train} strokeWidth={2} dot={{ r: 3 }} />
+          </LineChart>
+        </ResponsiveContainer>
+      )}
+    </Panel>
+  );
+}
+
+const SINONIMOS_TRACK = {
+  empuje: ["empuje", "pecho", "flexion", "flexiones", "triceps", "hombro", "hombros", "fondos"],
+  traccion: ["traccion", "tracción", "espalda", "dominada", "dominadas", "biceps", "remo", "muscle"],
+  piernas: ["pierna", "piernas", "sentadilla", "cuadriceps", "gluteo", "gluteos", "pistol", "zancada"],
+  core: ["core", "abdominal", "abdominales", "abs", "plancha", "dragon", "lever", "l-sit", "lsit"],
+};
+
+const KEYWORDS_CONSEJOS_LOCAL = [
+  { palabras: ["agua", "hidrat", "tomar liquido"], texto: "Tomá al menos 2 litros de agua por día, más si entrenás fuerte o hace calor." },
+  { palabras: ["dormir", "sueno", "sueño", "descanso", "descansar"], texto: "Dormí bien: la falta de sueño afecta tanto la recuperación muscular como el apetito." },
+  { palabras: ["proteina", "proteína"], texto: "Priorizá proteína en cada comida (carne, pollo, huevo, yogur) para acompañar la calistenia." },
+  { palabras: ["carbohidrato", "carbo"], texto: "Elegí carbohidratos con fibra (arroz, batata, avena, frutas) en vez de harinas refinadas." },
+  { palabras: ["grasa"], texto: "Dejá espacio para grasas buenas: palta, frutos secos, aceite de oliva." },
+  { palabras: ["bajar de peso", "adelgazar", "perder peso"], texto: "Para bajar de peso, priorizá alimentos que dan saciedad con pocas calorías: vegetales, proteína magra, legumbres, y un déficit moderado (no extremo)." },
+  { palabras: ["subir de peso", "engordar", "ganar musculo", "ganar masa"], texto: "Para subir de peso, no le tengas miedo a sumar calorías extra: frutos secos, más comidas en el día, carbohidratos y grasas de calidad." },
+  { palabras: ["dolor", "lesion", "lesión", "molestia"], texto: "Si tenés dolor persistente o una molestia que no baja, mejor consultá a un profesional de la salud antes de seguir entrenando esa zona." },
+];
+
+function buscarTrackPorTexto(texto) {
+  for (const [track, palabras] of Object.entries(SINONIMOS_TRACK)) {
+    if (palabras.some((p) => texto.includes(p))) return track;
+  }
+  return null;
+}
+
+function responderLocal(pregunta) {
+  const texto = pregunta.toLowerCase();
+
+  for (const track of Object.values(TRACKS)) {
+    for (const ej of track.ejercicios) {
+      const palabrasEj = ej.nombre.toLowerCase().split(" ").filter((w) => w.length > 3);
+      if (palabrasEj.some((w) => texto.includes(w))) {
+        return `${ej.nombre}: ${ej.tip}`;
+      }
+    }
+  }
+
+  for (const a of ALIMENTOS) {
+    const nombreSimple = a.nombre.toLowerCase().split("(")[0].trim();
+    if (nombreSimple.length > 3 && texto.includes(nombreSimple)) {
+      return `${a.nombre} tiene aproximadamente ${a.kcal} kcal, ${a.prot}g de proteína, ${a.carb}g de carbohidratos y ${a.grasa}g de grasas.`;
+    }
+  }
+
+  const track = buscarTrackPorTexto(texto);
+  if (track) {
+    const info = TRACKS[track];
+    const ejemplos = info.ejercicios.slice(0, 3).map((e) => `• ${e.nombre}: ${e.tip}`).join("\n");
+    return `Para ${info.nombre.toLowerCase()} podés progresar así:\n${ejemplos}`;
+  }
+
+  for (const k of KEYWORDS_CONSEJOS_LOCAL) {
+    if (k.palabras.some((p) => texto.includes(p))) return k.texto;
+  }
+
+  return null;
+}
+
+function ChatCoach({ accesoPremium, onBloqueado, onCerrar }) {
+  const [mensajes, setMensajes] = useState([
+    { rol: "assistant", texto: "Hola, soy tu coach de calistenia. Contame qué duda tenés sobre algún ejercicio o progresión.", saludo: true },
+  ]);
+  const [input, setInput] = useState("");
+  const [cargando, setCargando] = useState(false);
+
+  if (!accesoPremium) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 60 }}>
+        <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm">
+          <div className="flex justify-between items-center mb-3">
+            <span className="display text-sm" style={{ color: C.muted }}>COACH VIRTUAL</span>
+            <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+          </div>
+          <Locked titulo="Consultas ilimitadas a un coach de calistenia" onBloqueado={onBloqueado} />
+        </div>
+      </div>
+    );
+  }
+
+  const enviar = async () => {
+    const texto = input.trim();
+    if (!texto || cargando) return;
+    const nuevos = [...mensajes, { rol: "user", texto }];
+    setMensajes(nuevos);
+    setInput("");
+    setCargando(true);
+
+    // La API exige que la conversación arranque con un turno "user": el saludo
+    // inicial es solo de la interfaz, no se manda como historial. Además se
+    // recortan los últimos 20 mensajes para no arrastrar conversaciones enormes.
+    const historial = nuevos
+      .filter((m) => !m.saludo)
+      .slice(-20)
+      .map((m) => ({ role: m.rol, content: m.texto }));
+
+    try {
+      const texto2 = await llamarCoach(historial);
+      setMensajes((prev) => [...prev, { rol: "assistant", texto: texto2 }]);
+    } catch (e) {
+      console.warn("El coach con IA no está disponible, uso el modo básico:", e);
+      const respuestaLocal = responderLocal(texto);
+      const texto2 = respuestaLocal
+        ? `${respuestaLocal}\n\n(Modo básico: en este momento no pudimos conectar con el coach con IA.)`
+        : "No tengo una respuesta puntual para eso en modo básico. Probá preguntar por un ejercicio o alimento específico.";
+      setMensajes((prev) => [...prev, { rol: "assistant", texto: texto2 }]);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.6)", zIndex: 60 }}>
+      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-t-md sm:rounded-md w-full max-w-sm h-[75vh] flex flex-col">
+        <div className="flex justify-between items-center p-4" style={{ borderBottom: `1px solid ${C.border}` }}>
+          <div className="flex items-center gap-2">
+            <MessageCircle size={16} color={C.train} />
+            <span className="display text-sm" style={{ color: C.muted }}>COACH VIRTUAL</span>
+          </div>
+          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+          {mensajes.map((m, i) => (
+            <div
+              key={i}
+              className="max-w-[85%] rounded-md px-3 py-2 text-sm"
+              style={{
+                alignSelf: m.rol === "user" ? "flex-end" : "flex-start",
+                background: m.rol === "user" ? C.train : C.panelAlt,
+                color: m.rol === "user" ? C.panel : C.text,
+              }}
+            >
+              {m.texto}
+            </div>
+          ))}
+          {cargando && (
+            <div className="text-xs mono" style={{ color: C.muted }}>El coach está escribiendo...</div>
+          )}
+        </div>
+
+        <div className="p-3 flex gap-2" style={{ borderTop: `1px solid ${C.border}` }}>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && enviar()}
+            placeholder="Ej: ¿cómo mejoro mi dominada?"
+            className="flex-1 rounded px-3 py-2 text-sm"
+            style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
+          />
+          <button onClick={enviar} disabled={cargando} className="flex items-center justify-center rounded px-3" style={{ background: C.train, color: C.panel, opacity: cargando ? 0.5 : 1 }}>
+            <Send size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminCodigos({ onCerrar }) {
+  const [autorizado, setAutorizado] = useState(null);
+  const [codigos, setCodigos] = useState(null);
+  const [generando, setGenerando] = useState(false);
+
+  const cargar = useCallback(async () => {
+    try {
+      const lista = await listarCodigosPremium();
+      setCodigos(lista);
+    } catch (e) {
+      console.error(e);
+      setCodigos([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const ok = await soyAdmin();
+      setAutorizado(ok);
+      if (ok) cargar();
+    })();
+  }, [cargar]);
+
+  const generar = async () => {
+    setGenerando(true);
+    try {
+      await crearCodigoPremium();
+      await cargar();
+    } catch (e) {
+      console.error(e);
+    }
+    setGenerando(false);
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 70 }}>
+      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-2">
+          <span className="display text-sm" style={{ color: C.muted }}>PANEL DE CÓDIGOS (uso interno)</span>
+          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+
+        {autorizado === null && <p className="text-xs" style={{ color: C.muted }}>Verificando permisos...</p>}
+        {autorizado === false && (
+          <p className="text-xs" style={{ color: C.danger }}>Esta cuenta no tiene permisos de administrador.</p>
+        )}
+
+        {autorizado && (
+          <>
+            <p className="text-[10px] mb-3" style={{ color: C.muted }}>
+              Mercado Pago activa Premium automáticamente al confirmar el pago. Usá esto solo para casos manuales
+              (promociones, cortesías). Cada código es de un solo uso.
+            </p>
+            <button onClick={generar} disabled={generando} className="w-full py-2 rounded font-medium mb-3" style={{ background: C.food, color: C.bg, opacity: generando ? 0.5 : 1 }}>
+              {generando ? "Generando..." : "Generar código nuevo"}
+            </button>
+            {codigos === null ? (
+              <p className="text-xs" style={{ color: C.muted }}>Cargando...</p>
+            ) : codigos.length === 0 ? (
+              <p className="text-xs" style={{ color: C.muted }}>Todavía no generaste códigos.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {codigos.map((c) => (
+                  <div key={c.codigo} className="flex items-center justify-between rounded px-3 py-2" style={{ background: C.panelAlt }}>
+                    <span className="mono text-sm">{c.codigo}</span>
+                    <span className="text-[10px]" style={{ color: c.usado ? C.muted : C.food }}>{c.usado ? `Usado (${c.fecha_uso})` : "Disponible"}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- ONBOARDING ----------
+function Onboarding({ onCompletar, storageDisponible }) {
+  const [paso, setPaso] = useState(0);
+  const [nombre, setNombre] = useState("");
+  const [codigoInvitacion, setCodigoInvitacion] = useState("");
+  const [objetivo, setObjetivo] = useState("mantener");
+  const [datos, setDatos] = useState({ peso: "", altura: "", edad: "", sexo: "hombre", actividad: "ligero" });
+  const [nivel, setNivelElegido] = useState("principiante");
+
+  const totalPasos = 4;
+
+  const finalizar = () => {
+    const calculado = calcularObjetivoDiario({ ...datos, objetivo });
+    const base = calculado || { kcal: 2200, prot: 150, carb: 220, grasa: 70 };
+    const perfilNuevo = { ...base, objetivo, nombre: nombre.trim() };
+    const progresionNueva = NIVEL_OPCIONES.find((n) => n.id === nivel)?.progresion || NIVEL_OPCIONES[0].progresion;
+    onCompletar({ perfilNuevo, progresionNueva, codigoInvitacion });
+  };
+
+  return (
+    <div style={{ background: C.bg, color: C.text, fontFamily: "'Inter', sans-serif" }} className="min-h-screen flex flex-col">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+        .display { font-family: 'Oswald', sans-serif; letter-spacing: 0.02em; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+      `}</style>
+
+      <div className="flex gap-2 px-4 pt-6">
+        {Array.from({ length: totalPasos }).map((_, i) => (
+          <div key={i} style={{ height: 3, flex: 1, borderRadius: 2, background: i <= paso ? C.train : C.border }} />
+        ))}
+      </div>
+
+      {storageDisponible === false && paso === 0 && (
+        <div className="px-5 pt-3">
+          <BannerStorage />
+        </div>
+      )}
+
+      <div className="flex-1 px-5 pt-8 pb-4 flex flex-col">
+        {paso === 0 && (
+          <div className="flex-1 flex flex-col justify-center items-center text-center gap-3">
+            <Dumbbell size={40} color={C.train} />
+            <h1 className="display text-2xl font-bold">CALISTENIA <span style={{ color: C.train }}>/</span> NUTRICIÓN</h1>
+            <p className="text-sm" style={{ color: C.muted }}>
+              Entrená con progresiones de peso corporal y comé en base a tus calorías, todo en una sola app. Vamos a hacerte unas preguntas rápidas para armar tu plan.
+            </p>
+            <input
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              placeholder="¿Cómo te llamamos?"
+              className="w-full max-w-xs rounded px-3 py-2 text-sm text-center mt-2"
+              style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}
+            />
+            <input
+              value={codigoInvitacion}
+              onChange={(e) => setCodigoInvitacion(e.target.value)}
+              placeholder="¿Alguien te invitó? Código (opcional)"
+              className="w-full max-w-xs rounded px-3 py-2 text-sm text-center mono"
+              style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}
+            />
+          </div>
+        )}
+
+        {paso === 1 && (
+          <div className="flex-1">
+            <div className="display text-sm mb-1" style={{ color: C.muted }}>PASO 1 DE 3</div>
+            <h2 className="text-lg font-semibold mb-4">¿Cuál es tu objetivo?</h2>
+            <div className="flex flex-col gap-2">
+              {OBJETIVOS.map((o) => (
+                <button
+                  key={o.id}
+                  onClick={() => setObjetivo(o.id)}
+                  className="text-left px-4 py-3 rounded-md"
+                  style={{ background: objetivo === o.id ? C.trainDim : C.panel, border: `1px solid ${objetivo === o.id ? C.train : C.border}` }}
+                >
+                  <span className="text-sm" style={{ color: objetivo === o.id ? C.text : C.muted }}>{o.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {paso === 2 && (
+          <div className="flex-1">
+            <div className="display text-sm mb-1" style={{ color: C.muted }}>PASO 2 DE 3</div>
+            <h2 className="text-lg font-semibold mb-1">Contanos de vos</h2>
+            <p className="text-xs mb-4" style={{ color: C.muted }}>Con esto calculamos tu objetivo de calorías y macros (podés ajustarlo cuando quieras).</p>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input type="number" placeholder="Peso (kg)" value={datos.peso} onChange={(e) => setDatos({ ...datos, peso: e.target.value })} className="rounded px-3 py-2 text-sm w-full mono" style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }} />
+                <input type="number" placeholder="Altura (cm)" value={datos.altura} onChange={(e) => setDatos({ ...datos, altura: e.target.value })} className="rounded px-3 py-2 text-sm w-full mono" style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }} />
+              </div>
+              <input type="number" placeholder="Edad" value={datos.edad} onChange={(e) => setDatos({ ...datos, edad: e.target.value })} className="rounded px-3 py-2 text-sm w-full mono" style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }} />
+              <div className="flex gap-2">
+                {["hombre", "mujer"].map((s) => (
+                  <button key={s} onClick={() => setDatos({ ...datos, sexo: s })} className="flex-1 text-sm py-2 rounded" style={{ background: datos.sexo === s ? C.train : C.panel, color: datos.sexo === s ? C.panel : C.muted, border: `1px solid ${C.border}` }}>
+                    {s === "hombre" ? "Hombre" : "Mujer"}
+                  </button>
+                ))}
+              </div>
+              <select value={datos.actividad} onChange={(e) => setDatos({ ...datos, actividad: e.target.value })} className="rounded px-3 py-2 text-sm" style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}>
+                {NIVELES_ACTIVIDAD.map((n) => <option key={n.id} value={n.id}>{n.label}</option>)}
+              </select>
+            </div>
+            <button onClick={() => setPaso(3)} className="text-xs mt-3 underline" style={{ color: C.muted }}>
+              Prefiero completarlo después
+            </button>
+          </div>
+        )}
+
+        {paso === 3 && (
+          <div className="flex-1">
+            <div className="display text-sm mb-1" style={{ color: C.muted }}>PASO 3 DE 3</div>
+            <h2 className="text-lg font-semibold mb-4">¿Cómo te describís hoy?</h2>
+            <div className="flex flex-col gap-2">
+              {NIVEL_OPCIONES.map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => setNivelElegido(n.id)}
+                  className="text-left px-4 py-3 rounded-md"
+                  style={{ background: nivel === n.id ? C.trainDim : C.panel, border: `1px solid ${nivel === n.id ? C.train : C.border}` }}
+                >
+                  <div className="text-sm font-medium" style={{ color: nivel === n.id ? C.text : C.muted }}>{n.label}</div>
+                  <div className="text-xs mt-0.5" style={{ color: C.muted }}>{n.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="px-5 pb-6 flex gap-2">
+        {paso > 0 && (
+          <button onClick={() => setPaso(paso - 1)} className="px-4 py-3 rounded-md text-sm" style={{ background: C.panel, color: C.muted, border: `1px solid ${C.border}` }}>
+            Atrás
+          </button>
+        )}
+        {paso < totalPasos - 1 ? (
+          <button onClick={() => setPaso(paso + 1)} className="flex-1 py-3 rounded-md font-medium" style={{ background: C.train, color: C.panel }}>
+            Continuar
+          </button>
+        ) : (
+          <button onClick={finalizar} className="flex-1 py-3 rounded-md font-medium" style={{ background: C.food, color: C.bg }}>
+            Empezar mi prueba gratis de 7 días
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- MODAL PERFIL ----------
+function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos }) {
+  const [form, setForm] = useState(perfil);
+  const [datos, setDatos] = useState({ peso: "", altura: "", edad: "", sexo: "hombre", actividad: "ligero", objetivo: perfil.objetivo || "mantener" });
+  const [mostrarCalc, setMostrarCalc] = useState(false);
+
+  const calcular = () => {
+    const res = calcularObjetivoDiario(datos);
+    if (res) setForm({ ...form, ...res, objetivo: datos.objetivo });
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 50 }}>
+      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <span className="display text-sm" style={{ color: C.muted }}>OBJETIVOS DIARIOS</span>
+          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+
+        <button
+          onClick={() => setMostrarCalc(!mostrarCalc)}
+          className="w-full text-left text-xs mono mb-3 px-3 py-2 rounded"
+          style={{ background: C.panelAlt, color: C.food, border: `1px solid ${C.border}` }}
+        >
+          {mostrarCalc ? "Ocultar calculadora automática" : "¿No sabés cuántas calorías necesitás? Calculalo acá"}
+        </button>
+
+        {mostrarCalc && (
+          <div className="rounded-md p-3 mb-4 flex flex-col gap-2" style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}>
+            <div className="flex gap-2">
+              <input type="number" placeholder="Peso (kg)" value={datos.peso} onChange={(e) => setDatos({ ...datos, peso: e.target.value })} className="rounded px-2 py-2 text-xs w-full mono" style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }} />
+              <input type="number" placeholder="Altura (cm)" value={datos.altura} onChange={(e) => setDatos({ ...datos, altura: e.target.value })} className="rounded px-2 py-2 text-xs w-full mono" style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }} />
+              <input type="number" placeholder="Edad" value={datos.edad} onChange={(e) => setDatos({ ...datos, edad: e.target.value })} className="rounded px-2 py-2 text-xs w-full mono" style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }} />
+            </div>
+            <div className="flex gap-2">
+              {["hombre", "mujer"].map((s) => (
+                <button key={s} onClick={() => setDatos({ ...datos, sexo: s })} className="flex-1 text-xs py-2 rounded" style={{ background: datos.sexo === s ? C.food : C.panel, color: datos.sexo === s ? C.bg : C.muted, border: `1px solid ${C.border}` }}>
+                  {s === "hombre" ? "Hombre" : "Mujer"}
+                </button>
+              ))}
+            </div>
+            <select value={datos.actividad} onChange={(e) => setDatos({ ...datos, actividad: e.target.value })} className="rounded px-2 py-2 text-xs" style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}>
+              {NIVELES_ACTIVIDAD.map((n) => <option key={n.id} value={n.id}>{n.label}</option>)}
+            </select>
+            <select value={datos.objetivo} onChange={(e) => setDatos({ ...datos, objetivo: e.target.value })} className="rounded px-2 py-2 text-xs" style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}>
+              {OBJETIVOS.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+            </select>
+            <button onClick={calcular} className="py-2 rounded text-sm font-medium" style={{ background: C.food, color: C.bg }}>
+              Calcular y completar
+            </button>
+            <p className="text-[9px]" style={{ color: C.muted }}>Estimación orientativa (fórmula Mifflin-St Jeor). Ajustala si tenés indicación de un profesional.</p>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-3">
+          {[
+            ["kcal", "Calorías"],
+            ["prot", "Proteína (g)"],
+            ["carb", "Carbohidratos (g)"],
+            ["grasa", "Grasas (g)"],
+          ].map(([campo, label]) => (
+            <label key={campo} className="flex flex-col text-xs" style={{ color: C.muted }}>
+              {label}
+              <input
+                type="number"
+                value={form[campo]}
+                onChange={(e) => setForm({ ...form, [campo]: Number(e.target.value) })}
+                className="mt-1 rounded px-2 py-2 mono"
+                style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
+              />
+            </label>
+          ))}
+        </div>
+        <button
+          onClick={() => onGuardar(form)}
+          className="w-full mt-4 py-2 rounded font-medium"
+          style={{ background: C.train, color: C.panel }}
+        >
+          Guardar
+        </button>
+        <button onClick={onVerTerminos} className="w-full text-center text-[10px] mt-3 underline" style={{ color: C.muted }}>
+          Términos y Privacidad
+        </button>
+        <button onClick={cerrarSesion} className="w-full text-center text-[10px] mt-2 underline" style={{ color: C.danger }}>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ModalTerminos({ onCerrar }) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", zIndex: 80 }}>
+      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <span className="display text-sm" style={{ color: C.muted }}>TÉRMINOS Y PRIVACIDAD</span>
+          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+        <div className="flex flex-col gap-4 text-xs" style={{ color: C.text }}>
+          <div>
+            <div className="font-medium mb-1" style={{ color: C.food }}>Qué es esta app</div>
+            <p style={{ color: C.muted }}>
+              Calistenia + Nutrición es una herramienta de entrenamiento y registro alimentario. No reemplaza el asesoramiento de un médico, nutricionista o entrenador con matrícula. Si tenés una condición de salud preexistente, consultá a un profesional antes de empezar cualquier rutina.
+            </p>
+          </div>
+          <div>
+            <div className="font-medium mb-1" style={{ color: C.food }}>Coach virtual</div>
+            <p style={{ color: C.muted }}>
+              Las respuestas del coach (con IA o en modo básico) son orientación general, no un diagnóstico ni una indicación médica. Ante dolor persistente o una lesión, consultá a un profesional de la salud.
+            </p>
+          </div>
+          <div>
+            <div className="font-medium mb-1" style={{ color: C.food }}>Qué datos guardamos</div>
+            <p style={{ color: C.muted }}>
+              Guardamos lo que cargás vos: perfil (objetivo, peso, altura, calorías), tus registros de entrenamiento y comidas, y tu código de referido. Esta información se guarda asociada a tu cuenta y no se comparte ni se vende a terceros.
+            </p>
+          </div>
+          <div>
+            <div className="font-medium mb-1" style={{ color: C.food }}>Suscripción Premium</div>
+            <p style={{ color: C.muted }}>
+              Incluye {DIAS_PRUEBA} días de prueba gratis. Pasado ese período, el plan Premium se cobra por mes a través de Mercado Pago. Podés dejar de usarla cuando quieras: no se renueva sola sin que actives un nuevo pago.
+            </p>
+          </div>
+          <div>
+            <div className="font-medium mb-1" style={{ color: C.food }}>Borrar tus datos</div>
+            <p style={{ color: C.muted }}>
+              Si en algún momento querés que borremos tu información, escribinos y lo hacemos. (Reemplazá esto por tu contacto real antes de publicar la app.)
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
