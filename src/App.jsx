@@ -37,64 +37,123 @@ const TRACKS = {
   empuje: {
     nombre: "Empuje",
     ejercicios: [
-      { nombre: "Flexiones de rodillas", tip: "Apoyá las rodillas, espalda recta y bajá el pecho cerca del piso sin arquear la zona lumbar." },
-      { nombre: "Flexiones completas", tip: "Cuerpo en línea recta de cabeza a talones, codos a 45° del torso, no dejes caer la cadera." },
-      { nombre: "Flexiones con manos juntas", tip: "Manos juntas formando un diamante bajo el pecho; sumás trabajo de tríceps, controlá la bajada." },
-      { nombre: "Fondos en banco o paralelas", tip: "Bajá hasta que los hombros queden a la altura de los codos, no más, para cuidar el hombro." },
-      { nombre: "Flexiones con un brazo extendido", tip: "Un brazo se extiende al costado mientras el otro empuja; alterná lados en cada repetición." },
-      { nombre: "Flexión a un solo brazo (asistida)", tip: "La mano libre apoya solo de sostén, el peso real lo lleva el brazo de trabajo." },
-      { nombre: "Flexión pike (pica)", tip: "Cadera elevada formando una V invertida, bajá la cabeza hacia el piso entre las manos: empieza a preparar el hombro para el pino." },
-      { nombre: "Flexión pike con pies elevados", tip: "Pies apoyados en una silla o banco, cuanto más elevados más peso llevan los hombros." },
-      { nombre: "Flexión en pino asistida (contra la pared)", tip: "Apoyate en la pared con los pies, bajá la cabeza controlado hasta rozar el piso y empujá de nuevo arriba." },
-      { nombre: "Flexión a un solo brazo (completa)", tip: "Pies bien separados para dar base, empujá con todo el cuerpo tenso como una tabla, sin rotar la cadera." },
+      { nombre: "Flexiones de rodillas", tip: "Apoyá las rodillas, espalda recta y bajá el pecho cerca del piso sin arquear la zona lumbar.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Flexiones completas", tip: "Cuerpo en línea recta de cabeza a talones, codos a 45° del torso, no dejes caer la cadera.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Flexiones con manos juntas", tip: "Manos juntas formando un diamante bajo el pecho; sumás trabajo de tríceps, controlá la bajada.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Fondos en banco o paralelas", tip: "Bajá hasta que los hombros queden a la altura de los codos, no más, para cuidar el hombro.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Flexiones con un brazo extendido", tip: "Un brazo se extiende al costado mientras el otro empuja; alterná lados en cada repetición.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Flexión a un solo brazo (asistida)", tip: "La mano libre apoya solo de sostén, el peso real lo lleva el brazo de trabajo.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Flexión pike (pica)", tip: "Cadera elevada formando una V invertida, bajá la cabeza hacia el piso entre las manos: empieza a preparar el hombro para el pino.", figura: ["empuje_pike"] },
+      { nombre: "Flexión pike con pies elevados", tip: "Pies apoyados en una silla o banco, cuanto más elevados más peso llevan los hombros.", figura: ["empuje_pike"] },
+      { nombre: "Flexión en pino asistida (contra la pared)", tip: "Apoyate en la pared con los pies, bajá la cabeza controlado hasta rozar el piso y empujá de nuevo arriba.", figura: ["empuje_pino"] },
+      { nombre: "Flexión a un solo brazo (completa)", tip: "Pies bien separados para dar base, empujá con todo el cuerpo tenso como una tabla, sin rotar la cadera.", figura: ["empuje_bajo", "empuje_arriba"] },
     ],
   },
   traccion: {
     nombre: "Tracción",
     ejercicios: [
-      { nombre: "Remo con el cuerpo inclinado", tip: "Cuerpo recto, tirá con los codos pegados al torso y apretá los omóplatos arriba." },
-      { nombre: "Dominadas asistidas (con banda)", tip: "Usá banda o apoyo en los pies, priorizá el rango completo antes que la velocidad." },
-      { nombre: "Dominadas completas", tip: "Arrancá desde brazos extendidos, subí hasta que el mentón pase la barra, sin hamacarte." },
-      { nombre: "Dominadas con peso extra", tip: "Sumá peso extra solo cuando puedas hacer 8-10 dominadas limpias sin lastre." },
-      { nombre: "Subida completa a la barra, asistida", tip: "Usá banda para el impulso; practicá primero el tirón alto y el agarre girado." },
-      { nombre: "Subida completa a la barra", tip: "Sin impulso de piernas: tirón explosivo y transición rápida de muñeca sobre la barra." },
-      { nombre: "Muscle-up con peso extra", tip: "Sumá peso solo cuando el muscle-up de barra te salga limpio y controlado varias veces seguidas." },
-      { nombre: "Dominada arquero (archer)", tip: "Un brazo casi extendido al costado, el otro hace casi todo el trabajo de tracción; alterná lados." },
-      { nombre: "Dominada a un brazo, asistida (con banda)", tip: "La banda saca peso del brazo de trabajo; enfocate en no rotar el torso durante la subida." },
-      { nombre: "Dominada a un solo brazo (completa)", tip: "Agarrate la muñeca del brazo libre para dar algo de estabilidad al principio; tirá parejo, sin tirones bruscos." },
+      { nombre: "Remo con el cuerpo inclinado", tip: "Cuerpo recto, tirá con los codos pegados al torso y apretá los omóplatos arriba.", figura: ["remo_bajo", "remo_arriba"] },
+      { nombre: "Dominadas asistidas (con banda)", tip: "Usá banda o apoyo en los pies, priorizá el rango completo antes que la velocidad.", figura: ["traccion_colgado", "traccion_arriba"] },
+      { nombre: "Dominadas completas", tip: "Arrancá desde brazos extendidos, subí hasta que el mentón pase la barra, sin hamacarte.", figura: ["traccion_colgado", "traccion_arriba"] },
+      { nombre: "Dominadas con peso extra", tip: "Sumá peso extra solo cuando puedas hacer 8-10 dominadas limpias sin lastre.", figura: ["traccion_colgado", "traccion_arriba"] },
+      { nombre: "Subida completa a la barra, asistida", tip: "Usá banda para el impulso; practicá primero el tirón alto y el agarre girado.", figura: ["traccion_colgado", "traccion_arriba"] },
+      { nombre: "Subida completa a la barra", tip: "Sin impulso de piernas: tirón explosivo y transición rápida de muñeca sobre la barra.", figura: ["traccion_colgado", "traccion_arriba"] },
+      { nombre: "Muscle-up con peso extra", tip: "Sumá peso solo cuando el muscle-up de barra te salga limpio y controlado varias veces seguidas.", figura: ["traccion_colgado", "traccion_arriba"] },
+      { nombre: "Dominada arquero (archer)", tip: "Un brazo casi extendido al costado, el otro hace casi todo el trabajo de tracción; alterná lados.", figura: ["traccion_colgado", "traccion_arriba"] },
+      { nombre: "Dominada a un brazo, asistida (con banda)", tip: "La banda saca peso del brazo de trabajo; enfocate en no rotar el torso durante la subida.", figura: ["traccion_colgado", "traccion_arriba"] },
+      { nombre: "Dominada a un solo brazo (completa)", tip: "Agarrate la muñeca del brazo libre para dar algo de estabilidad al principio; tirá parejo, sin tirones bruscos.", figura: ["traccion_colgado", "traccion_arriba"] },
     ],
   },
   piernas: {
     nombre: "Piernas",
     ejercicios: [
-      { nombre: "Sentadilla con las dos piernas", tip: "Rodillas en línea con los pies, bajá hasta que los muslos queden paralelos al piso." },
-      { nombre: "Sentadilla con una pierna atrás elevada", tip: "Pie trasero elevado, bajá recto, sin que la rodilla delantera pase mucho la punta del pie." },
-      { nombre: "Zancada con salto", tip: "Aterrizá suave, controlá la rodilla y alterná piernas en el aire." },
-      { nombre: "Sentadilla a una pierna, asistida", tip: "Sostenete de algo (marco de puerta, barra) para trabajar equilibrio y rango completo." },
-      { nombre: "Sentadilla a una pierna completa", tip: "Pierna libre extendida al frente, bajá controlado, sin rebotar abajo." },
-      { nombre: "Sentadilla a una pierna con peso", tip: "Sumá una mancuerna solo cuando te salga limpia varias veces seguidas sin peso." },
-      { nombre: "Sentadilla búlgara con salto", tip: "Pie trasero elevado como en la búlgara, pero salta y aterrizá suave con la misma pierna adelante." },
-      { nombre: "Sentadilla a una pierna en déficit", tip: "Parate sobre un cajón o escalón para bajar más profundo de lo normal; exige más movilidad de tobillo." },
-      { nombre: "Shrimp squat asistido", tip: "Sostenete el pie trasero con la mano del mismo lado y ayudate con la otra mano en algo fijo para bajar controlado." },
-      { nombre: "Shrimp squat completo", tip: "Sin apoyo de manos: bajá la rodilla trasera casi hasta tocar el talón, manteniendo el torso erguido." },
+      { nombre: "Sentadilla con las dos piernas", tip: "Rodillas en línea con los pies, bajá hasta que los muslos queden paralelos al piso.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Sentadilla con una pierna atrás elevada", tip: "Pie trasero elevado, bajá recto, sin que la rodilla delantera pase mucho la punta del pie.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Zancada con salto", tip: "Aterrizá suave, controlá la rodilla y alterná piernas en el aire.", figura: ["piernas_de_pie", "piernas_salto"] },
+      { nombre: "Sentadilla a una pierna, asistida", tip: "Sostenete de algo (marco de puerta, barra) para trabajar equilibrio y rango completo.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Sentadilla a una pierna completa", tip: "Pierna libre extendida al frente, bajá controlado, sin rebotar abajo.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Sentadilla a una pierna con peso", tip: "Sumá una mancuerna solo cuando te salga limpia varias veces seguidas sin peso.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Sentadilla búlgara con salto", tip: "Pie trasero elevado como en la búlgara, pero salta y aterrizá suave con la misma pierna adelante.", figura: ["piernas_de_pie", "piernas_salto"] },
+      { nombre: "Sentadilla a una pierna en déficit", tip: "Parate sobre un cajón o escalón para bajar más profundo de lo normal; exige más movilidad de tobillo.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Shrimp squat asistido", tip: "Sostenete el pie trasero con la mano del mismo lado y ayudate con la otra mano en algo fijo para bajar controlado.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Shrimp squat completo", tip: "Sin apoyo de manos: bajá la rodilla trasera casi hasta tocar el talón, manteniendo el torso erguido.", figura: ["piernas_de_pie", "piernas_abajo"] },
     ],
   },
   core: {
     nombre: "Core",
     ejercicios: [
-      { nombre: "Plancha abdominal", tip: "Cuerpo en línea recta, abdomen contraído, no dejes caer la cadera.", porTiempo: true },
-      { nombre: "Subir las piernas colgado de la barra", tip: "Colgado de la barra, subí las piernas sin balancearte, controlá la bajada." },
-      { nombre: "Sostenerse con las piernas rectas al frente", tip: "Piernas extendidas al frente en forma de L, hombros activos empujando hacia abajo.", porTiempo: true },
-      { nombre: "Rueda abdominal desde rodillas", tip: "Rodillas apoyadas, extendé controlado y sin arquear la zona lumbar." },
-      { nombre: "Bajada controlada del cuerpo, recto", tip: "Solo los hombros apoyados, bajá el cuerpo recto lo más lento posible.", porTiempo: true },
-      { nombre: "Cuerpo horizontal colgado, piernas encogidas", tip: "Colgado, llevá las rodillas al pecho con el cuerpo horizontal, activando dorsales y core.", porTiempo: true },
-      { nombre: "Rueda abdominal de pie", tip: "Arrancás parado en vez de arrodillado: mucho más exigente, controlá la zona lumbar en todo momento." },
-      { nombre: "V-sit", tip: "Piernas y torso forman una V, más cerrada que el L-sit; hombros activos y abdomen bien contraído.", porTiempo: true },
-      { nombre: "Front lever con una pierna extendida", tip: "Cuerpo horizontal colgado, una pierna estirada y la otra encogida; alterná para trabajar parejo.", porTiempo: true },
-      { nombre: "Front lever completo", tip: "Cuerpo totalmente horizontal y recto, colgado de la barra; apretá dorsales, glúteos y abdomen a la vez.", porTiempo: true },
+      { nombre: "Plancha abdominal", tip: "Cuerpo en línea recta, abdomen contraído, no dejes caer la cadera.", porTiempo: true, figura: ["core_plancha"] },
+      { nombre: "Subir las piernas colgado de la barra", tip: "Colgado de la barra, subí las piernas sin balancearte, controlá la bajada.", figura: ["traccion_colgado", "core_colgado_arriba"] },
+      { nombre: "Sostenerse con las piernas rectas al frente", tip: "Piernas extendidas al frente en forma de L, hombros activos empujando hacia abajo.", porTiempo: true, figura: ["core_lsit"] },
+      { nombre: "Rueda abdominal desde rodillas", tip: "Rodillas apoyadas, extendé controlado y sin arquear la zona lumbar.", figura: ["core_rueda"] },
+      { nombre: "Bajada controlada del cuerpo, recto", tip: "Solo los hombros apoyados, bajá el cuerpo recto lo más lento posible.", porTiempo: true, figura: ["core_negativa"] },
+      { nombre: "Cuerpo horizontal colgado, piernas encogidas", tip: "Colgado, llevá las rodillas al pecho con el cuerpo horizontal, activando dorsales y core.", porTiempo: true, figura: ["core_frontlever"] },
+      { nombre: "Rueda abdominal de pie", tip: "Arrancás parado en vez de arrodillado: mucho más exigente, controlá la zona lumbar en todo momento.", figura: ["core_rueda"] },
+      { nombre: "V-sit", tip: "Piernas y torso forman una V, más cerrada que el L-sit; hombros activos y abdomen bien contraído.", porTiempo: true, figura: ["core_lsit"] },
+      { nombre: "Front lever con una pierna extendida", tip: "Cuerpo horizontal colgado, una pierna estirada y la otra encogida; alterná para trabajar parejo.", porTiempo: true, figura: ["core_frontlever"] },
+      { nombre: "Front lever completo", tip: "Cuerpo totalmente horizontal y recto, colgado de la barra; apretá dorsales, glúteos y abdomen a la vez.", porTiempo: true, figura: ["core_frontlever"] },
     ],
   },
 };
+
+// Coordenadas (viewBox 0-100) de figuras tipo pictograma: cabeza/hombro/cadera/mano/pie,
+// más una línea de piso o de barra opcional para dar contexto visual del movimiento.
+const FIGURAS = {
+  empuje_bajo: { cabeza: [25, 78], hombro: [32, 75], cadera: [65, 72], mano: [35, 90], pie: [90, 85], pisoY: 90 },
+  empuje_arriba: { cabeza: [25, 55], hombro: [32, 58], cadera: [65, 60], mano: [35, 90], pie: [90, 85], pisoY: 90 },
+  empuje_pike: { cabeza: [60, 70], hombro: [55, 65], cadera: [45, 35], mano: [35, 90], pie: [85, 88], pisoY: 90 },
+  empuje_pino: { cabeza: [50, 85], hombro: [50, 70], cadera: [50, 40], mano: [50, 90], pie: [50, 12], pisoY: 90 },
+  traccion_colgado: { cabeza: [50, 45], hombro: [50, 35], cadera: [50, 70], mano: [50, 15], pie: [50, 95], barraY: 15 },
+  traccion_arriba: { cabeza: [50, 20], hombro: [50, 25], cadera: [50, 60], mano: [50, 15], pie: [50, 90], barraY: 15 },
+  remo_bajo: { cabeza: [20, 50], hombro: [28, 52], cadera: [75, 65], mano: [30, 30], pie: [95, 80], barraY: 30 },
+  remo_arriba: { cabeza: [25, 35], hombro: [30, 38], cadera: [75, 60], mano: [30, 30], pie: [95, 78], barraY: 30 },
+  piernas_de_pie: { cabeza: [50, 20], hombro: [50, 30], cadera: [50, 55], mano: [42, 58], pie: [50, 90], pisoY: 90 },
+  piernas_abajo: { cabeza: [50, 45], hombro: [50, 52], cadera: [50, 72], mano: [35, 68], pie: [50, 90], pisoY: 90 },
+  piernas_salto: { cabeza: [50, 22], hombro: [50, 30], cadera: [50, 48], mano: [38, 42], pie: [62, 65], pisoY: 90 },
+  core_plancha: { cabeza: [20, 55], hombro: [28, 58], cadera: [65, 58], mano: [30, 80], pie: [90, 72], pisoY: 80 },
+  core_colgado_arriba: { cabeza: [50, 20], hombro: [50, 25], cadera: [50, 55], mano: [50, 15], pie: [62, 45], barraY: 15 },
+  core_lsit: { cabeza: [28, 35], hombro: [35, 40], cadera: [55, 55], mano: [55, 72], pie: [88, 50], pisoY: 75 },
+  core_frontlever: { cabeza: [85, 45], hombro: [78, 45], cadera: [40, 45], mano: [78, 15], pie: [15, 45], barraY: 15 },
+  core_negativa: { cabeza: [70, 60], hombro: [62, 58], cadera: [50, 68], mano: [60, 50], pie: [30, 72], pisoY: 80 },
+  core_rueda: { cabeza: [80, 70], hombro: [72, 65], cadera: [50, 72], mano: [75, 55], pie: [20, 80], pisoY: 80 },
+};
+
+function FiguraTecnica({ figura, size = 56, color }) {
+  const f = FIGURAS[figura];
+  if (!f) return null;
+  const trazo = color || C.train;
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} style={{ flexShrink: 0 }}>
+      {f.pisoY != null && <line x1="0" y1={f.pisoY} x2="100" y2={f.pisoY} stroke={C.border} strokeWidth="2" />}
+      {f.barraY != null && <line x1="25" y1={f.barraY} x2="75" y2={f.barraY} stroke={C.border} strokeWidth="3" strokeLinecap="round" />}
+      <line x1={f.hombro[0]} y1={f.hombro[1]} x2={f.cadera[0]} y2={f.cadera[1]} stroke={trazo} strokeWidth="5" strokeLinecap="round" />
+      <line x1={f.hombro[0]} y1={f.hombro[1]} x2={f.mano[0]} y2={f.mano[1]} stroke={trazo} strokeWidth="5" strokeLinecap="round" />
+      <line x1={f.cadera[0]} y1={f.cadera[1]} x2={f.pie[0]} y2={f.pie[1]} stroke={trazo} strokeWidth="5" strokeLinecap="round" />
+      <circle cx={f.cabeza[0]} cy={f.cabeza[1]} r="8" fill={trazo} />
+    </svg>
+  );
+}
+
+function GuiaTecnica({ figuras, size = 56, color }) {
+  if (!figuras || figuras.length === 0) return null;
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex flex-col items-center gap-0.5">
+        <FiguraTecnica figura={figuras[0]} size={size} color={color} />
+        {figuras.length > 1 && <span className="text-[8px]" style={{ color: C.muted }}>INICIO</span>}
+      </div>
+      {figuras.length > 1 && (
+        <>
+          <span style={{ color: C.muted }}>→</span>
+          <div className="flex flex-col items-center gap-0.5">
+            <FiguraTecnica figura={figuras[1]} size={size} color={color} />
+            <span className="text-[8px]" style={{ color: C.muted }}>FINAL</span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 const ALIMENTOS = [
   { nombre: "Milanesa (150g)", kcal: 380, prot: 32, carb: 12, grasa: 22 },
@@ -1066,7 +1125,10 @@ function QuickAddEjercicio({ progresion, onAgregar, onCerrar }) {
             </button>
           ))}
         </div>
-        <div className="text-sm mb-3">{ejercicioActual.nombre}</div>
+        <div className="flex items-center gap-3 mb-3">
+          <GuiaTecnica figuras={ejercicioActual.figura} size={48} />
+          <div className="text-sm">{ejercicioActual.nombre}</div>
+        </div>
 
         <div className="flex gap-2 mb-3">
           <button
@@ -1728,10 +1790,15 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             </button>
           ))}
         </div>
-        <div className="text-sm mb-1">{ejercicioActual.nombre}</div>
-        <p className="text-xs mb-3" style={{ color: C.muted }}>{ejercicioActual.tip}</p>
+        <div className="flex items-center gap-3 mb-1">
+          <GuiaTecnica figuras={ejercicioActual.figura} size={60} />
+          <div>
+            <div className="text-sm font-medium">{ejercicioActual.nombre}</div>
+            <p className="text-xs mt-0.5" style={{ color: C.muted }}>{ejercicioActual.tip}</p>
+          </div>
+        </div>
 
-        <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.food}` }}>
+        <div className="flex items-start gap-2 rounded px-3 py-2 mb-3 mt-2" style={{ background: C.panelAlt, border: `1px dashed ${C.food}` }}>
           <Lightbulb size={14} color={C.food} className="flex-shrink-0 mt-0.5" />
           <span className="text-[11px]" style={{ color: C.text }}>{sugerirDescanso(nivelActual).texto}</span>
         </div>
@@ -1953,9 +2020,12 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           {tipsAbiertos[key] && (
             <div className="flex flex-col gap-2 mt-2">
               {track.ejercicios.map((ej, i) => (
-                <div key={ej.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
-                  <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
-                  <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
+                <div key={ej.nombre} className="rounded px-3 py-2 flex items-center gap-3" style={{ background: C.panelAlt }}>
+                  <GuiaTecnica figuras={ej.figura} size={36} color={C.muted} />
+                  <div>
+                    <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
+                    <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
+                  </div>
                 </div>
               ))}
             </div>
