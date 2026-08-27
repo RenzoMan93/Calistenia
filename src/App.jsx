@@ -357,10 +357,27 @@ const ultimosDias = (n) => {
 const pad2 = (n) => String(n).padStart(2, "0");
 const NOMBRES_MES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+// Split semanal sugerido: cada grupo se entrena 2 veces por semana con al
+// menos 2-3 días de por medio para recuperar, y quedan días de descanso.
+const PLAN_SEMANAL = {
+  0: { descanso: true },
+  1: { tracks: ["empuje", "core"] },
+  2: { tracks: ["traccion", "piernas"] },
+  3: { descanso: true },
+  4: { tracks: ["empuje", "piernas"] },
+  5: { tracks: ["traccion", "core"] },
+  6: { descanso: true },
+};
+
+function planDeHoy() {
+  return PLAN_SEMANAL[new Date().getDay()];
+}
+
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 export default function App() {
   const [tab, setTab] = useState("hoy");
+  const [trackSugerido, setTrackSugerido] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [perfil, setPerfil] = useState({ kcal: 2200, prot: 150, carb: 220, grasa: 70, objetivo: "mantener", nombre: "" });
   const [progresion, setProgresion] = useState({ empuje: 1, traccion: 1, piernas: 1, core: 1 });
@@ -615,6 +632,11 @@ export default function App() {
             onBloqueado={() => setMostrarPlanes(true)}
             referido={referido}
             onCanjearInvitacion={canjearInvitacion}
+            planHoy={planDeHoy()}
+            onIrAEntrenar={(track) => {
+              setTrackSugerido(track);
+              setTab("entrenamiento");
+            }}
           />
         )}
         {tab === "entrenamiento" && (
@@ -627,6 +649,7 @@ export default function App() {
             onQuitar={quitarEjercicio}
             accesoPremium={accesoPremium}
             onBloqueado={() => setMostrarPlanes(true)}
+            trackInicial={trackSugerido}
           />
         )}
         {tab === "nutricion" && (
@@ -976,7 +999,7 @@ const NIVEL_OPCIONES = [
 ];
 
 // ---------- HOY ----------
-function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, referido, onCanjearInvitacion }) {
+function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, referido, onCanjearInvitacion, planHoy, onIrAEntrenar }) {
   const pct = Math.min(totales.kcal / perfil.kcal, 1) * 360;
   const restante = Math.max(perfil.kcal - totales.kcal, 0);
   const [quickComida, setQuickComida] = useState(false);
@@ -987,6 +1010,37 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
       <div className="flex items-center justify-between mb-3">
         <span className="text-lg font-semibold">Hola{perfil.nombre ? `, ${perfil.nombre}` : ""} 👋</span>
       </div>
+
+      {planHoy.descanso ? (
+        <Panel style={{ textAlign: "center" }}>
+          <div className="display text-sm mb-1" style={{ color: C.muted }}>PLAN DE HOY</div>
+          <div className="text-base font-semibold mb-1">Día de descanso 😌</div>
+          <p className="text-xs mb-3" style={{ color: C.muted }}>
+            Tu cuerpo también progresa recuperándose. Aprovechá para estirar o simplemente descansar.
+          </p>
+          <button onClick={() => onIrAEntrenar(Object.keys(TRACKS)[0])} className="text-xs mono underline" style={{ color: C.food }}>
+            Igual quiero entrenar
+          </button>
+        </Panel>
+      ) : (
+        <Panel style={{ borderColor: C.train }}>
+          <div className="display text-sm mb-1" style={{ color: C.muted }}>PLAN DE HOY</div>
+          <div className="text-base font-semibold mb-3">{planHoy.tracks.map((t) => TRACKS[t].nombre).join(" + ")}</div>
+          {registro.entrenamiento.length > 0 ? (
+            <div className="flex items-center gap-2 text-sm" style={{ color: C.food }}>
+              <Check size={16} /> ¡Ya entrenaste hoy!
+            </div>
+          ) : (
+            <button
+              onClick={() => onIrAEntrenar(planHoy.tracks[0])}
+              className="w-full py-2 rounded-md font-bold"
+              style={{ background: C.train, color: C.panel }}
+            >
+              Empezar mi entrenamiento
+            </button>
+          )}
+        </Panel>
+      )}
 
       <Panel style={{ display: "flex", alignItems: "center", gap: 20 }}>
         <div
@@ -1657,8 +1711,8 @@ function CuentaRegresiva({ onTerminar }) {
 }
 
 // ---------- ENTRENAMIENTO ----------
-function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, onAgregar, onQuitar, accesoPremium, onBloqueado }) {
-  const [trackSel, setTrackSel] = useState("empuje");
+function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, onAgregar, onQuitar, accesoPremium, onBloqueado, trackInicial }) {
+  const [trackSel, setTrackSel] = useState(trackInicial || "empuje");
   const [series, setSeries] = useState(3);
   const [tipsAbiertos, setTipsAbiertos] = useState({});
   const [sesionActiva, setSesionActiva] = useState(false);
