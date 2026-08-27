@@ -43,6 +43,10 @@ const TRACKS = {
       { nombre: "Fondos en banco o paralelas", tip: "Bajá hasta que los hombros queden a la altura de los codos, no más, para cuidar el hombro." },
       { nombre: "Flexiones con un brazo extendido", tip: "Un brazo se extiende al costado mientras el otro empuja; alterná lados en cada repetición." },
       { nombre: "Flexión a un solo brazo (asistida)", tip: "La mano libre apoya solo de sostén, el peso real lo lleva el brazo de trabajo." },
+      { nombre: "Flexión pike (pica)", tip: "Cadera elevada formando una V invertida, bajá la cabeza hacia el piso entre las manos: empieza a preparar el hombro para el pino." },
+      { nombre: "Flexión pike con pies elevados", tip: "Pies apoyados en una silla o banco, cuanto más elevados más peso llevan los hombros." },
+      { nombre: "Flexión en pino asistida (contra la pared)", tip: "Apoyate en la pared con los pies, bajá la cabeza controlado hasta rozar el piso y empujá de nuevo arriba." },
+      { nombre: "Flexión a un solo brazo (completa)", tip: "Pies bien separados para dar base, empujá con todo el cuerpo tenso como una tabla, sin rotar la cadera." },
     ],
   },
   traccion: {
@@ -54,6 +58,10 @@ const TRACKS = {
       { nombre: "Dominadas con peso extra", tip: "Sumá peso extra solo cuando puedas hacer 8-10 dominadas limpias sin lastre." },
       { nombre: "Subida completa a la barra, asistida", tip: "Usá banda para el impulso; practicá primero el tirón alto y el agarre girado." },
       { nombre: "Subida completa a la barra", tip: "Sin impulso de piernas: tirón explosivo y transición rápida de muñeca sobre la barra." },
+      { nombre: "Muscle-up con peso extra", tip: "Sumá peso solo cuando el muscle-up de barra te salga limpio y controlado varias veces seguidas." },
+      { nombre: "Dominada arquero (archer)", tip: "Un brazo casi extendido al costado, el otro hace casi todo el trabajo de tracción; alterná lados." },
+      { nombre: "Dominada a un brazo, asistida (con banda)", tip: "La banda saca peso del brazo de trabajo; enfocate en no rotar el torso durante la subida." },
+      { nombre: "Dominada a un solo brazo (completa)", tip: "Agarrate la muñeca del brazo libre para dar algo de estabilidad al principio; tirá parejo, sin tirones bruscos." },
     ],
   },
   piernas: {
@@ -65,6 +73,10 @@ const TRACKS = {
       { nombre: "Sentadilla a una pierna, asistida", tip: "Sostenete de algo (marco de puerta, barra) para trabajar equilibrio y rango completo." },
       { nombre: "Sentadilla a una pierna completa", tip: "Pierna libre extendida al frente, bajá controlado, sin rebotar abajo." },
       { nombre: "Sentadilla a una pierna con peso", tip: "Sumá una mancuerna solo cuando te salga limpia varias veces seguidas sin peso." },
+      { nombre: "Sentadilla búlgara con salto", tip: "Pie trasero elevado como en la búlgara, pero salta y aterrizá suave con la misma pierna adelante." },
+      { nombre: "Sentadilla a una pierna en déficit", tip: "Parate sobre un cajón o escalón para bajar más profundo de lo normal; exige más movilidad de tobillo." },
+      { nombre: "Shrimp squat asistido", tip: "Sostenete el pie trasero con la mano del mismo lado y ayudate con la otra mano en algo fijo para bajar controlado." },
+      { nombre: "Shrimp squat completo", tip: "Sin apoyo de manos: bajá la rodilla trasera casi hasta tocar el talón, manteniendo el torso erguido." },
     ],
   },
   core: {
@@ -76,6 +88,10 @@ const TRACKS = {
       { nombre: "Rueda abdominal desde rodillas", tip: "Rodillas apoyadas, extendé controlado y sin arquear la zona lumbar." },
       { nombre: "Bajada controlada del cuerpo, recto", tip: "Solo los hombros apoyados, bajá el cuerpo recto lo más lento posible.", porTiempo: true },
       { nombre: "Cuerpo horizontal colgado, piernas encogidas", tip: "Colgado, llevá las rodillas al pecho con el cuerpo horizontal, activando dorsales y core.", porTiempo: true },
+      { nombre: "Rueda abdominal de pie", tip: "Arrancás parado en vez de arrodillado: mucho más exigente, controlá la zona lumbar en todo momento." },
+      { nombre: "V-sit", tip: "Piernas y torso forman una V, más cerrada que el L-sit; hombros activos y abdomen bien contraído.", porTiempo: true },
+      { nombre: "Front lever con una pierna extendida", tip: "Cuerpo horizontal colgado, una pierna estirada y la otra encogida; alterná para trabajar parejo.", porTiempo: true },
+      { nombre: "Front lever completo", tip: "Cuerpo totalmente horizontal y recto, colgado de la barra; apretá dorsales, glúteos y abdomen a la vez.", porTiempo: true },
     ],
   },
 };
@@ -507,6 +523,7 @@ export default function App() {
         .mono { font-family: 'IBM Plex Mono', monospace; }
         ::-webkit-scrollbar { height: 6px; }
         ::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 4px; }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
       `}</style>
 
       <header className="px-4 pt-6 pb-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${C.border}` }}>
@@ -1544,12 +1561,39 @@ function PanelDescanso({ total, restante, corriendo, onElegirDuracion, onIniciar
   );
 }
 
+function CuentaRegresiva({ onTerminar }) {
+  const [n, setN] = useState(3);
+
+  useEffect(() => {
+    if (n <= 0) {
+      const t = setTimeout(onTerminar, 600);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => setN((v) => v - 1), 800);
+    return () => clearTimeout(t);
+  }, [n]);
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center" style={{ background: C.bg, zIndex: 90 }}>
+      <div
+        key={n}
+        className="display font-bold"
+        style={{ fontSize: n > 0 ? 160 : 64, color: n > 0 ? C.train : C.food, animation: "popIn 0.3s ease-out" }}
+      >
+        {n > 0 ? n : "¡A ENTRENAR!"}
+      </div>
+    </div>
+  );
+}
+
 // ---------- ENTRENAMIENTO ----------
 function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, onAgregar, onQuitar, accesoPremium, onBloqueado }) {
   const [trackSel, setTrackSel] = useState("empuje");
   const [series, setSeries] = useState(3);
   const [reps, setReps] = useState(10);
   const [tipsAbiertos, setTipsAbiertos] = useState({});
+  const [sesionActiva, setSesionActiva] = useState(false);
+  const [contando, setContando] = useState(false);
   const nivelActual = progresion[trackSel];
   const ejercicioActual = TRACKS[trackSel].ejercicios[nivelActual - 1];
 
@@ -1620,6 +1664,32 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
 
   return (
     <div>
+      {contando && (
+        <CuentaRegresiva
+          onTerminar={() => {
+            setContando(false);
+            setSesionActiva(true);
+          }}
+        />
+      )}
+
+      {!sesionActiva && (
+        <Panel style={{ borderColor: C.train, textAlign: "center" }}>
+          <Dumbbell size={28} color={C.train} style={{ margin: "0 auto 8px" }} />
+          <div className="display text-base font-bold mb-1">¿Listo para entrenar?</div>
+          <p className="text-xs mb-4" style={{ color: C.muted }}>
+            Elegí el grupo muscular de hoy y arrancá con una cuenta regresiva para prepararte.
+          </p>
+          <button
+            onClick={() => setContando(true)}
+            className="w-full py-3 rounded-md font-bold text-lg"
+            style={{ background: C.train, color: C.panel }}
+          >
+            INICIAR ENTRENAMIENTO
+          </button>
+        </Panel>
+      )}
+
       <PanelDescanso
         total={descansoTotal}
         restante={descansoRestante}
@@ -1723,8 +1793,14 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
         </Panel>
       ))}
 
-      <Panel>
-        <div className="display text-sm mb-3" style={{ color: C.muted }}>REGISTRAR SERIE</div>
+      {sesionActiva && (
+      <Panel style={{ borderColor: C.train }}>
+        <div className="flex items-center justify-between mb-3">
+          <span className="display text-sm" style={{ color: C.train }}>ENTRENAMIENTO EN CURSO</span>
+          <button onClick={() => setSesionActiva(false)} className="text-xs mono underline" style={{ color: C.muted }}>
+            Terminar
+          </button>
+        </div>
         <div className="flex gap-2 mb-3 flex-wrap">
           {Object.entries(TRACKS).map(([key, t]) => (
             <button
@@ -1821,6 +1897,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           </div>
         )}
       </Panel>
+      )}
     </div>
   );
 }
