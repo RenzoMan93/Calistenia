@@ -6,6 +6,7 @@ import {
   safeSet,
   verificarStorage,
   listRegistroKeysForMonth,
+  obtenerHistorialEjercicio,
   ensureReferralCode,
   redeemReferralCode,
   claimReferralBonus,
@@ -1728,6 +1729,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   const cronoRef = useRef(null);
   const [contadorReps, setContadorReps] = useState(0);
   const [serieActual, setSerieActual] = useState(1);
+  const [historialEj, setHistorialEj] = useState(null);
 
   useEffect(() => {
     setModoTiempo(Boolean(ejercicioActual.porTiempo));
@@ -1735,6 +1737,17 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
     setCronoCorriendo(false);
     setContadorReps(0);
     setSerieActual(1);
+  }, [ejercicioActual.nombre]);
+
+  useEffect(() => {
+    let cancelado = false;
+    setHistorialEj(null);
+    obtenerHistorialEjercicio(ejercicioActual.nombre).then((h) => {
+      if (!cancelado) setHistorialEj(h);
+    });
+    return () => {
+      cancelado = true;
+    };
   }, [ejercicioActual.nombre]);
 
   useEffect(() => {
@@ -1856,6 +1869,33 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           <Lightbulb size={14} color={C.food} className="flex-shrink-0 mt-0.5" />
           <span className="text-[11px]" style={{ color: C.text }}>{sugerirDescanso(nivelActual).texto}</span>
         </div>
+
+        {historialEj !== null && (
+          <div className="mb-3">
+            {historialEj.length === 0 ? (
+              <p className="text-xs" style={{ color: C.muted }}>Todavía no tenés marcas en este ejercicio. ¡Esta va a ser tu primera! 💪</p>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px]" style={{ color: C.muted }}>PROGRESO EN ESTE EJERCICIO</span>
+                  <span className="text-xs mono" style={{ color: C.food }}>
+                    Mejor marca: {Math.max(...historialEj.map((h) => h.valor))}{historialEj[0].tipo === "tiempo" ? "s" : " reps"}
+                  </span>
+                </div>
+                {historialEj.length >= 2 && (
+                  <ResponsiveContainer width="100%" height={80}>
+                    <LineChart data={historialEj.map((h) => ({ ...h, dia: fechaLegible(h.fecha).split(" ")[0] }))}>
+                      <XAxis dataKey="dia" tick={{ fill: C.muted, fontSize: 9 }} axisLine={false} tickLine={false} />
+                      <YAxis hide domain={["dataMin - 1", "dataMax + 1"]} />
+                      <Tooltip contentStyle={{ background: C.panelAlt, border: `1px solid ${C.border}`, fontSize: 11 }} labelStyle={{ color: C.text }} />
+                      <Line type="monotone" dataKey="valor" stroke={C.train} strokeWidth={2} dot={{ r: 2 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         <div className="flex gap-2 mb-3">
           <button

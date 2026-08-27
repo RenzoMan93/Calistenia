@@ -42,6 +42,40 @@ export async function safeSet(key, value) {
   }
 }
 
+// Historial de marcas para un ejercicio puntual: recorre los últimos registros
+// diarios guardados (en una sola consulta) y se queda con la mejor serie de
+// cada día en la que aparece ese ejercicio, para armar un gráfico de progreso.
+export async function obtenerHistorialEjercicio(nombreEjercicio, limiteDias = 20) {
+  try {
+    const userId = await currentUserId();
+    const { data, error } = await supabase
+      .from("user_data")
+      .select("key, value")
+      .eq("user_id", userId)
+      .like("key", "registro:%")
+      .order("key", { ascending: false })
+      .limit(limiteDias);
+    if (error) throw error;
+
+    const marcas = [];
+    for (const fila of data || []) {
+      const entrenamiento = fila.value?.entrenamiento || [];
+      const delEjercicio = entrenamiento.filter((e) => e.ejercicio === nombreEjercicio);
+      if (delEjercicio.length === 0) continue;
+      const esTiempo = delEjercicio[0].tipo === "tiempo";
+      const mejor = delEjercicio.reduce((max, e) => {
+        const valor = esTiempo ? Number(e.segundos || 0) : Number(e.reps || 0);
+        return valor > max ? valor : max;
+      }, 0);
+      marcas.push({ fecha: fila.key.replace("registro:", ""), valor: mejor, tipo: esTiempo ? "tiempo" : "reps" });
+    }
+    return marcas.sort((a, b) => (a.fecha > b.fecha ? 1 : -1));
+  } catch (e) {
+    console.error("obtenerHistorialEjercicio error", nombreEjercicio, e);
+    return [];
+  }
+}
+
 // Equivalente a window.storage.list("registro:2026-08") del código original:
 // devuelve el set de fechas (YYYY-MM-DD) que tienen registro guardado en ese mes.
 export async function listRegistroKeysForMonth(monthKey) {
