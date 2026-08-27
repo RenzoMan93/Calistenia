@@ -1590,7 +1590,6 @@ function CuentaRegresiva({ onTerminar }) {
 function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, onAgregar, onQuitar, accesoPremium, onBloqueado }) {
   const [trackSel, setTrackSel] = useState("empuje");
   const [series, setSeries] = useState(3);
-  const [reps, setReps] = useState(10);
   const [tipsAbiertos, setTipsAbiertos] = useState({});
   const [sesionActiva, setSesionActiva] = useState(false);
   const [contando, setContando] = useState(false);
@@ -1603,11 +1602,15 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   const [segundosEj, setSegundosEj] = useState(0);
   const [cronoCorriendo, setCronoCorriendo] = useState(false);
   const cronoRef = useRef(null);
+  const [contadorReps, setContadorReps] = useState(0);
+  const [serieActual, setSerieActual] = useState(1);
 
   useEffect(() => {
     setModoTiempo(Boolean(ejercicioActual.porTiempo));
     setSegundosEj(0);
     setCronoCorriendo(false);
+    setContadorReps(0);
+    setSerieActual(1);
   }, [ejercicioActual.nombre]);
 
   useEffect(() => {
@@ -1833,54 +1836,95 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           </button>
         </div>
 
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs mono" style={{ color: C.muted }}>
+            Serie <span style={{ color: C.train }}>{serieActual}</span> de{" "}
+            <input
+              type="number"
+              min={1}
+              value={series}
+              onChange={(e) => setSeries(e.target.value)}
+              className="w-10 rounded px-1 py-0.5 mono text-center"
+              style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
+            />
+          </span>
+          {serieActual > Number(series) && (
+            <span className="text-[10px]" style={{ color: C.food }}>¡Series completadas! 💪</span>
+          )}
+        </div>
+
         {!modoTiempo ? (
-          <div className="flex gap-3 items-end mb-3">
-            <label className="flex flex-col text-xs" style={{ color: C.muted }}>
-              Series
-              <input type="number" min={1} value={series} onChange={(e) => setSeries(e.target.value)} className="mt-1 w-16 rounded px-2 py-1 mono" style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }} />
-            </label>
-            <label className="flex flex-col text-xs" style={{ color: C.muted }}>
-              Reps
-              <input type="number" min={1} value={reps} onChange={(e) => setReps(e.target.value)} className="mt-1 w-16 rounded px-2 py-1 mono" style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }} />
-            </label>
+          <div className="flex flex-col items-center gap-3 mb-3">
+            <div
+              key={contadorReps}
+              className="mono font-bold"
+              style={{ fontSize: 72, color: C.train, animation: "popIn 0.2s ease-out", lineHeight: 1 }}
+            >
+              {contadorReps}
+            </div>
+            <span className="text-[10px]" style={{ color: C.muted }}>REPETICIONES</span>
             <button
               onClick={() => {
-                onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, series, reps });
-                iniciarDescanso();
+                setContadorReps((r) => r + 1);
+                try { navigator.vibrate?.(20); } catch {}
               }}
-              className="flex items-center gap-1 px-4 py-2 rounded font-medium"
+              className="w-full py-8 rounded-md font-bold text-2xl active:scale-95"
               style={{ background: C.train, color: C.panel }}
             >
-              <Plus size={16} /> Agregar
+              + REP
             </button>
+            <div className="flex gap-2 w-full">
+              <button
+                onClick={() => setContadorReps((r) => Math.max(0, r - 1))}
+                className="flex-1 py-2 rounded text-sm"
+                style={{ background: C.panelAlt, color: C.muted, border: `1px solid ${C.border}` }}
+              >
+                -1
+              </button>
+              <button
+                onClick={() => {
+                  if (contadorReps <= 0) return;
+                  onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, series: 1, reps: contadorReps });
+                  setContadorReps(0);
+                  setSerieActual((s) => s + 1);
+                  iniciarDescanso();
+                }}
+                disabled={contadorReps <= 0}
+                className="flex-[2] flex items-center justify-center gap-1 py-2 rounded font-medium disabled:opacity-40"
+                style={{ background: C.food, color: C.bg }}
+              >
+                <Check size={16} /> Serie terminada
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="flex items-center gap-4 mb-3">
-            <div className="mono text-2xl font-semibold" style={{ minWidth: 64 }}>
+          <div className="flex flex-col items-center gap-3 mb-3">
+            <div className="mono font-bold" style={{ fontSize: 56, color: C.train, lineHeight: 1 }}>
               {Math.floor(segundosEj / 60)}:{pad2(segundosEj % 60)}
             </div>
-            <div className="flex gap-2 flex-1">
+            <div className="flex gap-2 w-full">
               <button
                 onClick={() => setCronoCorriendo((c) => !c)}
-                className="flex-1 py-2 rounded text-sm font-medium"
+                className="flex-1 py-4 rounded-md text-lg font-bold"
                 style={{ background: cronoCorriendo ? C.panelAlt : C.train, color: cronoCorriendo ? C.text : C.panel, border: cronoCorriendo ? `1px solid ${C.border}` : "none" }}
               >
                 {cronoCorriendo ? "Pausar" : segundosEj > 0 ? "Reanudar" : "Iniciar"}
               </button>
-              <button
-                onClick={() => {
-                  if (segundosEj <= 0) return;
-                  onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, tipo: "tiempo", segundos: segundosEj });
-                  reiniciarCronoEj();
-                  iniciarDescanso();
-                }}
-                disabled={segundosEj <= 0}
-                className="flex items-center gap-1 px-4 py-2 rounded font-medium disabled:opacity-40"
-                style={{ background: C.food, color: C.bg }}
-              >
-                <Plus size={16} /> Agregar
-              </button>
             </div>
+            <button
+              onClick={() => {
+                if (segundosEj <= 0) return;
+                onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, tipo: "tiempo", segundos: segundosEj });
+                reiniciarCronoEj();
+                setSerieActual((s) => s + 1);
+                iniciarDescanso();
+              }}
+              disabled={segundosEj <= 0}
+              className="w-full flex items-center justify-center gap-1 py-2 rounded font-medium disabled:opacity-40"
+              style={{ background: C.food, color: C.bg }}
+            >
+              <Check size={16} /> Serie terminada
+            </button>
           </div>
         )}
 
