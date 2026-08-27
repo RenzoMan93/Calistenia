@@ -1498,7 +1498,15 @@ function reproducirBeep() {
   }
 }
 
-const DURACIONES_DESCANSO = [30, 60, 90, 120];
+const DURACIONES_DESCANSO = [15, 30, 45, 60, 90, 120];
+
+function sugerirDescanso(nivel) {
+  if (nivel <= 2) return { segundos: 15, texto: "Es un ejercicio de base, más de resistencia: con 15 segundos de descanso alcanza para seguir con buen ritmo." };
+  if (nivel <= 4) return { segundos: 30, texto: "Nivel intermedio: 30 segundos de descanso son un buen equilibrio entre esfuerzo y recuperación." };
+  if (nivel <= 6) return { segundos: 45, texto: "Ejercicio más exigente: dale 45 segundos para llegar fresco a la próxima serie." };
+  if (nivel <= 8) return { segundos: 60, texto: "Movimiento avanzado: descansá 60 segundos para mantener la técnica en la próxima serie." };
+  return { segundos: 90, texto: "Es un movimiento de fuerza máxima o de habilidad avanzada: descansá 90 segundos para recuperar bien antes de ir de nuevo." };
+}
 
 function PanelDescanso({ total, restante, corriendo, onElegirDuracion, onIniciar, onPausarReanudar, onReiniciar }) {
   const min = Math.floor(restante / 60);
@@ -1631,6 +1639,13 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   const intervalRef = useRef(null);
 
   useEffect(() => {
+    if (corriendo) return;
+    const sugerido = sugerirDescanso(nivelActual).segundos;
+    setDescansoTotal(sugerido);
+    setDescansoRestante(sugerido);
+  }, [ejercicioActual.nombre]);
+
+  useEffect(() => {
     if (corriendo) {
       intervalRef.current = setInterval(() => {
         setDescansoRestante((prev) => {
@@ -1715,6 +1730,11 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
         </div>
         <div className="text-sm mb-1">{ejercicioActual.nombre}</div>
         <p className="text-xs mb-3" style={{ color: C.muted }}>{ejercicioActual.tip}</p>
+
+        <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.food}` }}>
+          <Lightbulb size={14} color={C.food} className="flex-shrink-0 mt-0.5" />
+          <span className="text-[11px]" style={{ color: C.text }}>{sugerirDescanso(nivelActual).texto}</span>
+        </div>
 
         <div className="flex gap-2 mb-3">
           <button
