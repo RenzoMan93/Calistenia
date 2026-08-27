@@ -1693,109 +1693,6 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
         </Panel>
       )}
 
-      <PanelDescanso
-        total={descansoTotal}
-        restante={descansoRestante}
-        corriendo={corriendo}
-        onElegirDuracion={elegirDuracion}
-        onIniciar={() => iniciarDescanso()}
-        onPausarReanudar={pausarReanudar}
-        onReiniciar={reiniciarDescanso}
-      />
-
-      {Object.entries(TRACKS).map(([key, track]) => (
-        <Panel key={key}>
-          <div className="flex items-center justify-between mb-1">
-            <span className="display text-sm" style={{ color: C.text }}>{track.nombre.toUpperCase()}</span>
-            <span className="text-xs mono" style={{ color: C.muted }}>Nivel {progresion[key]}/{track.ejercicios.length}</span>
-          </div>
-          {progresion[key] < track.ejercicios.length && (
-            <div className="mb-3">
-              <div style={{ height: 4, background: C.panelAlt, borderRadius: 2 }}>
-                <div
-                  style={{
-                    width: `${Math.min(((progresoSeries?.[key] || 0) / UMBRAL_SUBIR_NIVEL) * 100, 100)}%`,
-                    height: 4,
-                    background: C.train,
-                    borderRadius: 2,
-                  }}
-                />
-              </div>
-              <span className="text-[9px] mono" style={{ color: C.muted }}>
-                {Math.min(progresoSeries?.[key] || 0, UMBRAL_SUBIR_NIVEL)}/{UMBRAL_SUBIR_NIVEL} series para el próximo nivel
-              </span>
-            </div>
-          )}
-          <div className="flex overflow-x-auto gap-0 pb-1 items-center">
-            {track.ejercicios.map((ej, i) => {
-              const nivel = i + 1;
-              const activo = nivel === progresion[key];
-              const hecho = nivel < progresion[key];
-              const bloqueado = nivel > NIVEL_LIMITE_FREE && !accesoPremium;
-              const esCorteFreePremium = i === NIVEL_LIMITE_FREE && !accesoPremium;
-              return (
-                <div key={ej.nombre} className="flex items-center flex-shrink-0">
-                  {i > 0 && !esCorteFreePremium && (
-                    <div style={{ width: 16, height: 2, background: hecho || activo ? C.train : C.border }} />
-                  )}
-                  {esCorteFreePremium && (
-                    <div className="flex flex-col items-center flex-shrink-0" style={{ width: 34 }}>
-                      <ChipPro texto="PRO" />
-                      <div style={{ width: "100%", height: 0, borderTop: `2px dashed ${C.food}`, marginTop: 4 }} />
-                    </div>
-                  )}
-                  <button
-                    onClick={() => (bloqueado ? onBloqueado() : setNivel(key, nivel))}
-                    className="flex flex-col items-center gap-1"
-                    style={{ width: 76 }}
-                  >
-                    <div
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: "50%",
-                        background: hecho ? C.train : activo ? C.panelAlt : "transparent",
-                        border: `2px solid ${bloqueado ? C.border : hecho || activo ? C.train : C.border}`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {bloqueado ? (
-                        <Lock size={12} color={C.muted} />
-                      ) : hecho ? (
-                        <Check size={14} color={C.panel} />
-                      ) : (
-                        <span className="mono text-[10px]" style={{ color: activo ? C.train : C.muted }}>{nivel}</span>
-                      )}
-                    </div>
-                    <span className="text-[9px] text-center leading-tight" style={{ color: bloqueado ? C.muted : activo ? C.text : C.muted, height: 26 }}>{ej.nombre}</span>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-
-          <button
-            onClick={() => toggleTips(key)}
-            className="text-xs mono mt-2"
-            style={{ color: C.food }}
-          >
-            {tipsAbiertos[key] ? "Ocultar consejos de técnica ▲" : "Ver consejos de técnica ▼"}
-          </button>
-          {tipsAbiertos[key] && (
-            <div className="flex flex-col gap-2 mt-2">
-              {track.ejercicios.map((ej, i) => (
-                <div key={ej.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
-                  <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
-                  <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Panel>
-      ))}
-
       {sesionActiva && (
       <Panel style={{ borderColor: C.train }}>
         <div className="flex items-center justify-between mb-3">
@@ -1942,6 +1839,110 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
         )}
       </Panel>
       )}
+
+      <PanelDescanso
+        total={descansoTotal}
+        restante={descansoRestante}
+        corriendo={corriendo}
+        onElegirDuracion={elegirDuracion}
+        onIniciar={() => iniciarDescanso()}
+        onPausarReanudar={pausarReanudar}
+        onReiniciar={reiniciarDescanso}
+      />
+
+      {Object.entries(TRACKS).map(([key, track]) => (
+        <Panel key={key}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="display text-sm" style={{ color: C.text }}>{track.nombre.toUpperCase()}</span>
+            <span className="text-xs mono" style={{ color: C.muted }}>Nivel {progresion[key]}/{track.ejercicios.length}</span>
+          </div>
+          {progresion[key] < track.ejercicios.length && (
+            <div className="mb-3">
+              <div style={{ height: 4, background: C.panelAlt, borderRadius: 2 }}>
+                <div
+                  style={{
+                    width: `${Math.min(((progresoSeries?.[key] || 0) / UMBRAL_SUBIR_NIVEL) * 100, 100)}%`,
+                    height: 4,
+                    background: C.train,
+                    borderRadius: 2,
+                  }}
+                />
+              </div>
+              <span className="text-[9px] mono" style={{ color: C.muted }}>
+                {Math.min(progresoSeries?.[key] || 0, UMBRAL_SUBIR_NIVEL)}/{UMBRAL_SUBIR_NIVEL} series para el próximo nivel
+              </span>
+            </div>
+          )}
+          <div className="flex overflow-x-auto gap-0 pb-1 items-center">
+            {track.ejercicios.map((ej, i) => {
+              const nivel = i + 1;
+              const activo = nivel === progresion[key];
+              const hecho = nivel < progresion[key];
+              const bloqueado = nivel > NIVEL_LIMITE_FREE && !accesoPremium;
+              const esCorteFreePremium = i === NIVEL_LIMITE_FREE && !accesoPremium;
+              return (
+                <div key={ej.nombre} className="flex items-center flex-shrink-0">
+                  {i > 0 && !esCorteFreePremium && (
+                    <div style={{ width: 16, height: 2, background: hecho || activo ? C.train : C.border }} />
+                  )}
+                  {esCorteFreePremium && (
+                    <div className="flex flex-col items-center flex-shrink-0" style={{ width: 34 }}>
+                      <ChipPro texto="PRO" />
+                      <div style={{ width: "100%", height: 0, borderTop: `2px dashed ${C.food}`, marginTop: 4 }} />
+                    </div>
+                  )}
+                  <button
+                    onClick={() => (bloqueado ? onBloqueado() : setNivel(key, nivel))}
+                    className="flex flex-col items-center gap-1"
+                    style={{ width: 76 }}
+                  >
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        background: hecho ? C.train : activo ? C.panelAlt : "transparent",
+                        border: `2px solid ${bloqueado ? C.border : hecho || activo ? C.train : C.border}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {bloqueado ? (
+                        <Lock size={12} color={C.muted} />
+                      ) : hecho ? (
+                        <Check size={14} color={C.panel} />
+                      ) : (
+                        <span className="mono text-[10px]" style={{ color: activo ? C.train : C.muted }}>{nivel}</span>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-center leading-tight" style={{ color: bloqueado ? C.muted : activo ? C.text : C.muted, height: 26 }}>{ej.nombre}</span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => toggleTips(key)}
+            className="text-xs mono mt-2"
+            style={{ color: C.food }}
+          >
+            {tipsAbiertos[key] ? "Ocultar consejos de técnica ▲" : "Ver consejos de técnica ▼"}
+          </button>
+          {tipsAbiertos[key] && (
+            <div className="flex flex-col gap-2 mt-2">
+              {track.ejercicios.map((ej, i) => (
+                <div key={ej.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
+                  <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
+                  <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Panel>
+      ))}
+
     </div>
   );
 }
