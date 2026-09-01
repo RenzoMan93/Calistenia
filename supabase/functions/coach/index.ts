@@ -26,8 +26,8 @@ function diasEntre(desde: string, hasta: string) {
 
 function tieneAccesoPremium(suscripcion: any) {
   if (!suscripcion) return false;
-  if (suscripcion.premium) return true;
   const hoy = new Date().toISOString().slice(0, 10);
+  if (suscripcion.premiumHasta && suscripcion.premiumHasta >= hoy) return true;
   const usados = diasEntre(suscripcion.trialStart, hoy);
   const restantes = DIAS_PRUEBA + (suscripcion.diasBonus || 0) - usados;
   return restantes > 0;

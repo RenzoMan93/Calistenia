@@ -313,6 +313,11 @@ const PLAN_PREMIUM = [
 
 const diasEntre = (desde, hasta) => Math.floor((new Date(hasta) - new Date(desde)) / 86400000);
 
+// El acceso Premium se calcula comparando la fecha de vencimiento con hoy,
+// nunca queda "activado para siempre": cada pago o código extiende
+// premiumHasta 30 días (ver _extender_premium en el backend).
+const premiumActivo = (suscripcion, fecha) => Boolean(suscripcion?.premiumHasta) && suscripcion.premiumHasta >= fecha;
+
 const NIVELES_ACTIVIDAD = [
   { id: "sedentario", label: "Sedentario (poco o nada de ejercicio)", factor: 1.2 },
   { id: "ligero", label: "Ligero (1-3 días/semana)", factor: 1.375 },
@@ -430,7 +435,7 @@ export default function App() {
 
       let susActual = sus;
       if (!susActual) {
-        susActual = { trialStart: fecha, premium: false, diasBonus: 0 };
+        susActual = { trialStart: fecha, diasBonus: 0, premiumHasta: null };
         await safeSet("suscripcion", susActual);
       }
       setSuscripcion(susActual);
@@ -472,16 +477,18 @@ export default function App() {
 
   const diasTrialUsados = suscripcion ? diasEntre(suscripcion.trialStart, fecha) : 0;
   const diasTrialRestantes = Math.max(DIAS_PRUEBA + (suscripcion?.diasBonus || 0) - diasTrialUsados, 0);
-  const enTrial = !suscripcion?.premium && diasTrialRestantes > 0;
-  const accesoPremium = Boolean(suscripcion?.premium) || enTrial;
+  const esPremiumActivo = premiumActivo(suscripcion, fecha);
+  const diasPremiumRestantes = esPremiumActivo ? diasEntre(fecha, suscripcion.premiumHasta) : null;
+  const enTrial = !esPremiumActivo && diasTrialRestantes > 0;
+  const accesoPremium = esPremiumActivo || enTrial;
 
   // Vuelve a leer la suscripción desde el servidor: la usan tanto el canje de
   // código como el botón "Ya pagué, verificar" (el webhook de Mercado Pago
-  // activa Premium del lado del servidor, no hay push al cliente).
+  // extiende premiumHasta del lado del servidor, no hay push al cliente).
   const revisarSuscripcion = async () => {
     const fresca = await safeGet("suscripcion");
     if (fresca) setSuscripcion(fresca);
-    return Boolean(fresca?.premium);
+    return premiumActivo(fresca, fecha);
   };
 
   const canjearInvitacion = async (codigoIngresado) => {
@@ -615,7 +622,14 @@ export default function App() {
 
       <div className="px-4">
         {storageDisponible === false && <BannerStorage />}
-        <BannerPlan suscripcion={suscripcion} enTrial={enTrial} diasTrialRestantes={diasTrialRestantes} onVerPlanes={() => setMostrarPlanes(true)} />
+        <BannerPlan
+          suscripcion={suscripcion}
+          esPremiumActivo={esPremiumActivo}
+          diasPremiumRestantes={diasPremiumRestantes}
+          enTrial={enTrial}
+          diasTrialRestantes={diasTrialRestantes}
+          onVerPlanes={() => setMostrarPlanes(true)}
+        />
       </div>
 
       <main className="px-4 mt-4">
@@ -673,7 +687,8 @@ export default function App() {
       {editandoPerfil && <ModalPerfil perfil={perfil} onGuardar={guardarPerfil} onCerrar={() => setEditandoPerfil(false)} onVerTerminos={() => setMostrarTerminos(true)} />}
       {mostrarPlanes && (
         <ModalPlanes
-          esPremium={Boolean(suscripcion?.premium)}
+          esPremium={esPremiumActivo}
+          diasPremiumRestantes={diasPremiumRestantes}
           diasTrialRestantes={diasTrialRestantes}
           onPagoConfirmado={revisarSuscripcion}
           onCerrar={() => setMostrarPlanes(false)}
@@ -760,13 +775,30 @@ function BannerStorage() {
   );
 }
 
-function BannerPlan({ suscripcion, enTrial, diasTrialRestantes, onVerPlanes }) {
+function BannerPlan({ suscripcion, esPremiumActivo, diasPremiumRestantes, enTrial, diasTrialRestantes, onVerPlanes }) {
   if (!suscripcion) return null;
-  if (suscripcion.premium) {
+  if (esPremiumActivo) {
+    const porVencer = diasPremiumRestantes <= 5;
+    if (porVencer) {
+      return (
+        <button
+          onClick={onVerPlanes}
+          className="w-full flex items-center justify-between rounded-md px-3 py-2 mt-3"
+          style={{ background: C.trainDim, border: `1px solid ${C.train}` }}
+        >
+          <span className="text-xs" style={{ color: C.text }}>
+            Tu Premium vence en <span style={{ color: C.food }}>{diasPremiumRestantes} día{diasPremiumRestantes !== 1 ? "s" : ""}</span>
+          </span>
+          <span className="text-xs mono" style={{ color: C.food }}>Renovar</span>
+        </button>
+      );
+    }
     return (
       <div className="flex items-center gap-2 rounded-md px-3 py-2 mt-3" style={{ background: C.foodDim, border: `1px solid ${C.food}` }}>
         <Crown size={14} color={C.food} />
-        <span className="text-xs" style={{ color: C.food }}>Sos usuario Premium</span>
+        <span className="text-xs" style={{ color: C.food }}>
+          Premium activo · vence en {diasPremiumRestantes} día{diasPremiumRestantes !== 1 ? "s" : ""}
+        </span>
       </div>
     );
   }
@@ -845,7 +877,7 @@ function ModalSugerenciaNivel({ track, nivelActual, onAceptar, onDescartar }) {
   );
 }
 
-function ModalPlanes({ esPremium, diasTrialRestantes, onPagoConfirmado, onCerrar, onVerTerminos }) {
+function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPagoConfirmado, onCerrar, onVerTerminos }) {
   const [codigo, setCodigo] = useState("");
   const [estado, setEstado] = useState(null);
   const [canjeando, setCanjeando] = useState(false);
@@ -933,10 +965,16 @@ function ModalPlanes({ esPremium, diasTrialRestantes, onPagoConfirmado, onCerrar
           </p>
         </div>
 
-        {esPremium ? (
-          <div className="text-center text-sm" style={{ color: C.food }}>Ya tenés Premium activo ✓</div>
-        ) : (
+        {esPremium && (
+          <div className="text-center text-sm mb-3" style={{ color: C.food }}>
+            Ya tenés Premium activo — vence en {diasPremiumRestantes} día{diasPremiumRestantes !== 1 ? "s" : ""} ✓
+          </div>
+        )}
+        {(!esPremium || diasPremiumRestantes <= 7) && (
           <div className="flex flex-col gap-3">
+            {esPremium && (
+              <div className="text-center text-[10px]" style={{ color: C.muted }}>Podés renovar antes de que venza:</div>
+            )}
             <button
               onClick={irAPagar}
               disabled={pagando}

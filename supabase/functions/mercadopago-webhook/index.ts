@@ -1,8 +1,10 @@
 // Edge Function: mercadopago-webhook
 //
 // Recibe la notificación (IPN / webhook) de Mercado Pago cuando el estado de
-// un pago cambia. Si el pago está aprobado, activa Premium automáticamente
-// para el usuario indicado en external_reference (ver mercadopago-create-preference).
+// un pago cambia. Si el pago está aprobado, extiende 30 días el vencimiento
+// de Premium (premiumHasta) para el usuario indicado en external_reference
+// (ver mercadopago-create-preference). Si ya tenía Premium activo, extiende
+// desde la fecha de vencimiento actual, no desde hoy, para no perder días.
 //
 // Configurá esta URL como "notification_url" en tu cuenta de Mercado Pago:
 //   https://<tu-proyecto>.supabase.co/functions/v1/mercadopago-webhook
@@ -13,6 +15,8 @@
 // Secrets necesarios: MP_ACCESS_TOKEN, SUPABASE_SERVICE_ROLE_KEY
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4?target=deno";
+
+const DIAS_PREMIUM = 30;
 
 Deno.serve(async (req) => {
   try {
@@ -52,6 +56,17 @@ Deno.serve(async (req) => {
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
       );
 
+      // Idempotencia: si Mercado Pago reenvía esta misma notificación, el
+      // insert falla por PK duplicada y no volvemos a sumar 30 días.
+      const { error: yaProcesado } = await supabaseAdmin
+        .from("mp_pagos_procesados")
+        .insert({ payment_id: String(paymentId), user_id: userId });
+      if (yaProcesado) {
+        console.log(`Pago ${paymentId} ya procesado antes, no se vuelve a extender.`);
+        return new Response("ok", { status: 200 });
+      }
+
+      const hoy = new Date().toISOString().slice(0, 10);
       const { data: existing } = await supabaseAdmin
         .from("user_data")
         .select("value")
@@ -59,10 +74,16 @@ Deno.serve(async (req) => {
         .eq("key", "suscripcion")
         .maybeSingle();
 
+      const vencimientoActual: string | undefined = existing?.value?.premiumHasta;
+      const base = vencimientoActual && vencimientoActual > hoy ? vencimientoActual : hoy;
+      const fechaBase = new Date(`${base}T00:00:00Z`);
+      fechaBase.setUTCDate(fechaBase.getUTCDate() + DIAS_PREMIUM);
+      const premiumHasta = fechaBase.toISOString().slice(0, 10);
+
       const nuevaSuscripcion = {
-        trialStart: existing?.value?.trialStart || new Date().toISOString().slice(0, 10),
+        trialStart: existing?.value?.trialStart || hoy,
         diasBonus: existing?.value?.diasBonus || 0,
-        premium: true,
+        premiumHasta,
       };
 
       await supabaseAdmin
