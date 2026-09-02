@@ -7,7 +7,10 @@
 // cualquiera que llame a la función.
 //
 // Deploy: supabase functions deploy coach
-// Secrets necesarios: ANTHROPIC_API_KEY
+// Secrets necesarios: ANTHROPIC_API_KEY, PROJECT_ANON_KEY
+// (PROJECT_ANON_KEY = la "Publishable key" / anon key de Project Settings > API
+// Keys. No usamos el secreto reservado SUPABASE_ANON_KEY porque en proyectos
+// con el sistema nuevo de claves aparece deprecado.)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4?target=deno";
 
@@ -42,7 +45,7 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization") || "";
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
+      Deno.env.get("PROJECT_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } }
     );
 

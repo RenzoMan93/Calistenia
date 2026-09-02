@@ -83,6 +83,8 @@ supabase link --project-ref <tu-project-ref>
 supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 supabase secrets set MP_ACCESS_TOKEN=APP_USR-...
 supabase secrets set APP_URL=https://tu-app.vercel.app
+supabase secrets set PROJECT_ANON_KEY=<tu anon/publishable key, Project Settings > API Keys>
+supabase secrets set PROJECT_SERVICE_KEY=<tu secret key (sb_secret_...), Project Settings > API Keys>
 
 # Deploy:
 supabase functions deploy coach
@@ -90,9 +92,12 @@ supabase functions deploy mercadopago-create-preference
 supabase functions deploy mercadopago-webhook --no-verify-jwt
 ```
 
-`SUPABASE_URL`, `SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` ya están
-disponibles automáticamente dentro de las Edge Functions, no hace falta
-setearlas a mano.
+`SUPABASE_URL` ya está disponible automáticamente dentro de las Edge
+Functions. Los secretos `PROJECT_ANON_KEY` y `PROJECT_SERVICE_KEY` sí hay
+que setearlos a mano: los reservados `SUPABASE_ANON_KEY` /
+`SUPABASE_SERVICE_ROLE_KEY` quedaron deprecados en proyectos que usan el
+sistema nuevo de API keys de Supabase (publishable/secret), así que las
+funciones usan sus propios nombres para evitar depender de eso.
 
 El flag `--no-verify-jwt` en `mercadopago-webhook` es necesario porque
 Mercado Pago llama a esa URL sin un token de Supabase.

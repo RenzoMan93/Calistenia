@@ -12,7 +12,11 @@
 // Deploy: supabase functions deploy mercadopago-webhook --no-verify-jwt
 // (--no-verify-jwt porque Mercado Pago llama a esta URL sin un JWT de Supabase)
 //
-// Secrets necesarios: MP_ACCESS_TOKEN, SUPABASE_SERVICE_ROLE_KEY
+// Secrets necesarios: MP_ACCESS_TOKEN, PROJECT_SERVICE_KEY
+// (PROJECT_SERVICE_KEY = la "Secret key" de Project Settings > API Keys, la
+// que empieza con sb_secret_... No usamos el secreto reservado
+// SUPABASE_SERVICE_ROLE_KEY porque en proyectos con el sistema nuevo de
+// claves aparece deprecado.)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4?target=deno";
 
@@ -53,7 +57,7 @@ Deno.serve(async (req) => {
       const userId = payment.external_reference;
       const supabaseAdmin = createClient(
         Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+        Deno.env.get("PROJECT_SERVICE_KEY")!
       );
 
       // Idempotencia: si Mercado Pago reenvía esta misma notificación, el

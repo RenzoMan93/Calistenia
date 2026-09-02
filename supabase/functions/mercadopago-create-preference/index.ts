@@ -5,7 +5,10 @@
 // Supabase para que el webhook sepa a quién activarle Premium.
 //
 // Deploy: supabase functions deploy mercadopago-create-preference
-// Secrets necesarios: MP_ACCESS_TOKEN
+// Secrets necesarios: MP_ACCESS_TOKEN, PROJECT_ANON_KEY
+// (PROJECT_ANON_KEY = la "Publishable key" / anon key de Project Settings > API
+// Keys. No usamos el secreto reservado SUPABASE_ANON_KEY porque en proyectos
+// con el sistema nuevo de claves aparece deprecado.)
 // Variable opcional: APP_URL (para las back_urls y notification_url), si no
 // se define se usa un valor genérico que conviene ajustar en producción.
 
@@ -28,7 +31,7 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization") || "";
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
+      Deno.env.get("PROJECT_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } }
     );
 
