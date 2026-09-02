@@ -130,11 +130,23 @@ function FiguraTecnica({ figura, size = 56, color }) {
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} style={{ flexShrink: 0 }}>
       {f.pisoY != null && <line x1="0" y1={f.pisoY} x2="100" y2={f.pisoY} stroke={C.border} strokeWidth="2" />}
-      {f.barraY != null && <line x1="20" y1={f.barraY} x2="80" y2={f.barraY} stroke={C.border} strokeWidth="4" strokeLinecap="round" />}
-      <line x1={f.hombro[0]} y1={f.hombro[1]} x2={f.cadera[0]} y2={f.cadera[1]} stroke={trazo} strokeWidth="6" strokeLinecap="round" />
-      <polyline points={brazo} fill="none" stroke={trazo} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-      <polyline points={pierna} fill="none" stroke={trazo} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={f.cabeza[0]} cy={f.cabeza[1]} r="9" fill={trazo} />
+      {f.barraY != null && <line x1="18" y1={f.barraY} x2="82" y2={f.barraY} stroke={C.border} strokeWidth="4" strokeLinecap="round" />}
+
+      {/* piernas: trazo grueso de base + resalte más claro encima para dar volumen */}
+      <polyline points={pierna} fill="none" stroke={trazo} strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={pierna} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+
+      {/* torso */}
+      <line x1={f.hombro[0]} y1={f.hombro[1]} x2={f.cadera[0]} y2={f.cadera[1]} stroke={trazo} strokeWidth="19" strokeLinecap="round" />
+      <line x1={f.hombro[0]} y1={f.hombro[1]} x2={f.cadera[0]} y2={f.cadera[1]} stroke="rgba(255,255,255,0.18)" strokeWidth="7" strokeLinecap="round" />
+
+      {/* brazos, van adelante del torso */}
+      <polyline points={brazo} fill="none" stroke={trazo} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={brazo} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+
+      {/* cabeza, con un pequeño resalte para que no quede plana */}
+      <circle cx={f.cabeza[0]} cy={f.cabeza[1]} r="11" fill={trazo} />
+      <circle cx={f.cabeza[0] - 3} cy={f.cabeza[1] - 3} r="3.5" fill="rgba(255,255,255,0.25)" />
     </svg>
   );
 }
