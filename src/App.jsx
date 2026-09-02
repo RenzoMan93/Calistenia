@@ -322,10 +322,27 @@ function sugerirDesdeHeladera(seleccion, misMenus = []) {
 // coinciden en 1 ingrediente cada una (y parece que ignora el resto de lo
 // que elegiste). Para esos casos armamos una sugerencia genérica que sí usa
 // TODO lo seleccionado, a modo de idea rápida (sin macros exactos, así que
-// no se puede registrar como una comida con calorías precisas).
+// no se puede registrar como una comida con calorías precisas). El texto
+// cambia según el tipo de ingredientes: no tiene sentido decir "cociná todo
+// junto" si elegiste pan o cosas que se comen crudas.
+const HELADERA_SIN_COCCION = new Set(["Palta", "Queso", "Queso untable", "Tomate", "Lechuga", "Yogur", "Leche", "Banana", "Manzana", "Frutos secos", "Miel", "Atún"]);
+const HELADERA_DULCE = new Set(["Avena", "Banana", "Manzana", "Yogur", "Leche", "Miel", "Frutos secos"]);
+
 function sugerirCombinacionLibre(seleccion) {
   if (seleccion.length < 2) return null;
-  return `Con ${seleccion.join(", ")} podés armar un salteado, guiso o ensalada tibia: cociná todo junto con un poco de aceite, sal y las especias que tengas. No tiene calorías exactas (no es una receta de la base), pero es una forma rápida de aprovechar justo lo que elegiste.`;
+  const lista = seleccion.join(", ");
+  const cierre = "No tiene calorías exactas (no es una receta de la base), pero es una forma rápida de aprovechar justo lo que elegiste.";
+
+  if (seleccion.includes("Pan")) {
+    return `Con ${lista} armá un sandwich o unas tostadas: no hace falta cocinar todo, solo tostar el pan y poner el resto arriba o adentro. ${cierre}`;
+  }
+  if (seleccion.every((i) => HELADERA_DULCE.has(i))) {
+    return `Con ${lista} armá un bowl o licuado dulce: mezclá todo (podés licuar lo líquido junto con el resto, o servirlo en capas). ${cierre}`;
+  }
+  if (seleccion.every((i) => HELADERA_SIN_COCCION.has(i))) {
+    return `Con ${lista} armá una ensalada o plato frío: mezclá todo y condimentá con sal, limón y un chorrito de aceite de oliva. ${cierre}`;
+  }
+  return `Con ${lista} podés armar un salteado, guiso o ensalada tibia: cociná todo junto con un poco de aceite, sal y las especias que tengas. ${cierre}`;
 }
 
 const CONSEJOS_BASE = [
