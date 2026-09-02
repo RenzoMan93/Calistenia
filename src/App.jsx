@@ -550,15 +550,21 @@ const NOMBRES_MES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Jul
 
 // Split semanal sugerido: cada grupo se entrena 2 veces por semana con al
 // menos 2-3 días de por medio para recuperar, y quedan días de descanso.
+// Sugerencia de rutina semanal: de lunes a viernes siempre hay algo
+// propuesto (repartiendo los 4 grupos musculares a lo largo de la semana),
+// y el fin de semana queda como descanso. Es solo una guía — el usuario
+// puede entrenar el grupo que quiera cualquier día desde la pestaña Entreno.
 const PLAN_SEMANAL = {
   0: { descanso: true },
   1: { tracks: ["empuje", "core"] },
   2: { tracks: ["traccion", "piernas"] },
-  3: { descanso: true },
-  4: { tracks: ["empuje", "piernas"] },
-  5: { tracks: ["traccion", "core"] },
+  3: { tracks: ["empuje", "piernas"] },
+  4: { tracks: ["traccion", "core"] },
+  5: { tracks: ["empuje", "traccion"] },
   6: { descanso: true },
 };
+
+const DIAS_SEMANA_LABEL = { 1: "Lunes", 2: "Martes", 3: "Miércoles", 4: "Jueves", 5: "Viernes" };
 
 function planDeHoy() {
   return PLAN_SEMANAL[new Date().getDay()];
@@ -892,7 +898,7 @@ export default function App() {
             onEditarObjetivo={() => setEditandoPerfil(true)}
           />
         )}
-        {tab === "consejos" && <VistaConsejos perfil={perfil} />}
+        {tab === "consejos" && <VistaConsejos perfil={perfil} progresion={progresion} />}
         {tab === "sugerencias" && <VistaSugerencias perfil={perfil} />}
       </main>
       </div>
@@ -2944,10 +2950,47 @@ function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, acceso
 
 // ---------- PROGRESO ----------
 // ---------- CONSEJOS ----------
-function VistaConsejos({ perfil }) {
+function PanelPlanSemanal({ progresion }) {
+  return (
+    <Panel>
+      <div className="display text-sm mb-1" style={{ color: C.muted }}>PLAN SEMANAL SUGERIDO</div>
+      <p className="text-[10px] mb-3" style={{ color: C.muted }}>
+        Una idea para no tener que pensar qué entrenar cada día. Es una sugerencia, no una obligación: en Entreno podés elegir el grupo que quieras, cualquier día.
+      </p>
+      <div className="flex flex-col gap-2">
+        {[1, 2, 3, 4, 5].map((dia) => {
+          const plan = PLAN_SEMANAL[dia];
+          return (
+            <div key={dia} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
+              <div className="text-xs font-medium mb-1" style={{ color: C.food }}>{DIAS_SEMANA_LABEL[dia]}</div>
+              <div className="flex flex-col gap-0.5">
+                {plan.tracks.map((track) => {
+                  const ej = TRACKS[track].ejercicios[(progresion?.[track] || 1) - 1];
+                  return (
+                    <div key={track} className="text-xs" style={{ color: C.text }}>
+                      <span style={{ color: C.muted }}>{TRACKS[track].nombre}:</span> {ej.nombre}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+        <div className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
+          <div className="text-xs font-medium" style={{ color: C.muted }}>Sábado y domingo</div>
+          <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>Descanso, o entrená igual si tenés ganas.</p>
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
+function VistaConsejos({ perfil, progresion }) {
   const [trackAbierto, setTrackAbierto] = useState(null);
   return (
     <div>
+      <PanelPlanSemanal progresion={progresion} />
+
       <Panel>
         <div className="flex items-center gap-2 mb-1">
           <Lightbulb size={16} color={C.food} />
@@ -4081,6 +4124,7 @@ const AYUDA_SECCIONES = [
     color: "food",
     titulo: "Consejos",
     puntos: [
+      "Plan semanal sugerido: qué entrenar cada día de lunes a viernes, con el ejercicio puntual según tu nivel.",
       "Consejos de nutrición según tu objetivo (bajar, mantener o subir de peso).",
       "Técnica animada de cada ejercicio, con posición inicial y final.",
     ],
