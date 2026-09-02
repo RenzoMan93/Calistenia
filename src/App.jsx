@@ -1872,14 +1872,34 @@ function reproducirBeep() {
 // externa) para poder entrenar sin mirar ni tocar la pantalla. Cancela lo que
 // esté diciendo antes de hablar de nuevo para no acumular frases atrasadas
 // cuando el ritmo de repeticiones es rápido.
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  // Dispara la carga de voces del navegador apenas arranca la app: si se
+  // llama a speak() antes de que las voces terminen de cargar (algo
+  // frecuente en Chrome de escritorio), la primera frase se pierde en
+  // silencio.
+  window.speechSynthesis.getVoices();
+}
+
 function hablar(texto) {
   try {
     if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(texto);
-    utt.lang = "es-ES";
-    utt.rate = 1.05;
-    window.speechSynthesis.speak(utt);
+    const synth = window.speechSynthesis;
+    const decir = () => {
+      const utt = new SpeechSynthesisUtterance(texto);
+      utt.lang = "es-ES";
+      utt.rate = 1.05;
+      synth.speak(utt);
+    };
+    // Cancelar y hablar en el mismo instante deja la síntesis de voz
+    // trabada en varios navegadores (sobre todo Chrome de escritorio): si
+    // hay algo sonando o encolado, cancela y espera un toque antes de
+    // decir la frase nueva.
+    if (synth.speaking || synth.pending) {
+      synth.cancel();
+      setTimeout(decir, 50);
+    } else {
+      decir();
+    }
   } catch {
     // sin soporte de voz en el navegador; no rompe el resto del entrenamiento
   }
@@ -2136,7 +2156,16 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
 
   return (
     <div>
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-end gap-2 mb-2">
+        {vozActiva && (
+          <button
+            onClick={() => hablar("Hola, soy tu coach.")}
+            className="text-[11px] mono px-2 py-1 rounded"
+            style={{ background: C.panelAlt, color: C.muted, border: `1px solid ${C.border}` }}
+          >
+            Probar voz
+          </button>
+        )}
         <button
           onClick={() => setVozActiva((v) => !v)}
           className="flex items-center gap-1 text-[11px] mono px-2 py-1 rounded"
