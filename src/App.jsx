@@ -292,6 +292,8 @@ const DIAS_PRUEBA = 7;
 const NIVEL_LIMITE_FREE = 3;
 const UMBRAL_SUBIR_NIVEL = 8;
 const PRECIO_PREMIUM = "$250";
+const WHATSAPP_CONTACTO = "59892778233";
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_CONTACTO}`;
 const BONUS_DIAS_REFERIDO = 3;
 
 const PLAN_FREE = [
@@ -3341,9 +3343,13 @@ function ModalTerminos({ onCerrar }) {
             </p>
           </div>
           <div>
-            <div className="font-medium mb-1" style={{ color: C.food }}>Borrar tus datos</div>
+            <div className="font-medium mb-1" style={{ color: C.food }}>Borrar tus datos o contactarnos</div>
             <p style={{ color: C.muted }}>
-              Si en algún momento querés que borremos tu información, escribinos y lo hacemos. (Reemplazá esto por tu contacto real antes de publicar la app.)
+              Si en algún momento querés que borremos tu información, o tenés cualquier duda, escribinos por WhatsApp al{" "}
+              <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" style={{ color: C.food }}>
+                +598 92 778 233
+              </a>
+              .
             </p>
           </div>
         </div>
