@@ -43,7 +43,7 @@ const TRACKS = {
       { nombre: "Flexiones de rodillas", tip: "Apoyá las rodillas, espalda recta y bajá el pecho cerca del piso sin arquear la zona lumbar.", figura: ["empuje_rodillas_bajo", "empuje_rodillas_arriba"] },
       { nombre: "Flexiones completas", tip: "Cuerpo en línea recta de cabeza a talones, codos a 45° del torso, no dejes caer la cadera.", figura: ["empuje_bajo", "empuje_arriba"] },
       { nombre: "Flexiones con manos juntas", tip: "Manos juntas formando un diamante bajo el pecho; sumás trabajo de tríceps, controlá la bajada.", figura: ["empuje_bajo", "empuje_arriba"] },
-      { nombre: "Fondos en banco o paralelas", tip: "Bajá hasta que los hombros queden a la altura de los codos, no más, para cuidar el hombro.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Fondos en banco o paralelas", tip: "Bajá hasta que los hombros queden a la altura de los codos, no más, para cuidar el hombro.", figura: ["empuje_bajo", "empuje_arriba"], sinEquipo: "Sin banco ni paralelas, usá dos sillas resistentes de la misma altura, o el borde firme de una cama o sofá bajo." },
       { nombre: "Flexiones con un brazo extendido", tip: "Un brazo se extiende al costado mientras el otro empuja; alterná lados en cada repetición.", figura: ["empuje_bajo", "empuje_arriba"] },
       { nombre: "Flexión a un solo brazo (asistida)", tip: "La mano libre apoya solo de sostén, el peso real lo lleva el brazo de trabajo.", figura: ["empuje_bajo", "empuje_arriba"] },
       { nombre: "Flexión pike (pica)", tip: "Cadera elevada formando una V invertida, bajá la cabeza hacia el piso entre las manos: empieza a preparar el hombro para el pino.", figura: ["empuje_pike"] },
@@ -55,16 +55,16 @@ const TRACKS = {
   traccion: {
     nombre: "Tracción",
     ejercicios: [
-      { nombre: "Remo con el cuerpo inclinado", tip: "Cuerpo recto, tirá con los codos pegados al torso y apretá los omóplatos arriba.", figura: ["remo_bajo", "remo_arriba"] },
-      { nombre: "Dominadas asistidas (con banda)", tip: "Usá banda o apoyo en los pies, priorizá el rango completo antes que la velocidad.", figura: ["traccion_colgado", "traccion_arriba"] },
-      { nombre: "Dominadas completas", tip: "Arrancá desde brazos extendidos, subí hasta que el mentón pase la barra, sin hamacarte.", figura: ["traccion_colgado", "traccion_arriba"] },
-      { nombre: "Dominadas con peso extra", tip: "Sumá peso extra solo cuando puedas hacer 8-10 dominadas limpias sin lastre.", figura: ["traccion_colgado", "traccion_arriba"] },
-      { nombre: "Subida completa a la barra, asistida", tip: "Usá banda para el impulso; practicá primero el tirón alto y el agarre girado.", figura: ["traccion_colgado", "traccion_arriba"] },
-      { nombre: "Subida completa a la barra", tip: "Sin impulso de piernas: tirón explosivo y transición rápida de muñeca sobre la barra.", figura: ["traccion_colgado", "traccion_arriba"] },
-      { nombre: "Muscle-up con peso extra", tip: "Sumá peso solo cuando el muscle-up de barra te salga limpio y controlado varias veces seguidas.", figura: ["traccion_colgado", "traccion_arriba"] },
-      { nombre: "Dominada arquero (archer)", tip: "Un brazo casi extendido al costado, el otro hace casi todo el trabajo de tracción; alterná lados.", figura: ["traccion_colgado", "traccion_arriba"] },
-      { nombre: "Dominada a un brazo, asistida (con banda)", tip: "La banda saca peso del brazo de trabajo; enfocate en no rotar el torso durante la subida.", figura: ["traccion_colgado", "traccion_arriba"] },
-      { nombre: "Dominada a un solo brazo (completa)", tip: "Agarrate la muñeca del brazo libre para dar algo de estabilidad al principio; tirá parejo, sin tirones bruscos.", figura: ["traccion_colgado", "traccion_arriba"] },
+      { nombre: "Remo con el cuerpo inclinado", tip: "Cuerpo recto, tirá con los codos pegados al torso y apretá los omóplatos arriba.", figura: ["remo_bajo", "remo_arriba"], sinEquipo: "Si no tenés una barra baja, usá el borde de una mesa resistente, un escritorio firme, o dos sillas fuertes con un palo de escoba apoyado entre los respaldos a la altura justa." },
+      { nombre: "Dominadas asistidas (con banda)", tip: "Usá banda o apoyo en los pies, priorizá el rango completo antes que la velocidad.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Sin barra fija funciona igual una barra de dominadas para marco de puerta (no hace falta atornillarla) o una rama gruesa y firme si entrenás al aire libre." },
+      { nombre: "Dominadas completas", tip: "Arrancá desde brazos extendidos, subí hasta que el mentón pase la barra, sin hamacarte.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Mismo reemplazo: barra de marco de puerta, estructura de juegos en una plaza, o una rama gruesa y firme." },
+      { nombre: "Dominadas con peso extra", tip: "Sumá peso extra solo cuando puedas hacer 8-10 dominadas limpias sin lastre.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Usá el mismo reemplazo de barra (marco de puerta o plaza) y sumá peso con una mochila cargada." },
+      { nombre: "Subida completa a la barra, asistida", tip: "Usá banda para el impulso; practicá primero el tirón alto y el agarre girado.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Una barra de marco de puerta o los juegos de una plaza sirven igual para practicar la subida." },
+      { nombre: "Subida completa a la barra", tip: "Sin impulso de piernas: tirón explosivo y transición rápida de muñeca sobre la barra.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta o una plaza con barras firmes." },
+      { nombre: "Muscle-up con peso extra", tip: "Sumá peso solo cuando el muscle-up de barra te salga limpio y controlado varias veces seguidas.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Este necesita una barra bien firme y alta por la transición: mejor en una plaza con barras o en un gimnasio, no en el marco de una puerta común." },
+      { nombre: "Dominada arquero (archer)", tip: "Un brazo casi extendido al costado, el otro hace casi todo el trabajo de tracción; alterná lados.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta o plaza, igual que las dominadas normales." },
+      { nombre: "Dominada a un brazo, asistida (con banda)", tip: "La banda saca peso del brazo de trabajo; enfocate en no rotar el torso durante la subida.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta o plaza; atá la banda arriba de la misma forma." },
+      { nombre: "Dominada a un solo brazo (completa)", tip: "Agarrate la muñeca del brazo libre para dar algo de estabilidad al principio; tirá parejo, sin tirones bruscos.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta bien firme, o plaza con barras." },
     ],
   },
   piernas: {
@@ -86,15 +86,15 @@ const TRACKS = {
     nombre: "Core",
     ejercicios: [
       { nombre: "Plancha abdominal", tip: "Cuerpo en línea recta, abdomen contraído, no dejes caer la cadera.", porTiempo: true, figura: ["core_plancha"] },
-      { nombre: "Subir las piernas colgado de la barra", tip: "Colgado de la barra, subí las piernas sin balancearte, controlá la bajada.", figura: ["traccion_colgado", "core_colgado_arriba"] },
+      { nombre: "Subir las piernas colgado de la barra", tip: "Colgado de la barra, subí las piernas sin balancearte, controlá la bajada.", figura: ["traccion_colgado", "core_colgado_arriba"], sinEquipo: "Mismo reemplazo que las dominadas: barra de marco de puerta o plaza." },
       { nombre: "Sostenerse con las piernas rectas al frente", tip: "Piernas extendidas al frente en forma de L, hombros activos empujando hacia abajo.", porTiempo: true, figura: ["core_lsit"] },
       { nombre: "Rueda abdominal desde rodillas", tip: "Rodillas apoyadas, extendé controlado y sin arquear la zona lumbar.", figura: ["core_rueda"] },
       { nombre: "Bajada controlada del cuerpo, recto", tip: "Solo los hombros apoyados, bajá el cuerpo recto lo más lento posible.", porTiempo: true, figura: ["core_negativa"] },
-      { nombre: "Cuerpo horizontal colgado, piernas encogidas", tip: "Colgado, llevá las rodillas al pecho con el cuerpo horizontal, activando dorsales y core.", porTiempo: true, figura: ["core_frontlever"] },
+      { nombre: "Cuerpo horizontal colgado, piernas encogidas", tip: "Colgado, llevá las rodillas al pecho con el cuerpo horizontal, activando dorsales y core.", porTiempo: true, figura: ["core_frontlever"], sinEquipo: "Necesitás algo bien firme para colgarte: barra de marco de puerta reforzada o plaza con barras." },
       { nombre: "Rueda abdominal de pie", tip: "Arrancás parado en vez de arrodillado: mucho más exigente, controlá la zona lumbar en todo momento.", figura: ["core_rueda"] },
       { nombre: "V-sit", tip: "Piernas y torso forman una V, más cerrada que el L-sit; hombros activos y abdomen bien contraído.", porTiempo: true, figura: ["core_lsit"] },
-      { nombre: "Front lever con una pierna extendida", tip: "Cuerpo horizontal colgado, una pierna estirada y la otra encogida; alterná para trabajar parejo.", porTiempo: true, figura: ["core_frontlever"] },
-      { nombre: "Front lever completo", tip: "Cuerpo totalmente horizontal y recto, colgado de la barra; apretá dorsales, glúteos y abdomen a la vez.", porTiempo: true, figura: ["core_frontlever"] },
+      { nombre: "Front lever con una pierna extendida", tip: "Cuerpo horizontal colgado, una pierna estirada y la otra encogida; alterná para trabajar parejo.", porTiempo: true, figura: ["core_frontlever"], sinEquipo: "Mismo reemplazo: barra de marco de puerta reforzada o plaza." },
+      { nombre: "Front lever completo", tip: "Cuerpo totalmente horizontal y recto, colgado de la barra; apretá dorsales, glúteos y abdomen a la vez.", porTiempo: true, figura: ["core_frontlever"], sinEquipo: "Barra de marco de puerta bien firme o plaza; este exige mucho agarre, asegurate que no se mueva." },
     ],
   },
 };
@@ -2100,6 +2100,15 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           <Lightbulb size={14} color={C.food} className="flex-shrink-0 mt-0.5" />
           <span className="text-[11px]" style={{ color: C.text }}>{sugerirDescanso(nivelActual).texto}</span>
         </div>
+
+        {ejercicioActual.sinEquipo && (
+          <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.muted}` }}>
+            <HelpCircle size={14} color={C.muted} className="flex-shrink-0 mt-0.5" />
+            <span className="text-[11px]" style={{ color: C.text }}>
+              <b>¿No tenés el equipo?</b> {ejercicioActual.sinEquipo}
+            </span>
+          </div>
+        )}
 
         {historialEj !== null && (
           <div className="mb-3">
