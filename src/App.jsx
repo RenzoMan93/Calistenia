@@ -291,11 +291,19 @@ const TIPOS_COMIDA = [
 function sugerirDesdeHeladera(seleccion, misMenus = []) {
   const todasRecetas = [...RECETAS, ...misMenus];
   const set = new Set(seleccion);
+  if (set.size === 0) return { completas: [], casiCompletas: [] };
+
   const completas = todasRecetas.filter((r) => r.ingredientes.every((i) => set.has(i)));
   if (completas.length > 0) return { completas, casiCompletas: [] };
-  const casiCompletas = todasRecetas.map((r) => ({ ...r, falta: r.ingredientes.filter((i) => !set.has(i)) }))
-    .filter((r) => r.falta.length === 1 && seleccion.length > 0)
+
+  // Sin match perfecto: mostramos las que mejor se arman con lo que elegiste,
+  // aunque falte más de un ingrediente, priorizando las que más coinciden.
+  const casiCompletas = todasRecetas
+    .map((r) => ({ ...r, tenes: r.ingredientes.filter((i) => set.has(i)), falta: r.ingredientes.filter((i) => !set.has(i)) }))
+    .filter((r) => r.tenes.length > 0)
+    .sort((a, b) => b.tenes.length - a.tenes.length || a.falta.length - b.falta.length)
     .slice(0, 3);
+
   return { completas: [], casiCompletas };
 }
 
@@ -1666,10 +1674,13 @@ function PanelHeladera({ restanteKcal, onAgregarComida, accesoPremium, onBloquea
 
       {completas.length === 0 && casiCompletas.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs" style={{ color: C.muted }}>Con lo que tenés no llega a ninguna receta completa, pero te falta poco para estas:</p>
+          <p className="text-xs" style={{ color: C.muted }}>No llega a ninguna receta completa, pero estas son las que mejor podés armar con lo que tenés:</p>
           {casiCompletas.map((r) => (
             <div key={r.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
-              <div className="text-sm">{r.nombre}</div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">{r.nombre}</span>
+                <span className="text-[10px] mono" style={{ color: C.muted }}>{r.tenes.length}/{r.ingredientes.length}</span>
+              </div>
               <div className="text-[10px]" style={{ color: C.food }}>Te falta: {r.falta.join(", ")}</div>
             </div>
           ))}
