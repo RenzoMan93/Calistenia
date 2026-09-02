@@ -1809,6 +1809,21 @@ function reproducirBeep() {
 
 const DURACIONES_DESCANSO = [15, 30, 45, 60, 90, 120];
 
+// Repeticiones sugeridas por ronda: arranca más alto en la primera serie y
+// baja un poco en las siguientes (fatiga normal), sin bajar de un mínimo.
+function sugerirRepeticiones(nivel) {
+  if (nivel <= 2) return 12;
+  if (nivel <= 4) return 10;
+  if (nivel <= 6) return 8;
+  if (nivel <= 8) return 6;
+  return 5;
+}
+
+function objetivoRepsRonda(nivel, ronda) {
+  const base = sugerirRepeticiones(nivel);
+  return Math.max(3, base - (ronda - 1) * 2);
+}
+
 function sugerirDescanso(nivel) {
   if (nivel <= 2) return { segundos: 15, texto: "Es un ejercicio de base, más de resistencia: con 15 segundos de descanso alcanza para seguir con buen ritmo." };
   if (nivel <= 4) return { segundos: 30, texto: "Nivel intermedio: 30 segundos de descanso son un buen equilibrio entre esfuerzo y recuperación." };
@@ -2071,6 +2086,13 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           <div>
             <div className="text-sm font-medium">{ejercicioActual.nombre}</div>
             <p className="text-xs mt-0.5" style={{ color: C.muted }}>{ejercicioActual.tip}</p>
+            {!modoTiempo && (
+              <p className="text-xs mt-1 font-medium" style={{ color: C.train }}>
+                {serieActual === 1
+                  ? `${objetivoRepsRonda(nivelActual, 1)} repeticiones en la primera vuelta`
+                  : `Ronda ${serieActual}: apuntá a ${objetivoRepsRonda(nivelActual, serieActual)} repeticiones`}
+              </p>
+            )}
           </div>
         </div>
 
