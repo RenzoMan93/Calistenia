@@ -40,7 +40,7 @@ const TRACKS = {
   empuje: {
     nombre: "Empuje",
     ejercicios: [
-      { nombre: "Flexiones de rodillas", tip: "Apoyá las rodillas, espalda recta y bajá el pecho cerca del piso sin arquear la zona lumbar.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Flexiones de rodillas", tip: "Apoyá las rodillas, espalda recta y bajá el pecho cerca del piso sin arquear la zona lumbar.", figura: ["empuje_rodillas_bajo", "empuje_rodillas_arriba"] },
       { nombre: "Flexiones completas", tip: "Cuerpo en línea recta de cabeza a talones, codos a 45° del torso, no dejes caer la cadera.", figura: ["empuje_bajo", "empuje_arriba"] },
       { nombre: "Flexiones con manos juntas", tip: "Manos juntas formando un diamante bajo el pecho; sumás trabajo de tríceps, controlá la bajada.", figura: ["empuje_bajo", "empuje_arriba"] },
       { nombre: "Fondos en banco o paralelas", tip: "Bajá hasta que los hombros queden a la altura de los codos, no más, para cuidar el hombro.", figura: ["empuje_bajo", "empuje_arriba"] },
@@ -106,6 +106,10 @@ const TRACKS = {
 const FIGURAS = {
   empuje_bajo: { cabeza: [24, 80], hombro: [30, 74], codo: [42, 66], mano: [38, 90], cadera: [62, 70], rodilla: [77, 78], pie: [92, 86], pisoY: 90 },
   empuje_arriba: { cabeza: [24, 52], hombro: [30, 56], codo: [34, 73], mano: [38, 90], cadera: [62, 58], rodilla: [77, 72], pie: [92, 86], pisoY: 90 },
+  // Flexiones de rodillas: la rodilla queda apoyada y fija en el piso (pivote),
+  // y lo que sube y baja es el torso, con el pie/canilla levantado atrás.
+  empuje_rodillas_bajo: { cabeza: [26, 80], hombro: [32, 74], codo: [42, 66], mano: [38, 90], cadera: [56, 76], rodilla: [68, 90], pie: [82, 82], pisoY: 90 },
+  empuje_rodillas_arriba: { cabeza: [26, 54], hombro: [32, 58], codo: [36, 75], mano: [38, 90], cadera: [56, 62], rodilla: [68, 90], pie: [82, 84], pisoY: 90 },
   empuje_pike: { cabeza: [58, 72], hombro: [52, 62], codo: [44, 76], mano: [38, 90], cadera: [42, 32], rodilla: [65, 60], pie: [88, 86], pisoY: 90 },
   empuje_pino: { cabeza: [50, 86], hombro: [50, 72], codo: [50, 81], mano: [50, 90], cadera: [50, 42], rodilla: [50, 25], pie: [50, 10], pisoY: 90 },
   traccion_colgado: { cabeza: [50, 42], hombro: [50, 32], codo: [50, 23], mano: [50, 15], cadera: [50, 68], rodilla: [50, 82], pie: [50, 96], barraY: 15 },
