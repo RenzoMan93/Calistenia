@@ -1014,8 +1014,9 @@ function BannerPlan({ suscripcion, esPremiumActivo, diasPremiumRestantes, enTria
       >
         <span className="text-xs" style={{ color: C.muted }}>
           Prueba gratis: te quedan <span style={{ color: C.food }}>{diasTrialRestantes} día{diasTrialRestantes !== 1 ? "s" : ""}</span>
+          <span className="mono" style={{ color: C.muted }}> · después {PRECIO_PREMIUM}/mes</span>
         </span>
-        <span className="text-xs mono" style={{ color: C.food }}>Ver planes</span>
+        <span className="text-xs mono font-medium flex items-center gap-0.5" style={{ color: C.food }}>Ver planes ›</span>
       </button>
     );
   }
@@ -3761,6 +3762,9 @@ function Onboarding({ onCompletar, storageDisponible }) {
             <p className="text-sm" style={{ color: C.muted }}>
               Entrená con progresiones de peso corporal y comé en base a tus calorías, todo en una sola app. Vamos a hacerte unas preguntas rápidas para armar tu plan.
             </p>
+            <div className="rounded-full px-3 py-1.5 mono text-[11px]" style={{ background: C.foodDim, color: C.food, border: `1px solid ${C.food}` }}>
+              {DIAS_PRUEBA} días gratis · después {PRECIO_PREMIUM}/mes
+            </div>
             <input
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
