@@ -587,6 +587,7 @@ export default function App() {
   const [progresoSeries, setProgresoSeries] = useState({ empuje: 0, traccion: 0, piernas: 0, core: 0 });
   const [sugerenciaNivel, setSugerenciaNivel] = useState(null);
   const [storageDisponible, setStorageDisponible] = useState(null);
+  const [mostrarRecordatorio, setMostrarRecordatorio] = useState(false);
   const fecha = hoy();
 
   const tocarLogo = () => {
@@ -646,6 +647,23 @@ export default function App() {
   const diasPremiumRestantes = esPremiumActivo ? diasEntre(fecha, suscripcion.premiumHasta) : null;
   const enTrial = !esPremiumActivo && diasTrialRestantes > 0;
   const accesoPremium = esPremiumActivo || enTrial;
+
+  // Recordatorio de renovación: un aviso que se muestra una sola vez por día
+  // (no en cada apertura de la app) cuando quedan 2 días o menos para que
+  // venza el Premium o la prueba gratis. No hay cobro automático (Mercado
+  // Pago Checkout Pro no es una suscripción recurrente): esto es lo que le
+  // avisa al usuario que tiene que volver a pagar para no perder el acceso.
+  useEffect(() => {
+    if (cargando || !suscripcion || !onboarding?.completo) return;
+    const diasParaVencer = esPremiumActivo ? diasPremiumRestantes : enTrial ? diasTrialRestantes : null;
+    if (diasParaVencer === null || diasParaVencer > 2) return;
+    (async () => {
+      const visto = await safeGet("recordatorioRenovacionVisto");
+      if (visto?.fecha === fecha) return;
+      setMostrarRecordatorio(true);
+      safeSet("recordatorioRenovacionVisto", { fecha });
+    })();
+  }, [cargando, suscripcion, onboarding, esPremiumActivo, diasPremiumRestantes, enTrial, diasTrialRestantes, fecha]);
 
   // Vuelve a leer la suscripción desde el servidor: la usan tanto el canje de
   // código Premium como el botón "Ya pagué, verificar" (el webhook de
@@ -885,6 +903,18 @@ export default function App() {
       )}
       {mostrarTerminos && <ModalTerminos onCerrar={() => setMostrarTerminos(false)} />}
       {mostrarAyuda && <ModalAyuda onCerrar={() => setMostrarAyuda(false)} />}
+      {mostrarRecordatorio && (
+        <ModalRecordatorioRenovacion
+          esPremiumActivo={esPremiumActivo}
+          diasPremiumRestantes={diasPremiumRestantes}
+          diasTrialRestantes={diasTrialRestantes}
+          onVerPlanes={() => {
+            setMostrarRecordatorio(false);
+            setMostrarPlanes(true);
+          }}
+          onCerrar={() => setMostrarRecordatorio(false)}
+        />
+      )}
 
       {mostrarAdmin && <AdminCodigos onCerrar={() => setMostrarAdmin(false)} />}
       {sugerenciaNivel && (
@@ -945,6 +975,51 @@ function BannerStorage() {
   );
 }
 
+function ModalRecordatorioRenovacion({ esPremiumActivo, diasPremiumRestantes, diasTrialRestantes, onVerPlanes, onCerrar }) {
+  const dias = esPremiumActivo ? diasPremiumRestantes : diasTrialRestantes;
+  const cuando = dias <= 0 ? "hoy" : dias === 1 ? "mañana" : `en ${dias} días`;
+  const titulo = esPremiumActivo ? "Tu Premium está por vencer" : "Tu prueba gratis está por terminar";
+  const texto = esPremiumActivo
+    ? `Vence ${cuando}. Si no volvés a pagar, pasás al plan gratis y perdés los niveles avanzados, las recetas y tu historial de progreso.`
+    : `Termina ${cuando}. Después pasás al plan gratis (niveles 1 a 3). Activá Premium por ${PRECIO_PREMIUM}/mes para seguir con todo.`;
+
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.7)", zIndex: 90 }}
+      onClick={onCerrar}
+    >
+      <div
+        className="w-full max-w-sm rounded-lg p-5"
+        style={{ background: C.panel, border: `1px solid ${C.train}`, boxShadow: "0 20px 50px rgba(0,0,0,0.45)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <Crown size={18} color={C.food} />
+          <span className="display text-sm" style={{ color: C.text }}>{titulo}</span>
+        </div>
+        <p className="text-sm mb-4" style={{ color: C.muted }}>{texto}</p>
+        <div className="flex gap-2">
+          <button
+            onClick={onCerrar}
+            className="flex-1 py-2 rounded text-sm"
+            style={{ background: C.panelAlt, color: C.muted, border: `1px solid ${C.border}` }}
+          >
+            Ahora no
+          </button>
+          <button
+            onClick={onVerPlanes}
+            className="flex-1 py-2 rounded text-sm font-medium"
+            style={{ background: C.train, color: C.panel }}
+          >
+            Ver planes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function BannerPlan({ suscripcion, esPremiumActivo, diasPremiumRestantes, enTrial, diasTrialRestantes, onVerPlanes }) {
   if (!suscripcion) return null;
   if (esPremiumActivo) {
@@ -973,15 +1048,19 @@ function BannerPlan({ suscripcion, esPremiumActivo, diasPremiumRestantes, enTria
     );
   }
   if (enTrial) {
+    const porVencer = diasTrialRestantes <= 2;
     return (
       <button
         onClick={onVerPlanes}
         className="w-full flex items-center justify-between rounded-lg px-4 py-3 mt-4"
-        style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}
+        style={{
+          background: porVencer ? C.trainDim : C.panelAlt,
+          border: `1px solid ${porVencer ? C.train : C.border}`,
+        }}
       >
-        <span className="text-xs" style={{ color: C.muted }}>
+        <span className="text-xs" style={{ color: porVencer ? C.text : C.muted }}>
           Prueba gratis: te quedan <span style={{ color: C.food }}>{diasTrialRestantes} día{diasTrialRestantes !== 1 ? "s" : ""}</span>
-          <span className="mono" style={{ color: C.muted }}> · después {PRECIO_PREMIUM}/mes</span>
+          <span className="mono" style={{ color: porVencer ? C.text : C.muted }}> · después {PRECIO_PREMIUM}/mes</span>
         </span>
         <span className="text-xs mono font-medium flex items-center gap-0.5" style={{ color: C.food }}>Ver planes ›</span>
       </button>
