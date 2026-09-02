@@ -97,40 +97,44 @@ const TRACKS = {
   },
 };
 
-// Coordenadas (viewBox 0-100) de figuras tipo pictograma: cabeza/hombro/cadera/mano/pie,
-// más una línea de piso o de barra opcional para dar contexto visual del movimiento.
+// Coordenadas (viewBox 0-100) de figuras tipo pictograma: cabeza/hombro/codo/
+// mano forman el brazo en dos tramos, cadera/rodilla/pie la pierna en dos
+// tramos (así se ve la "quiebra" del codo o la rodilla en vez de una línea
+// recta), más una línea de piso o de barra opcional para dar contexto.
 const FIGURAS = {
-  empuje_bajo: { cabeza: [25, 78], hombro: [32, 75], cadera: [65, 72], mano: [35, 90], pie: [90, 85], pisoY: 90 },
-  empuje_arriba: { cabeza: [25, 55], hombro: [32, 58], cadera: [65, 60], mano: [35, 90], pie: [90, 85], pisoY: 90 },
-  empuje_pike: { cabeza: [60, 70], hombro: [55, 65], cadera: [45, 35], mano: [35, 90], pie: [85, 88], pisoY: 90 },
-  empuje_pino: { cabeza: [50, 85], hombro: [50, 70], cadera: [50, 40], mano: [50, 90], pie: [50, 12], pisoY: 90 },
-  traccion_colgado: { cabeza: [50, 45], hombro: [50, 35], cadera: [50, 70], mano: [50, 15], pie: [50, 95], barraY: 15 },
-  traccion_arriba: { cabeza: [50, 20], hombro: [50, 25], cadera: [50, 60], mano: [50, 15], pie: [50, 90], barraY: 15 },
-  remo_bajo: { cabeza: [20, 50], hombro: [28, 52], cadera: [75, 65], mano: [30, 30], pie: [95, 80], barraY: 30 },
-  remo_arriba: { cabeza: [25, 35], hombro: [30, 38], cadera: [75, 60], mano: [30, 30], pie: [95, 78], barraY: 30 },
-  piernas_de_pie: { cabeza: [50, 20], hombro: [50, 30], cadera: [50, 55], mano: [42, 58], pie: [50, 90], pisoY: 90 },
-  piernas_abajo: { cabeza: [50, 45], hombro: [50, 52], cadera: [50, 72], mano: [35, 68], pie: [50, 90], pisoY: 90 },
-  piernas_salto: { cabeza: [50, 22], hombro: [50, 30], cadera: [50, 48], mano: [38, 42], pie: [62, 65], pisoY: 90 },
-  core_plancha: { cabeza: [20, 55], hombro: [28, 58], cadera: [65, 58], mano: [30, 80], pie: [90, 72], pisoY: 80 },
-  core_colgado_arriba: { cabeza: [50, 20], hombro: [50, 25], cadera: [50, 55], mano: [50, 15], pie: [62, 45], barraY: 15 },
-  core_lsit: { cabeza: [28, 35], hombro: [35, 40], cadera: [55, 55], mano: [55, 72], pie: [88, 50], pisoY: 75 },
-  core_frontlever: { cabeza: [85, 45], hombro: [78, 45], cadera: [40, 45], mano: [78, 15], pie: [15, 45], barraY: 15 },
-  core_negativa: { cabeza: [70, 60], hombro: [62, 58], cadera: [50, 68], mano: [60, 50], pie: [30, 72], pisoY: 80 },
-  core_rueda: { cabeza: [80, 70], hombro: [72, 65], cadera: [50, 72], mano: [75, 55], pie: [20, 80], pisoY: 80 },
+  empuje_bajo: { cabeza: [24, 80], hombro: [30, 74], codo: [42, 66], mano: [38, 90], cadera: [62, 70], rodilla: [77, 78], pie: [92, 86], pisoY: 90 },
+  empuje_arriba: { cabeza: [24, 52], hombro: [30, 56], codo: [34, 73], mano: [38, 90], cadera: [62, 58], rodilla: [77, 72], pie: [92, 86], pisoY: 90 },
+  empuje_pike: { cabeza: [58, 72], hombro: [52, 62], codo: [44, 76], mano: [38, 90], cadera: [42, 32], rodilla: [65, 60], pie: [88, 86], pisoY: 90 },
+  empuje_pino: { cabeza: [50, 86], hombro: [50, 72], codo: [50, 81], mano: [50, 90], cadera: [50, 42], rodilla: [50, 25], pie: [50, 10], pisoY: 90 },
+  traccion_colgado: { cabeza: [50, 42], hombro: [50, 32], codo: [50, 23], mano: [50, 15], cadera: [50, 68], rodilla: [50, 82], pie: [50, 96], barraY: 15 },
+  traccion_arriba: { cabeza: [50, 18], hombro: [50, 24], codo: [44, 19], mano: [50, 15], cadera: [50, 58], rodilla: [50, 76], pie: [50, 92], barraY: 15 },
+  remo_bajo: { cabeza: [18, 48], hombro: [26, 51], codo: [28, 40], mano: [30, 30], cadera: [74, 64], rodilla: [84, 74], pie: [95, 80], barraY: 30 },
+  remo_arriba: { cabeza: [24, 32], hombro: [29, 36], codo: [22, 33], mano: [30, 30], cadera: [74, 58], rodilla: [84, 70], pie: [95, 78], barraY: 30 },
+  piernas_de_pie: { cabeza: [50, 18], hombro: [50, 28], codo: [46, 42], mano: [42, 56], cadera: [50, 54], rodilla: [50, 72], pie: [50, 90], pisoY: 90 },
+  piernas_abajo: { cabeza: [50, 42], hombro: [50, 50], codo: [40, 60], mano: [32, 68], cadera: [50, 68], rodilla: [62, 80], pie: [50, 90], pisoY: 90 },
+  piernas_salto: { cabeza: [50, 20], hombro: [50, 28], codo: [42, 36], mano: [36, 42], cadera: [50, 46], rodilla: [60, 54], pie: [64, 66], pisoY: 90 },
+  core_plancha: { cabeza: [18, 55], hombro: [26, 58], codo: [30, 70], mano: [32, 80], cadera: [64, 58], rodilla: [78, 66], pie: [90, 72], pisoY: 80 },
+  core_colgado_arriba: { cabeza: [50, 18], hombro: [50, 24], codo: [50, 19], mano: [50, 15], cadera: [50, 54], rodilla: [58, 48], pie: [64, 44], barraY: 15 },
+  core_lsit: { cabeza: [26, 32], hombro: [33, 38], codo: [42, 55], mano: [52, 70], cadera: [55, 55], rodilla: [72, 52], pie: [88, 50], pisoY: 75 },
+  core_frontlever: { cabeza: [86, 44], hombro: [78, 44], codo: [78, 30], mano: [78, 15], cadera: [40, 44], rodilla: [28, 44], pie: [15, 44], barraY: 15 },
+  core_negativa: { cabeza: [72, 58], hombro: [63, 56], codo: [58, 50], mano: [58, 48], cadera: [50, 68], rodilla: [40, 72], pie: [28, 72], pisoY: 80 },
+  core_rueda: { cabeza: [82, 68], hombro: [73, 63], codo: [76, 58], mano: [75, 53], cadera: [50, 72], rodilla: [35, 77], pie: [20, 80], pisoY: 80 },
 };
 
 function FiguraTecnica({ figura, size = 56, color }) {
   const f = FIGURAS[figura];
   if (!f) return null;
   const trazo = color || C.train;
+  const brazo = `${f.hombro[0]},${f.hombro[1]} ${f.codo[0]},${f.codo[1]} ${f.mano[0]},${f.mano[1]}`;
+  const pierna = `${f.cadera[0]},${f.cadera[1]} ${f.rodilla[0]},${f.rodilla[1]} ${f.pie[0]},${f.pie[1]}`;
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} style={{ flexShrink: 0 }}>
       {f.pisoY != null && <line x1="0" y1={f.pisoY} x2="100" y2={f.pisoY} stroke={C.border} strokeWidth="2" />}
-      {f.barraY != null && <line x1="25" y1={f.barraY} x2="75" y2={f.barraY} stroke={C.border} strokeWidth="3" strokeLinecap="round" />}
-      <line x1={f.hombro[0]} y1={f.hombro[1]} x2={f.cadera[0]} y2={f.cadera[1]} stroke={trazo} strokeWidth="5" strokeLinecap="round" />
-      <line x1={f.hombro[0]} y1={f.hombro[1]} x2={f.mano[0]} y2={f.mano[1]} stroke={trazo} strokeWidth="5" strokeLinecap="round" />
-      <line x1={f.cadera[0]} y1={f.cadera[1]} x2={f.pie[0]} y2={f.pie[1]} stroke={trazo} strokeWidth="5" strokeLinecap="round" />
-      <circle cx={f.cabeza[0]} cy={f.cabeza[1]} r="8" fill={trazo} />
+      {f.barraY != null && <line x1="20" y1={f.barraY} x2="80" y2={f.barraY} stroke={C.border} strokeWidth="4" strokeLinecap="round" />}
+      <line x1={f.hombro[0]} y1={f.hombro[1]} x2={f.cadera[0]} y2={f.cadera[1]} stroke={trazo} strokeWidth="6" strokeLinecap="round" />
+      <polyline points={brazo} fill="none" stroke={trazo} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={pierna} fill="none" stroke={trazo} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={f.cabeza[0]} cy={f.cabeza[1]} r="9" fill={trazo} />
     </svg>
   );
 }
@@ -1234,7 +1238,7 @@ function QuickAddEjercicio({ progresion, onAgregar, onCerrar }) {
           ))}
         </div>
         <div className="flex items-center gap-3 mb-3">
-          <GuiaTecnica figuras={ejercicioActual.figura} size={48} />
+          <GuiaTecnica figuras={ejercicioActual.figura} size={64} />
           <div className="text-sm">{ejercicioActual.nombre}</div>
         </div>
 
@@ -1911,7 +1915,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           ))}
         </div>
         <div className="flex items-center gap-3 mb-1">
-          <GuiaTecnica figuras={ejercicioActual.figura} size={60} />
+          <GuiaTecnica figuras={ejercicioActual.figura} size={84} />
           <div>
             <div className="text-sm font-medium">{ejercicioActual.nombre}</div>
             <p className="text-xs mt-0.5" style={{ color: C.muted }}>{ejercicioActual.tip}</p>
@@ -2168,7 +2172,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             <div className="flex flex-col gap-2 mt-2">
               {track.ejercicios.map((ej, i) => (
                 <div key={ej.nombre} className="rounded px-3 py-2 flex items-center gap-3" style={{ background: C.panelAlt }}>
-                  <GuiaTecnica figuras={ej.figura} size={36} color={C.muted} />
+                  <GuiaTecnica figuras={ej.figura} size={44} color={C.muted} />
                   <div>
                     <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
                     <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
@@ -2456,9 +2460,12 @@ function VistaConsejos({ perfil }) {
               {trackAbierto === key && (
                 <div className="flex flex-col gap-2 mt-2">
                   {track.ejercicios.map((ej, i) => (
-                    <div key={ej.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
-                      <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
-                      <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
+                    <div key={ej.nombre} className="rounded px-3 py-2 flex items-center gap-3" style={{ background: C.panelAlt }}>
+                      <GuiaTecnica figuras={ej.figura} size={44} color={C.muted} />
+                      <div>
+                        <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
+                        <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
