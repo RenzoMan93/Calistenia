@@ -72,11 +72,11 @@ const TRACKS = {
     ejercicios: [
       { nombre: "Sentadilla con las dos piernas", tip: "Rodillas en línea con los pies, bajá hasta que los muslos queden paralelos al piso.", figura: ["piernas_de_pie", "piernas_abajo"] },
       { nombre: "Sentadilla con una pierna atrás elevada", tip: "Pie trasero elevado, bajá recto, sin que la rodilla delantera pase mucho la punta del pie.", figura: ["piernas_de_pie", "piernas_abajo"] },
-      { nombre: "Zancada con salto", tip: "Aterrizá suave, controlá la rodilla y alterná piernas en el aire.", figura: ["piernas_de_pie", "piernas_salto"] },
+      { nombre: "Zancada con salto", tip: "Aterrizá suave, controlá la rodilla y alterná piernas en el aire.", figura: ["piernas_de_pie", "piernas_salto"], adaptacionVeterano: "Para cuidar las rodillas podés hacerla sin el salto: bajás y subís controlado alternando piernas, con casi el mismo trabajo muscular y mucho menos impacto." },
       { nombre: "Sentadilla a una pierna, asistida", tip: "Sostenete de algo (marco de puerta, barra) para trabajar equilibrio y rango completo.", figura: ["piernas_de_pie", "piernas_abajo"] },
       { nombre: "Sentadilla a una pierna completa", tip: "Pierna libre extendida al frente, bajá controlado, sin rebotar abajo.", figura: ["piernas_de_pie", "piernas_abajo"] },
       { nombre: "Sentadilla a una pierna con peso", tip: "Sumá una mancuerna solo cuando te salga limpia varias veces seguidas sin peso.", figura: ["piernas_de_pie", "piernas_abajo"] },
-      { nombre: "Sentadilla búlgara con salto", tip: "Pie trasero elevado como en la búlgara, pero salta y aterrizá suave con la misma pierna adelante.", figura: ["piernas_de_pie", "piernas_salto"] },
+      { nombre: "Sentadilla búlgara con salto", tip: "Pie trasero elevado como en la búlgara, pero salta y aterrizá suave con la misma pierna adelante.", figura: ["piernas_de_pie", "piernas_salto"], adaptacionVeterano: "Podés sacarle el salto y hacerla controlada, sin despegar los pies del piso, para cuidar rodillas y tobillos." },
       { nombre: "Sentadilla a una pierna en déficit", tip: "Parate sobre un cajón o escalón para bajar más profundo de lo normal; exige más movilidad de tobillo.", figura: ["piernas_de_pie", "piernas_abajo"] },
       { nombre: "Shrimp squat asistido", tip: "Sostenete el pie trasero con la mano del mismo lado y ayudate con la otra mano en algo fijo para bajar controlado.", figura: ["piernas_de_pie", "piernas_abajo"] },
       { nombre: "Shrimp squat completo", tip: "Sin apoyo de manos: bajá la rodilla trasera casi hasta tocar el talón, manteniendo el torso erguido.", figura: ["piernas_de_pie", "piernas_abajo"] },
@@ -790,6 +790,7 @@ export default function App() {
             accesoPremium={accesoPremium}
             onBloqueado={() => setMostrarPlanes(true)}
             trackInicial={trackSugerido}
+            perfil={perfil}
           />
         )}
         {tab === "nutricion" && (
@@ -1824,6 +1825,16 @@ function objetivoRepsRonda(nivel, ronda) {
   return Math.max(3, base - (ronda - 1) * 2);
 }
 
+// Franja etaria a partir de la edad cargada en el perfil, para adaptar
+// avisos puntuales (ej. cuidado articular en ejercicios de salto).
+function franjaEtaria(edad) {
+  const e = Number(edad);
+  if (!e) return null;
+  if (e < 30) return "joven";
+  if (e < 50) return "adulto";
+  return "veterano";
+}
+
 function sugerirDescanso(nivel) {
   if (nivel <= 2) return { segundos: 15, texto: "Es un ejercicio de base, más de resistencia: con 15 segundos de descanso alcanza para seguir con buen ritmo." };
   if (nivel <= 4) return { segundos: 30, texto: "Nivel intermedio: 30 segundos de descanso son un buen equilibrio entre esfuerzo y recuperación." };
@@ -1919,7 +1930,8 @@ function CuentaRegresiva({ onTerminar }) {
 }
 
 // ---------- ENTRENAMIENTO ----------
-function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, onAgregar, onQuitar, accesoPremium, onBloqueado, trackInicial }) {
+function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, onAgregar, onQuitar, accesoPremium, onBloqueado, trackInicial, perfil }) {
+  const esVeterano = franjaEtaria(perfil?.edad) === "veterano";
   const [trackSel, setTrackSel] = useState(trackInicial || "empuje");
   const [series, setSeries] = useState(3);
   const [tipsAbiertos, setTipsAbiertos] = useState({});
@@ -2106,6 +2118,15 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             <HelpCircle size={14} color={C.muted} className="flex-shrink-0 mt-0.5" />
             <span className="text-[11px]" style={{ color: C.text }}>
               <b>¿No tenés el equipo?</b> {ejercicioActual.sinEquipo}
+            </span>
+          </div>
+        )}
+
+        {esVeterano && ejercicioActual.adaptacionVeterano && (
+          <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.train}` }}>
+            <Lightbulb size={14} color={C.train} className="flex-shrink-0 mt-0.5" />
+            <span className="text-[11px]" style={{ color: C.text }}>
+              <b>Cuidando las articulaciones:</b> {ejercicioActual.adaptacionVeterano}
             </span>
           </div>
         )}
@@ -2858,7 +2879,7 @@ function VistaProgreso({ semana, perfil, progresion, accesoPremium, onBloqueado,
         </Panel>
       </div>
 
-      <PanelLogros racha={racha} diasEntrenados={diasEntrenados} nivelMaximo={nivelMaximo} />
+      <PanelLogros racha={racha} diasEntrenados={diasEntrenados} nivelMaximo={nivelMaximo} progresion={progresion} />
 
       <PanelCalendario />
 
@@ -2908,10 +2929,13 @@ const LOGROS_DEF = [
   { id: "semana", nombre: "Semana perfecta", desc: "Entrenaste los 7 días de la semana", cumple: (ctx) => ctx.diasEntrenados >= 7 },
   { id: "nivel3", nombre: "Salió de principiante", desc: "Llegaste al nivel 3 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 3 },
   { id: "nivel5", nombre: "Nivel avanzado", desc: "Llegaste al nivel 5 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 5 },
+  { id: "nivel8", nombre: "Casi experto", desc: "Llegaste al nivel 8 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 8 },
+  { id: "nivel10", nombre: "Nivel máximo", desc: "Llegaste al nivel 10 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 10 },
+  { id: "todoterreno", nombre: "Todo terreno", desc: "Nivel 2 o más en los 4 grupos", cumple: (ctx) => Object.values(ctx.progresion || {}).every((n) => n >= 2) },
 ];
 
-function PanelLogros({ racha, diasEntrenados, nivelMaximo }) {
-  const ctx = { racha, diasEntrenados, nivelMaximo };
+function PanelLogros({ racha, diasEntrenados, nivelMaximo, progresion }) {
+  const ctx = { racha, diasEntrenados, nivelMaximo, progresion };
   return (
     <Panel>
       <div className="display text-sm mb-3" style={{ color: C.muted }}>LOGROS</div>
