@@ -3161,12 +3161,16 @@ function AdminCodigos({ onCerrar }) {
     }
   }, []);
 
+  const [errorUsuarios, setErrorUsuarios] = useState(null);
+
   const cargarUsuarios = useCallback(async () => {
+    setErrorUsuarios(null);
     try {
       const lista = await adminListarUsuarios();
       setUsuarios(lista);
     } catch (e) {
       console.error(e);
+      setErrorUsuarios(e?.message || "Error desconocido");
       setUsuarios([]);
     }
   }, []);
@@ -3256,7 +3260,9 @@ function AdminCodigos({ onCerrar }) {
                   className="w-full rounded px-3 py-2 text-xs mb-3"
                   style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
                 />
-                {usuarios === null ? (
+                {errorUsuarios ? (
+                  <p className="text-xs" style={{ color: C.danger }}>Error al cargar: {errorUsuarios}</p>
+                ) : usuarios === null ? (
                   <p className="text-xs" style={{ color: C.muted }}>Cargando...</p>
                 ) : usuariosFiltrados.length === 0 ? (
                   <p className="text-xs" style={{ color: C.muted }}>No hay usuarios que coincidan.</p>
