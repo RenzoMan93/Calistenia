@@ -796,10 +796,21 @@ export default function App() {
       `}</style>
 
       <div className="max-w-2xl mx-auto">
-      <header className="px-4 pt-6 pb-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${C.border}` }}>
-        <div onClick={tocarLogo}>
-          <div className="display text-xs uppercase" style={{ color: C.muted, letterSpacing: "0.15em" }}>Rutina + Plato</div>
-          <h1 className="display text-2xl font-bold" style={{ color: C.text }}>CALISTENIA <span style={{ color: C.train }}>/</span> NUTRICIÓN</h1>
+      <header
+        className="px-4 pt-5 pb-4 flex items-center justify-between sticky top-0 z-30"
+        style={{ borderBottom: `1px solid ${C.border}`, background: C.bg, boxShadow: "0 6px 16px rgba(0,0,0,0.28)" }}
+      >
+        <div onClick={tocarLogo} className="flex items-center gap-2.5">
+          <svg viewBox="0 0 100 100" width="28" height="28" style={{ flexShrink: 0 }}>
+            <rect x="34.4" y="46.1" width="31.2" height="7.8" rx="3.9" fill={C.train} />
+            <rect x="16.8" y="32.4" width="12.5" height="35.2" rx="3.5" fill={C.train} />
+            <rect x="70.7" y="32.4" width="12.5" height="35.2" rx="3.5" fill={C.train} />
+            <circle cx="50" cy="50" r="2.2" fill={C.food} />
+          </svg>
+          <div>
+            <div className="display text-xs uppercase" style={{ color: C.muted, letterSpacing: "0.15em" }}>Rutina + Plato</div>
+            <h1 className="display text-2xl font-bold" style={{ color: C.text, letterSpacing: "0.01em" }}>CALISTENIA <span style={{ color: C.train }}>/</span> NUTRICIÓN</h1>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <button onClick={() => setMostrarAyuda(true)} aria-label="Cómo usar la app" className="flex items-center gap-1">
@@ -945,7 +956,15 @@ function NavBtn({ icon: Icon, label, activo, onClick, color }) {
 
 function Panel({ children, style }) {
   return (
-    <div style={{ background: C.panel, border: `1px solid ${C.border}`, ...style }} className="rounded-md p-4 mb-4">
+    <div
+      style={{
+        background: C.panel,
+        border: `1px solid ${C.border}`,
+        boxShadow: "0 4px 14px rgba(0,0,0,0.22)",
+        ...style,
+      }}
+      className="rounded-lg p-4 mb-4"
+    >
       {children}
     </div>
   );
@@ -967,7 +986,7 @@ function BannerPlan({ suscripcion, esPremiumActivo, diasPremiumRestantes, enTria
       return (
         <button
           onClick={onVerPlanes}
-          className="w-full flex items-center justify-between rounded-md px-3 py-2 mt-3"
+          className="w-full flex items-center justify-between rounded-lg px-4 py-3 mt-4"
           style={{ background: C.trainDim, border: `1px solid ${C.train}` }}
         >
           <span className="text-xs" style={{ color: C.text }}>
@@ -978,7 +997,7 @@ function BannerPlan({ suscripcion, esPremiumActivo, diasPremiumRestantes, enTria
       );
     }
     return (
-      <div className="flex items-center gap-2 rounded-md px-3 py-2 mt-3" style={{ background: C.foodDim, border: `1px solid ${C.food}` }}>
+      <div className="flex items-center gap-2 rounded-lg px-4 py-3 mt-4" style={{ background: C.foodDim, border: `1px solid ${C.food}` }}>
         <Crown size={14} color={C.food} />
         <span className="text-xs" style={{ color: C.food }}>
           Premium activo · vence en {diasPremiumRestantes} día{diasPremiumRestantes !== 1 ? "s" : ""}
@@ -990,7 +1009,7 @@ function BannerPlan({ suscripcion, esPremiumActivo, diasPremiumRestantes, enTria
     return (
       <button
         onClick={onVerPlanes}
-        className="w-full flex items-center justify-between rounded-md px-3 py-2 mt-3"
+        className="w-full flex items-center justify-between rounded-lg px-4 py-3 mt-4"
         style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}
       >
         <span className="text-xs" style={{ color: C.muted }}>
@@ -1003,7 +1022,7 @@ function BannerPlan({ suscripcion, esPremiumActivo, diasPremiumRestantes, enTria
   return (
     <button
       onClick={onVerPlanes}
-      className="w-full flex items-center justify-between rounded-md px-3 py-2 mt-3"
+      className="w-full flex items-center justify-between rounded-lg px-4 py-3 mt-4"
       style={{ background: C.trainDim, border: `1px solid ${C.train}` }}
     >
       <span className="text-xs" style={{ color: C.text }}>Tu prueba gratis terminó</span>
@@ -1109,20 +1128,23 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 50 }}>
-      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.65)", zIndex: 50 }}>
+      <div
+        style={{ background: C.panel, border: `1px solid ${C.border}`, boxShadow: "0 20px 50px rgba(0,0,0,0.45)" }}
+        className="rounded-lg p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto"
+      >
         <div className="flex justify-between items-center mb-4">
           <span className="display text-sm" style={{ color: C.muted }}>PLANES</span>
           <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
         </div>
 
         <div className="mb-4">
-          <div className="display text-lg font-bold">{PREMIUM_TITULO}</div>
+          <div className="display text-xl font-bold" style={{ letterSpacing: "0.01em" }}>{PREMIUM_TITULO}</div>
           <p className="text-xs mt-1" style={{ color: C.muted }}>{PREMIUM_SUBTITULO}</p>
         </div>
 
-        <div className="rounded-md p-3 mb-3" style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}>
-          <div className="display text-sm mb-2">Gratis</div>
+        <div className="rounded-lg p-3 mb-3" style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}>
+          <div className="display text-sm mb-2" style={{ color: C.muted, letterSpacing: "0.05em" }}>GRATIS</div>
           <div className="flex flex-col gap-1">
             {PLAN_FREE.map((f) => (
               <div key={f} className="flex gap-2 text-xs" style={{ color: C.muted }}>
@@ -1133,15 +1155,29 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
           </div>
         </div>
 
-        <div className="rounded-md p-3 mb-4" style={{ background: C.foodDim, border: `1px solid ${C.food}` }}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1">
-              <Crown size={14} color={C.food} />
-              <span className="display text-sm" style={{ color: C.food }}>Premium</span>
-            </div>
-            <span className="mono text-sm" style={{ color: C.food }}>{PRECIO_PREMIUM}/mes</span>
+        <div
+          className="relative rounded-lg p-4 mb-4 mt-5"
+          style={{
+            background: `linear-gradient(160deg, ${C.foodDim}, ${C.panel} 65%)`,
+            border: `1.5px solid ${C.food}`,
+            boxShadow: "0 10px 30px rgba(255,193,69,0.16)",
+          }}
+        >
+          <div
+            className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase whitespace-nowrap"
+            style={{ background: C.food, color: C.bg, letterSpacing: "0.08em" }}
+          >
+            Recomendado
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 mb-1">
+            <Crown size={20} color={C.food} />
+            <span className="display text-base font-bold" style={{ color: C.food, letterSpacing: "0.02em" }}>PREMIUM</span>
+          </div>
+          <div className="flex items-baseline gap-1 mb-3">
+            <span className="mono font-bold" style={{ fontSize: 38, color: C.text, lineHeight: 1 }}>{PRECIO_PREMIUM}</span>
+            <span className="text-sm" style={{ color: C.muted }}>/mes</span>
+          </div>
+          <div className="flex flex-col gap-1.5">
             {PLAN_PREMIUM.map((f) => (
               <div key={f} className="flex gap-2 text-xs" style={{ color: C.text }}>
                 <Check size={13} color={C.food} className="flex-shrink-0 mt-0.5" />
@@ -1149,7 +1185,7 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
               </div>
             ))}
           </div>
-          <p className="text-[10px] mt-2" style={{ color: C.muted }}>
+          <p className="text-[10px] mt-3" style={{ color: C.muted }}>
             {DIAS_PRUEBA} días de prueba gratis para usuarios nuevos, después se factura mensual. Cancelás cuando quieras.
           </p>
         </div>
@@ -1167,8 +1203,13 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
             <button
               onClick={irAPagar}
               disabled={pagando}
-              className="block text-center w-full py-2 rounded font-medium"
-              style={{ background: C.food, color: C.bg, opacity: pagando ? 0.6 : 1 }}
+              className="block text-center w-full py-3.5 rounded-md font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
+              style={{
+                background: `linear-gradient(135deg, ${C.food}, #E0A83A)`,
+                color: C.bg,
+                opacity: pagando ? 0.6 : 1,
+                boxShadow: "0 8px 22px rgba(255,193,69,0.3)",
+              }}
             >
               {pagando ? "Generando link de pago..." : "Pagar con Mercado Pago"}
             </button>
@@ -1267,8 +1308,8 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
           ) : (
             <button
               onClick={() => onIrAEntrenar(planHoy.tracks[0])}
-              className="w-full py-2 rounded-md font-bold"
-              style={{ background: C.train, color: C.panel }}
+              className="w-full py-3 rounded-md font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
+              style={{ background: `linear-gradient(135deg, ${C.train}, #E8503A)`, color: C.panel, boxShadow: "0 8px 20px rgba(255,107,74,0.32)" }}
             >
               Empezar mi entrenamiento
             </button>
@@ -1418,7 +1459,7 @@ function QuickAddEjercicio({ progresion, onAgregar, onCerrar }) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 55 }}>
-      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm">
+      <div style={{ background: C.panel, border: `1px solid ${C.border}`, boxShadow: "0 20px 50px rgba(0,0,0,0.45)" }} className="rounded-lg p-4 w-full max-w-sm">
         <div className="flex justify-between items-center mb-4">
           <span className="display text-sm" style={{ color: C.muted }}>REGISTRAR EJERCICIO</span>
           <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
@@ -1516,7 +1557,7 @@ function QuickAddEjercicio({ progresion, onAgregar, onCerrar }) {
 function QuickAddComida({ onAgregar, onCerrar }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 55 }}>
-      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[80vh] overflow-y-auto">
+      <div style={{ background: C.panel, border: `1px solid ${C.border}`, boxShadow: "0 20px 50px rgba(0,0,0,0.45)" }} className="rounded-lg p-4 w-full max-w-sm max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <span className="display text-sm" style={{ color: C.muted }}>REGISTRAR COMIDA</span>
           <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
@@ -2143,8 +2184,8 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           </p>
           <button
             onClick={() => setContando(true)}
-            className="w-full py-3 rounded-md font-bold text-lg"
-            style={{ background: C.train, color: C.panel }}
+            className="w-full py-4 rounded-md font-bold text-lg tracking-wide active:scale-[0.98] transition-transform"
+            style={{ background: `linear-gradient(135deg, ${C.train}, #E8503A)`, color: C.panel, boxShadow: "0 8px 24px rgba(255,107,74,0.35)" }}
           >
             INICIAR ENTRENAMIENTO
           </button>
@@ -3561,7 +3602,7 @@ function AdminCodigos({ onCerrar }) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 70 }}>
-      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+      <div style={{ background: C.panel, border: `1px solid ${C.border}`, boxShadow: "0 20px 50px rgba(0,0,0,0.45)" }} className="rounded-lg p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
           <span className="display text-sm" style={{ color: C.muted }}>PANEL DE ADMINISTRACIÓN</span>
           <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
@@ -3863,7 +3904,7 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
 
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 50 }}>
-      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+      <div style={{ background: C.panel, border: `1px solid ${C.border}`, boxShadow: "0 20px 50px rgba(0,0,0,0.45)" }} className="rounded-lg p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <span className="display text-sm" style={{ color: C.muted }}>OBJETIVOS DIARIOS</span>
           <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
@@ -4061,7 +4102,7 @@ const AYUDA_SECCIONES = [
 function ModalAyuda({ onCerrar }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", zIndex: 80 }}>
-      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+      <div style={{ background: C.panel, border: `1px solid ${C.border}`, boxShadow: "0 20px 50px rgba(0,0,0,0.45)" }} className="rounded-lg p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-1">
           <span className="display text-sm" style={{ color: C.muted }}>¿CÓMO USAR LA APP?</span>
           <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
@@ -4105,7 +4146,7 @@ function ModalAyuda({ onCerrar }) {
 function ModalTerminos({ onCerrar }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", zIndex: 80 }}>
-      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+      <div style={{ background: C.panel, border: `1px solid ${C.border}`, boxShadow: "0 20px 50px rgba(0,0,0,0.45)" }} className="rounded-lg p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <span className="display text-sm" style={{ color: C.muted }}>TÉRMINOS Y PRIVACIDAD</span>
           <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
