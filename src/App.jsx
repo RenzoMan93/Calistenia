@@ -3874,10 +3874,9 @@ const AYUDA_SECCIONES = [
     color: null,
     titulo: "Hoy",
     puntos: [
-      "Tu resumen del día: calorías consumidas, plan de entrenamiento sugerido, y lo que ya cargaste de comida y ejercicio.",
-      "Los botones \"+ Ejercicio\" y \"+ Comida\" son para cargar algo rápido sin cambiar de pestaña.",
-      "\"En la heladera tengo...\" te sugiere recetas con lo que marques que tenés a mano (Premium).",
-      "Más abajo podés compartir tu código de invitación y ganar días gratis cuando alguien lo use.",
+      "Calorías del día, plan de entrenamiento sugerido y lo que ya cargaste.",
+      "\"+ Ejercicio\" / \"+ Comida\" cargan algo puntual sin cambiar de pestaña.",
+      "\"En la heladera tengo...\": marcá ingredientes y te sugiere qué recetas armar (Premium).",
     ],
   },
   {
@@ -3885,10 +3884,9 @@ const AYUDA_SECCIONES = [
     color: "train",
     titulo: "Entreno",
     puntos: [
-      "Elegí el grupo muscular y tocá \"Iniciar entrenamiento\": arranca una cuenta regresiva 3-2-1.",
-      "Mientras entrenás, tocá \"+ REP\" en cada repetición y \"Serie terminada\" para guardar la serie — ahí arranca el descanso solo.",
-      "Al completar suficientes series de un ejercicio, la app te va a sugerir subir de nivel.",
-      "Los primeros 3 niveles de cada grupo son gratis; del nivel 4 en adelante es Premium.",
+      "Elegí el grupo muscular y tocá \"Iniciar entrenamiento\" (cuenta regresiva 3-2-1).",
+      "El contador de repeticiones suma solo al ritmo que elijas; \"Serie terminada\" la guarda y arranca el descanso.",
+      "Niveles 1 a 3 de cada grupo son gratis; del 4 en adelante, Premium.",
     ],
   },
   {
@@ -3896,44 +3894,40 @@ const AYUDA_SECCIONES = [
     color: "food",
     titulo: "Nutrición",
     puntos: [
-      "Tus macros del día, y accesos rápidos para cargar comidas comunes o buscar alimentos personalizados.",
-      "\"Qué comer ahora\" te recomienda algo según lo que te falta de macros hoy (Premium).",
-      "En \"Cuánto debés comer por día\" podés ver y editar cómo repartís tus calorías entre desayuno, almuerzo, merienda y cena.",
+      "Macros del día y accesos rápidos para cargar comidas o buscar alimentos.",
+      "\"Qué comer ahora\" recomienda según lo que te falta de macros hoy (Premium).",
+      "Editá cómo repartís las calorías entre desayuno, almuerzo, merienda y cena.",
     ],
   },
   {
     icon: TrendingUp,
     color: null,
     titulo: "Progreso",
-    puntos: [
-      "Racha de entrenamiento, logros, calendario con tu historial, seguimiento de peso corporal y gráfico de calorías de la semana (todo Premium).",
-    ],
+    puntos: ["Racha, logros, calendario, peso corporal y gráfico semanal de calorías (Premium)."],
   },
   {
     icon: Lightbulb,
     color: "food",
     titulo: "Consejos",
     puntos: [
-      "Consejos generales de nutrición según tu objetivo (bajar, mantener o subir de peso).",
-      "La técnica de cada ejercicio de todos los grupos, con dibujos de la posición inicial y final.",
+      "Consejos de nutrición según tu objetivo (bajar, mantener o subir de peso).",
+      "Técnica animada de cada ejercicio, con posición inicial y final.",
     ],
   },
   {
     icon: MessageCircle,
     color: "train",
     titulo: "Coach virtual",
-    puntos: [
-      "El botón naranja flotante abre el coach: preguntale dudas de técnica o nutrición cuando quieras (Premium).",
-    ],
+    puntos: ["Botón naranja flotante: preguntale dudas de técnica o nutrición (Premium)."],
   },
   {
     icon: Crown,
     color: "food",
     titulo: "Premium y prueba gratis",
     puntos: [
-      `Arrancás con ${DIAS_PRUEBA} días de prueba gratis con acceso completo a todo.`,
-      `Después, ${PRECIO_PREMIUM}/mes vía Mercado Pago (se renueva solo cada 30 días), o con un código de activación si te lo pasaron.`,
-      "Invitando amigos con tu código (panel \"Invitá y ganá días gratis\" en Hoy), ambos suman días extra de prueba.",
+      `${DIAS_PRUEBA} días de prueba gratis con acceso completo.`,
+      `Después, ${PRECIO_PREMIUM}/mes vía Mercado Pago (se renueva solo cada 30 días), o con un código de activación.`,
+      "Invitá amigos con tu código (panel en Hoy) y ambos ganan días extra.",
     ],
   },
 ];
