@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Lightbulb, HelpCircle, Star, Trash2 } from "lucide-react";
+import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Lightbulb, HelpCircle, Star, Trash2, CalendarDays } from "lucide-react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, ReferenceLine, ResponsiveContainer, Tooltip } from "recharts";
 import {
   safeGet,
@@ -3116,6 +3116,9 @@ function VistaSugerencias({ perfil }) {
 }
 
 function VistaProgreso({ semana, perfil, progresion, accesoPremium, onBloqueado, onEditarObjetivo }) {
+  const [verCalendario, setVerCalendario] = useState(false);
+  const [verPeso, setVerPeso] = useState(false);
+  const [verCalorias, setVerCalorias] = useState(false);
   if (!accesoPremium) {
     return (
       <Panel>
@@ -3155,45 +3158,26 @@ function VistaProgreso({ semana, perfil, progresion, accesoPremium, onBloqueado,
 
       <PanelLogros racha={racha} diasEntrenados={diasEntrenados} nivelMaximo={nivelMaximo} progresion={progresion} />
 
-      <PanelCalendario />
+      <FilaColapsable icon={CalendarDays} color={C.food} titulo="Ver calendario" abierto={verCalendario} onClick={() => setVerCalendario((v) => !v)} />
+      {verCalendario && <PanelCalendario />}
 
-      <PanelPeso objetivo={perfil.objetivo} onEditarObjetivo={onEditarObjetivo} />
+      <FilaColapsable icon={TrendingUp} color={C.food} titulo="Peso corporal" abierto={verPeso} onClick={() => setVerPeso((v) => !v)} />
+      {verPeso && <PanelPeso objetivo={perfil.objetivo} onEditarObjetivo={onEditarObjetivo} />}
 
-      <Panel>
-        <div className="display text-sm mb-3" style={{ color: C.muted }}>CALORÍAS ÚLTIMOS 7 DÍAS</div>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={semana}>
-            <XAxis dataKey="dia" tick={{ fill: C.muted, fontSize: 10 }} axisLine={{ stroke: C.border }} tickLine={false} />
-            <YAxis tick={{ fill: C.muted, fontSize: 10 }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={{ background: C.panelAlt, border: `1px solid ${C.border}`, fontSize: 12 }} labelStyle={{ color: C.text }} />
-            <ReferenceLine y={perfil.kcal} stroke={C.food} strokeDasharray="4 4" />
-            <Bar dataKey="kcal" fill={C.train} radius={[3, 3, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </Panel>
-
-      <Panel>
-        <div className="display text-sm mb-3" style={{ color: C.muted }}>ENTRENO POR DÍA</div>
-        <div className="flex justify-between">
-          {semana.map((d) => (
-            <div key={d.fecha} className="flex flex-col items-center gap-1">
-              <div
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: "50%",
-                  background: d.entreno ? C.train : C.panelAlt,
-                  border: `1px solid ${d.entreno ? C.train : C.border}`,
-                }}
-                className="flex items-center justify-center"
-              >
-                {d.entreno && <Check size={12} color={C.panel} />}
-              </div>
-              <span className="text-[9px]" style={{ color: C.muted }}>{d.dia.split(" ")[0]}</span>
-            </div>
-          ))}
-        </div>
-      </Panel>
+      <FilaColapsable icon={Apple} color={C.food} titulo="Gráfico de calorías (7 días)" abierto={verCalorias} onClick={() => setVerCalorias((v) => !v)} />
+      {verCalorias && (
+        <Panel>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={semana}>
+              <XAxis dataKey="dia" tick={{ fill: C.muted, fontSize: 10 }} axisLine={{ stroke: C.border }} tickLine={false} />
+              <YAxis tick={{ fill: C.muted, fontSize: 10 }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: C.panelAlt, border: `1px solid ${C.border}`, fontSize: 12 }} labelStyle={{ color: C.text }} />
+              <ReferenceLine y={perfil.kcal} stroke={C.food} strokeDasharray="4 4" />
+              <Bar dataKey="kcal" fill={C.train} radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Panel>
+      )}
     </div>
   );
 }
