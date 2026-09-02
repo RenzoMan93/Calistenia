@@ -317,6 +317,17 @@ function sugerirDesdeHeladera(seleccion, misMenus = []) {
   return { completas: [], casiCompletas };
 }
 
+// Cuando ninguna receta de la base combina 2 o más de los ingredientes
+// elegidos, la lista de "casiCompletas" termina mostrando recetas que apenas
+// coinciden en 1 ingrediente cada una (y parece que ignora el resto de lo
+// que elegiste). Para esos casos armamos una sugerencia genérica que sí usa
+// TODO lo seleccionado, a modo de idea rápida (sin macros exactos, así que
+// no se puede registrar como una comida con calorías precisas).
+function sugerirCombinacionLibre(seleccion) {
+  if (seleccion.length < 2) return null;
+  return `Con ${seleccion.join(", ")} podés armar un salteado, guiso o ensalada tibia: cociná todo junto con un poco de aceite, sal y las especias que tengas. No tiene calorías exactas (no es una receta de la base), pero es una forma rápida de aprovechar justo lo que elegiste.`;
+}
+
 const CONSEJOS_BASE = [
   "Tomá al menos 2 litros de agua por día, más si entrenás fuerte o hace calor.",
   "No saltees comidas para 'ahorrar' calorías: llegás con más hambre y comés peor a la noche.",
@@ -1562,6 +1573,7 @@ function PanelHeladera({ restanteKcal, onAgregarComida, accesoPremium, onBloquea
   }
 
   const { completas, casiCompletas } = sugerirDesdeHeladera(seleccion, misMenus || []);
+  const combinacionLibre = completas.length === 0 ? sugerirCombinacionLibre(seleccion) : null;
 
   const agregar = (r) => {
     onAgregarComida({ nombre: r.nombre, kcal: r.kcal, prot: r.prot, carb: r.carb, grasa: r.grasa });
@@ -1655,9 +1667,19 @@ function PanelHeladera({ restanteKcal, onAgregarComida, accesoPremium, onBloquea
         </div>
       )}
 
+      {completas.length === 0 && combinacionLibre && (
+        <div className="rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.food}` }}>
+          <p className="text-xs" style={{ color: C.text }}>{combinacionLibre}</p>
+        </div>
+      )}
+
       {completas.length === 0 && casiCompletas.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs" style={{ color: C.muted }}>No llega a ninguna receta completa, pero estas son las que mejor podés armar con lo que tenés:</p>
+          <p className="text-xs" style={{ color: C.muted }}>
+            {combinacionLibre
+              ? "También tenés estas recetas ya armadas (no usan todo lo que elegiste, pero traen las calorías calculadas):"
+              : "No llega a ninguna receta completa, pero estas son las que mejor podés armar con lo que tenés:"}
+          </p>
           {casiCompletas.map((r) => (
             <div key={r.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
               <div className="flex items-center justify-between">
