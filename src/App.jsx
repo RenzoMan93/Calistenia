@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Send, Lightbulb } from "lucide-react";
+import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Send, Lightbulb, HelpCircle } from "lucide-react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, ReferenceLine, ResponsiveContainer, Tooltip } from "recharts";
 import {
   safeGet,
@@ -414,6 +414,7 @@ export default function App() {
   const [suscripcion, setSuscripcion] = useState(null);
   const [mostrarPlanes, setMostrarPlanes] = useState(false);
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
+  const [mostrarAyuda, setMostrarAyuda] = useState(false);
   const [mostrarChat, setMostrarChat] = useState(false);
   const [onboarding, setOnboarding] = useState(null);
   const [mostrarAdmin, setMostrarAdmin] = useState(false);
@@ -636,9 +637,14 @@ export default function App() {
           <div className="display text-xs uppercase" style={{ color: C.muted, letterSpacing: "0.15em" }}>Rutina + Plato</div>
           <h1 className="display text-2xl font-bold" style={{ color: C.text }}>CALISTENIA <span style={{ color: C.train }}>/</span> NUTRICIÓN</h1>
         </div>
-        <button onClick={() => setEditandoPerfil(true)} aria-label="Configurar objetivos">
-          <Settings size={20} color={C.muted} />
-        </button>
+        <div className="flex items-center gap-4">
+          <button onClick={() => setMostrarAyuda(true)} aria-label="Cómo usar la app">
+            <HelpCircle size={20} color={C.muted} />
+          </button>
+          <button onClick={() => setEditandoPerfil(true)} aria-label="Configurar objetivos">
+            <Settings size={20} color={C.muted} />
+          </button>
+        </div>
       </header>
 
       <div className="px-4">
@@ -705,7 +711,15 @@ export default function App() {
         {tab === "consejos" && <VistaConsejos perfil={perfil} />}
       </main>
 
-      {editandoPerfil && <ModalPerfil perfil={perfil} onGuardar={guardarPerfil} onCerrar={() => setEditandoPerfil(false)} onVerTerminos={() => setMostrarTerminos(true)} />}
+      {editandoPerfil && (
+        <ModalPerfil
+          perfil={perfil}
+          onGuardar={guardarPerfil}
+          onCerrar={() => setEditandoPerfil(false)}
+          onVerTerminos={() => setMostrarTerminos(true)}
+          onVerAyuda={() => setMostrarAyuda(true)}
+        />
+      )}
       {mostrarPlanes && (
         <ModalPlanes
           esPremium={esPremiumActivo}
@@ -717,6 +731,7 @@ export default function App() {
         />
       )}
       {mostrarTerminos && <ModalTerminos onCerrar={() => setMostrarTerminos(false)} />}
+      {mostrarAyuda && <ModalAyuda onCerrar={() => setMostrarAyuda(false)} />}
       {mostrarChat && (
         <ChatCoach
           accesoPremium={accesoPremium}
@@ -3251,7 +3266,7 @@ function Onboarding({ onCompletar, storageDisponible }) {
 }
 
 // ---------- MODAL PERFIL ----------
-function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos }) {
+function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda }) {
   const [form, setForm] = useState(perfil);
   const [datos, setDatos] = useState({ peso: "", altura: "", edad: "", sexo: "hombre", actividad: "ligero", objetivo: perfil.objetivo || "mantener" });
   const [mostrarCalc, setMostrarCalc] = useState(false);
@@ -3330,6 +3345,13 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos }) {
         >
           Guardar
         </button>
+        <button
+          onClick={onVerAyuda}
+          className="flex items-center justify-center gap-1 w-full text-center text-[10px] mt-3 underline"
+          style={{ color: C.muted }}
+        >
+          <HelpCircle size={11} /> ¿Cómo usar la app?
+        </button>
         <a
           href={WHATSAPP_LINK}
           target="_blank"
@@ -3345,6 +3367,120 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos }) {
         <button onClick={cerrarSesion} className="w-full text-center text-[10px] mt-2 underline" style={{ color: C.danger }}>
           Cerrar sesión
         </button>
+      </div>
+    </div>
+  );
+}
+
+const AYUDA_SECCIONES = [
+  {
+    icon: Home,
+    color: null,
+    titulo: "Hoy",
+    puntos: [
+      "Tu resumen del día: calorías consumidas, plan de entrenamiento sugerido, y lo que ya cargaste de comida y ejercicio.",
+      "Los botones \"+ Ejercicio\" y \"+ Comida\" son para cargar algo rápido sin cambiar de pestaña.",
+      "\"En la heladera tengo...\" te sugiere recetas con lo que marques que tenés a mano (Premium).",
+      "Más abajo podés compartir tu código de invitación y ganar días gratis cuando alguien lo use.",
+    ],
+  },
+  {
+    icon: Dumbbell,
+    color: "train",
+    titulo: "Entreno",
+    puntos: [
+      "Elegí el grupo muscular y tocá \"Iniciar entrenamiento\": arranca una cuenta regresiva 3-2-1.",
+      "Mientras entrenás, tocá \"+ REP\" en cada repetición y \"Serie terminada\" para guardar la serie — ahí arranca el descanso solo.",
+      "Al completar suficientes series de un ejercicio, la app te va a sugerir subir de nivel.",
+      "Los primeros 3 niveles de cada grupo son gratis; del nivel 4 en adelante es Premium.",
+    ],
+  },
+  {
+    icon: Apple,
+    color: "food",
+    titulo: "Nutrición",
+    puntos: [
+      "Tus macros del día, y accesos rápidos para cargar comidas comunes o buscar alimentos personalizados.",
+      "\"Qué comer ahora\" te recomienda algo según lo que te falta de macros hoy (Premium).",
+      "En \"Cuánto debés comer por día\" podés ver y editar cómo repartís tus calorías entre desayuno, almuerzo, merienda y cena.",
+    ],
+  },
+  {
+    icon: TrendingUp,
+    color: null,
+    titulo: "Progreso",
+    puntos: [
+      "Racha de entrenamiento, logros, calendario con tu historial, seguimiento de peso corporal y gráfico de calorías de la semana (todo Premium).",
+    ],
+  },
+  {
+    icon: Lightbulb,
+    color: "food",
+    titulo: "Consejos",
+    puntos: [
+      "Consejos generales de nutrición según tu objetivo (bajar, mantener o subir de peso).",
+      "La técnica de cada ejercicio de todos los grupos, con dibujos de la posición inicial y final.",
+    ],
+  },
+  {
+    icon: MessageCircle,
+    color: "train",
+    titulo: "Coach virtual",
+    puntos: [
+      "El botón naranja flotante abre el coach: preguntale dudas de técnica o nutrición cuando quieras (Premium).",
+    ],
+  },
+  {
+    icon: Crown,
+    color: "food",
+    titulo: "Premium y prueba gratis",
+    puntos: [
+      `Arrancás con ${DIAS_PRUEBA} días de prueba gratis con acceso completo a todo.`,
+      `Después, ${PRECIO_PREMIUM}/mes vía Mercado Pago (se renueva solo cada 30 días), o con un código de activación si te lo pasaron.`,
+      "Invitando amigos con tu código (panel \"Invitá y ganá días gratis\" en Hoy), ambos suman días extra de prueba.",
+    ],
+  },
+];
+
+function ModalAyuda({ onCerrar }) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", zIndex: 80 }}>
+      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-1">
+          <span className="display text-sm" style={{ color: C.muted }}>¿CÓMO USAR LA APP?</span>
+          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+        <p className="text-[11px] mb-4" style={{ color: C.muted }}>
+          Una guía rápida de qué encontrás en cada pestaña.
+        </p>
+        <div className="flex flex-col gap-4">
+          {AYUDA_SECCIONES.map((s) => {
+            const Icon = s.icon;
+            const tinte = s.color === "train" ? C.train : s.color === "food" ? C.food : C.text;
+            return (
+              <div key={s.titulo}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Icon size={15} color={tinte} />
+                  <span className="text-sm font-medium" style={{ color: tinte }}>{s.titulo}</span>
+                </div>
+                <div className="flex flex-col gap-1.5 pl-1">
+                  {s.puntos.map((p, i) => (
+                    <p key={i} className="text-xs" style={{ color: C.muted }}>{p}</p>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <a
+          href={WHATSAPP_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1 w-full text-center text-[10px] mt-4 underline"
+          style={{ color: C.food }}
+        >
+          <MessageCircle size={11} /> ¿Seguís con dudas? Escribinos por WhatsApp
+        </a>
       </div>
     </div>
   );
