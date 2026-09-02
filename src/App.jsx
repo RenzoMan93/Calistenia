@@ -1237,6 +1237,7 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
   const restante = Math.max(perfil.kcal - totales.kcal, 0);
   const [quickComida, setQuickComida] = useState(false);
   const [quickEjercicio, setQuickEjercicio] = useState(false);
+  const [mostrarReferidos, setMostrarReferidos] = useState(false);
 
   return (
     <div>
@@ -1355,9 +1356,31 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
         )}
       </Panel>
 
-      <PanelHeladera restanteKcal={restante} onAgregarComida={onAgregarComida} accesoPremium={accesoPremium} onBloqueado={onBloqueado} />
+      <button
+        onClick={() => setMostrarReferidos(true)}
+        className="w-full flex items-center justify-between rounded-md px-4 py-3 mb-4"
+        style={{ background: C.trainDim, border: `1px solid ${C.train}` }}
+      >
+        <span className="text-sm font-medium flex items-center gap-2" style={{ color: C.text }}>
+          <Flame size={16} color={C.train} /> Invitá y ganá días gratis
+        </span>
+        <span className="text-xs mono" style={{ color: C.muted }}>›</span>
+      </button>
 
-      <PanelReferidos referido={referido} onCanjear={onCanjearInvitacion} />
+      {mostrarReferidos && (
+        <div
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.6)", zIndex: 55 }}
+          onClick={() => setMostrarReferidos(false)}
+        >
+          <div className="w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-end mb-1">
+              <button onClick={() => setMostrarReferidos(false)}><X size={18} color={C.muted} /></button>
+            </div>
+            <PanelReferidos referido={referido} onCanjear={onCanjearInvitacion} />
+          </div>
+        </div>
+      )}
 
       {quickEjercicio && (
         <QuickAddEjercicio progresion={progresion} onAgregar={onAgregarEjercicio} onCerrar={() => setQuickEjercicio(false)} />
@@ -2770,6 +2793,8 @@ function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, acceso
 
       <PanelRecetas onAgregar={onAgregar} objetivo={perfil.objetivo} />
 
+      <PanelHeladera restanteKcal={Math.max(perfil.kcal - totales.kcal, 0)} onAgregarComida={onAgregar} accesoPremium={accesoPremium} onBloqueado={onBloqueado} />
+
       <PanelComidasDia perfil={perfil} />
 
       <Panel>
@@ -3963,7 +3988,7 @@ const AYUDA_SECCIONES = [
     puntos: [
       "Calorías del día, plan de entrenamiento sugerido y lo que ya cargaste.",
       "\"+ Ejercicio\" / \"+ Comida\" cargan algo puntual sin cambiar de pestaña.",
-      "\"En la heladera tengo...\": marcá ingredientes y te sugiere qué recetas armar (Premium).",
+      "\"Invitá y ganá días gratis\" comparte tu código para sumar Premium extra.",
     ],
   },
   {
@@ -3983,6 +4008,7 @@ const AYUDA_SECCIONES = [
     puntos: [
       "Macros del día y accesos rápidos para cargar comidas o buscar alimentos.",
       "\"Qué comer ahora\" recomienda según lo que te falta de macros hoy (Premium).",
+      "\"En la heladera tengo...\": marcá ingredientes y te sugiere qué recetas armar (Premium).",
       "Editá cómo repartís las calorías entre desayuno, almuerzo, merienda y cena.",
     ],
   },
