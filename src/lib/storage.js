@@ -106,46 +106,6 @@ export async function verificarStorage() {
 }
 
 // ---------------------------------------------------------------------------
-// Referidos — todo pasa por funciones RPC (SECURITY DEFINER) para que nadie
-// pueda fabricar canjes o días de bono editando datos directamente.
-// ---------------------------------------------------------------------------
-
-export async function ensureReferralCode() {
-  const { data, error } = await supabase.rpc("ensure_referral_code");
-  if (error) {
-    console.error("ensure_referral_code error", error);
-    return null;
-  }
-  return data;
-}
-
-const MENSAJES_REFERIDO = {
-  empty: "Ingresá un código.",
-  not_found: "Ese código no existe.",
-  self: "No podés usar tu propio código.",
-  already_used: "Ya usaste un código de invitación.",
-  ok: "¡Listo! Sumaste 3 días extra de prueba.",
-};
-
-export async function redeemReferralCode(codigoIngresado) {
-  const { data, error } = await supabase.rpc("redeem_referral_code", { p_codigo: codigoIngresado });
-  if (error) {
-    console.error("redeem_referral_code error", error);
-    return { ok: false, mensaje: "No se pudo canjear el código. Probá de nuevo." };
-  }
-  return { ok: data === "ok", mensaje: MENSAJES_REFERIDO[data] || "No se pudo canjear el código." };
-}
-
-export async function claimReferralBonus() {
-  const { data, error } = await supabase.rpc("claim_referral_bonus");
-  if (error) {
-    console.error("claim_referral_bonus error", error);
-    return 0;
-  }
-  return data || 0;
-}
-
-// ---------------------------------------------------------------------------
 // Códigos Premium (panel oculto de administración)
 // ---------------------------------------------------------------------------
 

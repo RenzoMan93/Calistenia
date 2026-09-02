@@ -7,9 +7,6 @@ import {
   verificarStorage,
   listRegistroKeysForMonth,
   obtenerHistorialEjercicio,
-  ensureReferralCode,
-  redeemReferralCode,
-  claimReferralBonus,
   soyAdmin,
   crearCodigoPremium,
   listarCodigosPremium,
@@ -461,7 +458,6 @@ const UMBRAL_SUBIR_NIVEL = 8;
 const PRECIO_PREMIUM = "$250";
 const WHATSAPP_CONTACTO = "59892778233";
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_CONTACTO}`;
-const BONUS_DIAS_REFERIDO = 3;
 
 const PLAN_FREE = [
   "Registro diario de entrenamiento y comidas",
@@ -588,7 +584,6 @@ export default function App() {
   const [onboarding, setOnboarding] = useState(null);
   const [mostrarAdmin, setMostrarAdmin] = useState(false);
   const [tapsLogo, setTapsLogo] = useState(0);
-  const [referido, setReferido] = useState(null);
   const [progresoSeries, setProgresoSeries] = useState({ empuje: 0, traccion: 0, piernas: 0, core: 0 });
   const [sugerenciaNivel, setSugerenciaNivel] = useState(null);
   const [storageDisponible, setStorageDisponible] = useState(null);
@@ -610,14 +605,13 @@ export default function App() {
       const disponible = await verificarStorage();
       setStorageDisponible(disponible);
 
-      const [p, pr, reg, sus, onb, ps, refLocal] = await Promise.all([
+      const [p, pr, reg, sus, onb, ps] = await Promise.all([
         safeGet("perfil"),
         safeGet("progresion"),
         safeGet(`registro:${fecha}`),
         safeGet("suscripcion"),
         safeGet("onboarding"),
         safeGet("progresoSeries"),
-        safeGet("referido"),
       ]);
       if (p) setPerfil(p);
       if (pr) setProgresion(pr);
@@ -632,20 +626,11 @@ export default function App() {
       setSuscripcion(susActual);
       setOnboarding(onb || { completo: false });
 
-      const miCodigo = await ensureReferralCode();
-      setReferido({ miCodigo, codigoUsado: refLocal?.codigoUsado || null });
-
-      const nuevosCanjes = await claimReferralBonus();
-      if (nuevosCanjes > 0) {
-        const susFresca = await safeGet("suscripcion");
-        if (susFresca) setSuscripcion(susFresca);
-      }
-
       setCargando(false);
     })();
   }, []);
 
-  const completarOnboarding = async ({ perfilNuevo, progresionNueva, codigoInvitacion }) => {
+  const completarOnboarding = async ({ perfilNuevo, progresionNueva }) => {
     setPerfil(perfilNuevo);
     safeSet("perfil", perfilNuevo);
     setProgresion(progresionNueva);
@@ -653,17 +638,6 @@ export default function App() {
     const onb = { completo: true };
     setOnboarding(onb);
     safeSet("onboarding", onb);
-
-    if (codigoInvitacion && codigoInvitacion.trim()) {
-      const res = await redeemReferralCode(codigoInvitacion);
-      if (res.ok) {
-        const refNuevo = { ...referido, codigoUsado: codigoInvitacion.trim().toUpperCase() };
-        setReferido(refNuevo);
-        safeSet("referido", { codigoUsado: refNuevo.codigoUsado });
-        const susFresca = await safeGet("suscripcion");
-        if (susFresca) setSuscripcion(susFresca);
-      }
-    }
   };
 
   const diasTrialUsados = suscripcion ? diasEntre(suscripcion.trialStart, fecha) : 0;
@@ -674,23 +648,12 @@ export default function App() {
   const accesoPremium = esPremiumActivo || enTrial;
 
   // Vuelve a leer la suscripción desde el servidor: la usan tanto el canje de
-  // código como el botón "Ya pagué, verificar" (el webhook de Mercado Pago
-  // extiende premiumHasta del lado del servidor, no hay push al cliente).
+  // código Premium como el botón "Ya pagué, verificar" (el webhook de
+  // Mercado Pago extiende premiumHasta del lado del servidor, no hay push al cliente).
   const revisarSuscripcion = async () => {
     const fresca = await safeGet("suscripcion");
     if (fresca) setSuscripcion(fresca);
     return premiumActivo(fresca, fecha);
-  };
-
-  const canjearInvitacion = async (codigoIngresado) => {
-    const res = await redeemReferralCode(codigoIngresado);
-    if (res.ok) {
-      const refNuevo = { ...referido, codigoUsado: codigoIngresado.trim().toUpperCase() };
-      setReferido(refNuevo);
-      safeSet("referido", { codigoUsado: refNuevo.codigoUsado });
-      await revisarSuscripcion();
-    }
-    return res;
   };
 
   const guardarRegistro = useCallback(
@@ -854,8 +817,6 @@ export default function App() {
             progresion={progresion}
             accesoPremium={accesoPremium}
             onBloqueado={() => setMostrarPlanes(true)}
-            referido={referido}
-            onCanjearInvitacion={canjearInvitacion}
             planHoy={planDeHoy()}
             onIrAEntrenar={(track) => {
               setTrackSugerido(track);
@@ -1280,12 +1241,11 @@ const NIVEL_OPCIONES = [
 ];
 
 // ---------- HOY ----------
-function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, referido, onCanjearInvitacion, planHoy, onIrAEntrenar }) {
+function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, planHoy, onIrAEntrenar }) {
   const pct = Math.min(totales.kcal / perfil.kcal, 1) * 360;
   const restante = Math.max(perfil.kcal - totales.kcal, 0);
   const [quickComida, setQuickComida] = useState(false);
   const [quickEjercicio, setQuickEjercicio] = useState(false);
-  const [mostrarReferidos, setMostrarReferidos] = useState(false);
 
   return (
     <div>
@@ -1403,32 +1363,6 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
           </div>
         )}
       </Panel>
-
-      <button
-        onClick={() => setMostrarReferidos(true)}
-        className="w-full flex items-center justify-between rounded-md px-4 py-3 mb-4"
-        style={{ background: C.trainDim, border: `1px solid ${C.train}` }}
-      >
-        <span className="text-sm font-medium flex items-center gap-2" style={{ color: C.text }}>
-          <Flame size={16} color={C.train} /> Invita y gana días gratis
-        </span>
-        <span className="text-xs mono" style={{ color: C.muted }}>›</span>
-      </button>
-
-      {mostrarReferidos && (
-        <div
-          className="fixed inset-0 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.6)", zIndex: 55 }}
-          onClick={() => setMostrarReferidos(false)}
-        >
-          <div className="w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-end mb-1">
-              <button onClick={() => setMostrarReferidos(false)}><X size={18} color={C.muted} /></button>
-            </div>
-            <PanelReferidos referido={referido} onCanjear={onCanjearInvitacion} />
-          </div>
-        </div>
-      )}
 
       {quickEjercicio && (
         <QuickAddEjercicio progresion={progresion} onAgregar={onAgregarEjercicio} onCerrar={() => setQuickEjercicio(false)} />
@@ -1588,83 +1522,6 @@ function QuickAddComida({ onAgregar, onCerrar }) {
         <p className="text-[10px] mt-3 text-center" style={{ color: C.muted }}>¿No está lo que buscas? Cárgalo desde la pestaña Nutrición.</p>
       </div>
     </div>
-  );
-}
-
-function PanelReferidos({ referido, onCanjear }) {
-  const [codigoInput, setCodigoInput] = useState("");
-  const [estado, setEstado] = useState(null);
-  const [enviando, setEnviando] = useState(false);
-  const [copiado, setCopiado] = useState(false);
-
-  if (!referido) return null;
-
-  const mensaje = `Estoy usando esta app de calistenia + nutrición 💪🥗 Súmate con mi código ${referido.miCodigo} y los dos ganamos ${BONUS_DIAS_REFERIDO} días gratis de Premium.`;
-  const linkWhatsapp = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-
-  const copiar = async () => {
-    try {
-      await navigator.clipboard.writeText(referido.miCodigo);
-      setCopiado(true);
-      setTimeout(() => setCopiado(false), 1500);
-    } catch {
-      // silencioso: si el navegador no permite clipboard, el usuario puede copiarlo a mano
-    }
-  };
-
-  const canjear = async () => {
-    if (!codigoInput.trim() || enviando) return;
-    setEnviando(true);
-    const res = await onCanjear(codigoInput);
-    setEstado(res);
-    setEnviando(false);
-  };
-
-  return (
-    <Panel>
-      <div className="flex items-center gap-2 mb-1">
-        <Flame size={16} color={C.train} />
-        <span className="display text-sm" style={{ color: C.muted }}>INVITÁ Y GANÁ DÍAS GRATIS</span>
-      </div>
-      <p className="text-xs mb-3" style={{ color: C.muted }}>
-        Comparte tu código. Cuando alguien lo use, ambos suman {BONUS_DIAS_REFERIDO} días extra de Premium.
-      </p>
-
-      <div className="flex items-center justify-between rounded px-3 py-2 mb-2" style={{ background: C.panelAlt }}>
-        <span className="mono text-lg" style={{ color: C.food }}>{referido.miCodigo}</span>
-        <button onClick={copiar} className="text-xs mono px-2 py-1 rounded" style={{ background: C.border, color: C.text }}>
-          {copiado ? "Copiado ✓" : "Copiar"}
-        </button>
-      </div>
-
-      <a
-        href={linkWhatsapp}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block text-center w-full py-2 rounded font-medium mb-3"
-        style={{ background: C.food, color: C.bg }}
-      >
-        Compartir por WhatsApp
-      </a>
-
-      {referido.codigoUsado ? (
-        <p className="text-xs" style={{ color: C.food }}>Ya usaste un código de invitación ✓</p>
-      ) : (
-        <div className="flex gap-2">
-          <input
-            value={codigoInput}
-            onChange={(e) => setCodigoInput(e.target.value)}
-            placeholder="¿Alguien te invitó? Ingresa su código"
-            className="flex-1 rounded px-3 py-2 text-xs mono"
-            style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
-          />
-          <button onClick={canjear} disabled={enviando} className="px-3 py-2 rounded text-xs font-medium" style={{ background: C.train, color: C.panel, opacity: enviando ? 0.5 : 1 }}>
-            Canjear
-          </button>
-        </div>
-      )}
-      {estado && <p className="text-xs mt-2" style={{ color: estado.ok ? C.food : C.danger }}>{estado.mensaje}</p>}
-    </Panel>
   );
 }
 
@@ -3762,7 +3619,6 @@ function AdminCodigos({ onCerrar }) {
 function Onboarding({ onCompletar, storageDisponible }) {
   const [paso, setPaso] = useState(0);
   const [nombre, setNombre] = useState("");
-  const [codigoInvitacion, setCodigoInvitacion] = useState("");
   const [objetivo, setObjetivo] = useState("mantener");
   const [datos, setDatos] = useState({ peso: "", altura: "", edad: "", sexo: "hombre", actividad: "ligero" });
   const [nivel, setNivelElegido] = useState("principiante");
@@ -3774,7 +3630,7 @@ function Onboarding({ onCompletar, storageDisponible }) {
     const base = calculado || { kcal: 2200, prot: 150, carb: 220, grasa: 70 };
     const perfilNuevo = { ...base, objetivo, nombre: nombre.trim(), ...datos };
     const progresionNueva = NIVEL_OPCIONES.find((n) => n.id === nivel)?.progresion || NIVEL_OPCIONES[0].progresion;
-    onCompletar({ perfilNuevo, progresionNueva, codigoInvitacion });
+    onCompletar({ perfilNuevo, progresionNueva });
   };
 
   return (
@@ -3813,13 +3669,6 @@ function Onboarding({ onCompletar, storageDisponible }) {
               onChange={(e) => setNombre(e.target.value)}
               placeholder="¿Cómo te llamamos?"
               className="w-full max-w-xs rounded px-3 py-2 text-sm text-center mt-2"
-              style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}
-            />
-            <input
-              value={codigoInvitacion}
-              onChange={(e) => setCodigoInvitacion(e.target.value)}
-              placeholder="¿Alguien te invitó? Código (opcional)"
-              className="w-full max-w-xs rounded px-3 py-2 text-sm text-center mono"
               style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }}
             />
           </div>
@@ -4089,7 +3938,6 @@ const AYUDA_SECCIONES = [
     puntos: [
       "Calorías del día, plan de entrenamiento sugerido y lo que ya cargaste.",
       "\"+ Ejercicio\" / \"+ Comida\" cargan algo puntual sin cambiar de pestaña.",
-      "\"Invita y gana días gratis\" comparte tu código para sumar Premium extra.",
     ],
   },
   {
@@ -4142,7 +3990,6 @@ const AYUDA_SECCIONES = [
     puntos: [
       `${DIAS_PRUEBA} días de prueba gratis con acceso completo.`,
       `Después, ${PRECIO_PREMIUM}/mes vía Mercado Pago (se renueva solo cada 30 días), o con un código de activación.`,
-      "Invita amigos con tu código (panel en Hoy) y ambos ganan días extra.",
     ],
   },
 ];
@@ -4209,7 +4056,7 @@ function ModalTerminos({ onCerrar }) {
           <div>
             <div className="font-medium mb-1" style={{ color: C.food }}>Qué datos guardamos</div>
             <p style={{ color: C.muted }}>
-              Guardamos lo que cargas tú: perfil (objetivo, peso, altura, calorías), tus registros de entrenamiento y comidas, y tu código de referido. Esta información se guarda asociada a tu cuenta y no se comparte ni se vende a terceros.
+              Guardamos lo que cargas tú: perfil (objetivo, peso, altura, calorías) y tus registros de entrenamiento y comidas. Esta información se guarda asociada a tu cuenta y no se comparte ni se vende a terceros.
             </p>
           </div>
           <div>
