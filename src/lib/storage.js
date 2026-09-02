@@ -213,3 +213,39 @@ export async function llamarCoach(messages) {
   if (!data?.texto) throw new Error("Respuesta vacía del coach");
   return data.texto;
 }
+
+// ---------------------------------------------------------------------------
+// Sugerencias — pizarra pública: todos los usuarios ven las sugerencias de
+// los demás con nombre y calificación en estrellas, cada uno solo puede
+// borrar las suyas (protegido por RLS, ver 0004_sugerencias.sql).
+// ---------------------------------------------------------------------------
+
+export async function usuarioActualId() {
+  return currentUserId();
+}
+
+export async function listarSugerencias() {
+  const { data, error } = await supabase
+    .from("sugerencias")
+    .select("id, user_id, nombre, estrellas, texto, created_at")
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) {
+    console.error("listarSugerencias error", error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function crearSugerencia({ nombre, estrellas, texto }) {
+  const userId = await currentUserId();
+  const { error } = await supabase
+    .from("sugerencias")
+    .insert({ user_id: userId, nombre, estrellas, texto });
+  if (error) throw error;
+}
+
+export async function borrarSugerencia(id) {
+  const { error } = await supabase.from("sugerencias").delete().eq("id", id);
+  if (error) throw error;
+}
