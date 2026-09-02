@@ -327,6 +327,11 @@ function sugerirDesdeHeladera(seleccion, misMenus = []) {
 // junto" si elegiste pan o cosas que se comen crudas.
 const HELADERA_SIN_COCCION = new Set(["Palta", "Queso", "Queso untable", "Tomate", "Lechuga", "Yogur", "Leche", "Banana", "Manzana", "Frutos secos", "Miel", "Atún"]);
 const HELADERA_DULCE = new Set(["Avena", "Banana", "Manzana", "Yogur", "Leche", "Miel", "Frutos secos"]);
+// Rellenos válidos para pan: los que se comen fríos tal cual, y los que sirven
+// de relleno pero primero hay que cocinarlos. Todo lo demás (arroz, avena,
+// lentejas, etc.) no tiene sentido meterlo "arriba del pan".
+const PAN_RELLENO_FRIO = new Set(["Palta", "Queso", "Queso untable", "Tomate", "Lechuga", "Atún", "Miel"]);
+const PAN_RELLENO_COCIDO = new Set(["Huevo", "Pollo", "Carne picada", "Carne de cerdo", "Pescado"]);
 
 function sugerirCombinacionLibre(seleccion) {
   if (seleccion.length < 2) return null;
@@ -334,7 +339,17 @@ function sugerirCombinacionLibre(seleccion) {
   const cierre = "No tiene calorías exactas (no es una receta de la base), pero es una forma rápida de aprovechar justo lo que elegiste.";
 
   if (seleccion.includes("Pan")) {
-    return `Con ${lista} armá un sandwich o unas tostadas: no hace falta cocinar todo, solo tostar el pan y poner el resto arriba o adentro. ${cierre}`;
+    const otros = seleccion.filter((i) => i !== "Pan");
+    if (otros.every((i) => PAN_RELLENO_FRIO.has(i))) {
+      return `Con ${lista} armá un sandwich o unas tostadas: no hace falta cocinar nada, solo tostar el pan y poner el resto arriba o adentro. ${cierre}`;
+    }
+    if (otros.every((i) => PAN_RELLENO_FRIO.has(i) || PAN_RELLENO_COCIDO.has(i))) {
+      const aCocinar = otros.filter((i) => PAN_RELLENO_COCIDO.has(i)).join(" y ");
+      return `Con ${lista} armá un sandwich: cociná primero ${aCocinar}, tostá el pan, y armalo con el resto arriba o adentro. ${cierre}`;
+    }
+    // El resto no funciona como relleno de sandwich (arroz, avena, lentejas, etc.):
+    // el pan queda como acompañamiento y el resto se cocina aparte.
+    return `El pan te sirve de acompañamiento; con ${otros.join(", ")} armá un salteado, guiso o ensalada tibia, cocinando todo junto con un poco de aceite, sal y las especias que tengas. ${cierre}`;
   }
   if (seleccion.every((i) => HELADERA_DULCE.has(i))) {
     return `Con ${lista} armá un bowl o licuado dulce: mezclá todo (podés licuar lo líquido junto con el resto, o servirlo en capas). ${cierre}`;
