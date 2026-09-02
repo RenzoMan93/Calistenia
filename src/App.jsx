@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Lightbulb, HelpCircle, Star, Trash2, CalendarDays } from "lucide-react";
+import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Lightbulb, HelpCircle, Star, Trash2, CalendarDays, BookOpen } from "lucide-react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, ReferenceLine, ResponsiveContainer, Tooltip } from "recharts";
 import {
   safeGet,
@@ -2191,7 +2191,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           className="flex items-center gap-1 text-[11px] mono mb-3 mt-2"
           style={{ color: C.food }}
         >
-          {verMasConsejos ? "▲ Ocultar consejos" : "▾ Ver consejos (descanso, equipo)"}
+          {verMasConsejos ? "▲ Ocultar consejos" : "▾ Más consejos"}
         </button>
 
         {verMasConsejos && (
@@ -2811,7 +2811,7 @@ function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, acceso
         )}
       </Panel>
 
-      <FilaColapsable icon={Apple} color={C.food} titulo="Ver recetas" abierto={verRecetas} onClick={() => setVerRecetas((v) => !v)} />
+      <FilaColapsable icon={BookOpen} color={C.food} titulo="Ver recetas" abierto={verRecetas} onClick={() => setVerRecetas((v) => !v)} />
       {verRecetas && <PanelRecetas onAgregar={onAgregar} objetivo={perfil.objetivo} />}
 
       <FilaColapsable icon={Apple} color={C.food} titulo="En la heladera tengo..." abierto={verHeladera} onClick={() => setVerHeladera((v) => !v)} />
