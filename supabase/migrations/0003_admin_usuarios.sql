@@ -24,7 +24,7 @@ begin
   return query
     select
       u.id,
-      u.email,
+      u.email::text,
       u.created_at,
       (perfil.value->>'nombre')::text,
       (sus.value->>'trialStart')::date,
