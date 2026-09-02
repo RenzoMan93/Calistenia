@@ -195,28 +195,37 @@ const HELADERA_ITEMS = [
 ];
 
 const RECETAS = [
-  { nombre: "Tortilla de huevo con tomate", ingredientes: ["Huevo", "Tomate"], kcal: 220, prot: 16, carb: 4, grasa: 15, preparacion: "Batí los huevos, agregá el tomate picado y volcá en una sartén con un poco de aceite a fuego medio hasta que cuaje de los dos lados." },
-  { nombre: "Pollo con arroz y lechuga", ingredientes: ["Pollo", "Arroz", "Lechuga"], kcal: 420, prot: 42, carb: 45, grasa: 8, preparacion: "Cociná el pollo a la plancha con sal y limón, herví el arroz aparte, y serví todo junto con la lechuga fresca." },
-  { nombre: "Ensalada de atún con palta", ingredientes: ["Atún", "Palta", "Tomate"], kcal: 310, prot: 26, carb: 8, grasa: 20, preparacion: "Mezclá el atún escurrido con la palta en cubos y el tomate picado; condimentá con sal, limón y un chorrito de aceite de oliva." },
-  { nombre: "Bowl de avena, banana y yogur", ingredientes: ["Avena", "Banana", "Yogur"], kcal: 340, prot: 14, carb: 55, grasa: 7, preparacion: "Cociná la avena con un poco de agua o leche, dejala entibiar y agregá la banana en rodajas y el yogur arriba." },
-  { nombre: "Carne picada con batata al horno", ingredientes: ["Carne picada", "Batata"], kcal: 460, prot: 30, carb: 40, grasa: 20, preparacion: "Dorá la carne picada en una sartén con sal y condimentos, y horneá la batata en rodajas hasta que esté tierna." },
-  { nombre: "Sandwich de pollo y queso", ingredientes: ["Pollo", "Pan", "Queso"], kcal: 380, prot: 32, carb: 30, grasa: 14, preparacion: "Armá el sandwich con el pollo cocido (desmenuzado o en fetas) y el queso; podés tostarlo si querés." },
-  { nombre: "Lentejas con arroz", ingredientes: ["Lentejas", "Arroz"], kcal: 350, prot: 18, carb: 60, grasa: 3, preparacion: "Cociná las lentejas hasta que estén tiernas y mezclá con el arroz ya hervido; podés sumar un sofrito de cebolla." },
-  { nombre: "Huevos revueltos con palta", ingredientes: ["Huevo", "Palta"], kcal: 300, prot: 18, carb: 6, grasa: 24, preparacion: "Batí los huevos y cociná revolviendo a fuego bajo hasta que cuajen; serví con la palta en rodajas o pisada." },
-  { nombre: "Ensalada de pollo, lechuga y tomate", ingredientes: ["Pollo", "Lechuga", "Tomate"], kcal: 260, prot: 38, carb: 6, grasa: 8, preparacion: "Cociná el pollo a la plancha, cortalo en tiras y mezclá con la lechuga y el tomate; condimentá a gusto." },
-  { nombre: "Yogur con banana", ingredientes: ["Yogur", "Banana"], kcal: 205, prot: 7, carb: 35, grasa: 5, preparacion: "Cortá la banana en rodajas y mezclala con el yogur. Así de simple." },
-  { nombre: "Atún con arroz", ingredientes: ["Atún", "Arroz"], kcal: 290, prot: 28, carb: 35, grasa: 4, preparacion: "Herví el arroz y mezclalo con el atún escurrido; podés sumar un chorrito de aceite de oliva." },
-  { nombre: "Tostadas con queso y tomate", ingredientes: ["Pan", "Queso", "Tomate"], kcal: 270, prot: 14, carb: 28, grasa: 11, preparacion: "Tostá el pan y agregá el queso y el tomate en rodajas encima." },
-  { nombre: "Cerdo salteado con zanahoria y cebolla", ingredientes: ["Carne de cerdo", "Zanahoria", "Cebolla"], kcal: 400, prot: 34, carb: 12, grasa: 22, preparacion: "Cortá la carne de cerdo en tiras y salteala en una sartén con la zanahoria y la cebolla cortadas finas." },
-  { nombre: "Pescado al horno con zapallo", ingredientes: ["Pescado", "Zapallo"], kcal: 280, prot: 32, carb: 14, grasa: 9, preparacion: "Horneá el pescado con sal y limón junto con el zapallo en cubos, unos 20-25 minutos a fuego medio." },
-  { nombre: "Fideos con champiñones y queso", ingredientes: ["Fideos", "Champiñones", "Queso"], kcal: 430, prot: 18, carb: 55, grasa: 15, preparacion: "Herví los fideos, salteá los champiñones aparte y mezclá todo con el queso rallado." },
-  { nombre: "Quinoa con garbanzos y espinaca", ingredientes: ["Quinoa", "Garbanzos", "Espinaca"], kcal: 380, prot: 16, carb: 58, grasa: 8, preparacion: "Cociná la quinoa según el paquete y mezclala con los garbanzos y la espinaca salteada." },
-  { nombre: "Tostadas con queso untable y manzana", ingredientes: ["Pan", "Queso untable", "Manzana"], kcal: 260, prot: 9, carb: 38, grasa: 8, preparacion: "Untá el pan con el queso untable y agregá láminas finas de manzana arriba." },
-  { nombre: "Choclo con pollo y espinaca", ingredientes: ["Choclo", "Pollo", "Espinaca"], kcal: 350, prot: 34, carb: 30, grasa: 9, preparacion: "Cociná el pollo a la plancha, salteá la espinaca, y mezclá todo con el choclo (fresco, en lata o hervido)." },
-  { nombre: "Yogur con frutos secos y miel", ingredientes: ["Yogur", "Frutos secos", "Miel"], kcal: 280, prot: 10, carb: 30, grasa: 13, preparacion: "Mezclá el yogur con un puñado de frutos secos y un chorrito de miel arriba." },
-  { nombre: "Omelette de queso, cebolla y champiñones", ingredientes: ["Huevo", "Queso", "Cebolla", "Champiñones"], kcal: 340, prot: 22, carb: 6, grasa: 25, preparacion: "Salteá la cebolla y los champiñones, batí los huevos con el queso y volcá todo en la sartén hasta que cuaje." },
-  { nombre: "Licuado de banana, leche y avena", ingredientes: ["Banana", "Leche", "Avena"], kcal: 290, prot: 11, carb: 50, grasa: 6, preparacion: "Licuá la banana con la leche y la avena hasta que quede cremoso." },
-  { nombre: "Ensalada de garbanzos, tomate y cebolla", ingredientes: ["Garbanzos", "Tomate", "Cebolla"], kcal: 250, prot: 12, carb: 38, grasa: 6, preparacion: "Mezclá los garbanzos cocidos con el tomate y la cebolla picados finos; condimentá con aceite, sal y limón." },
+  { nombre: "Tortilla de huevo con tomate", ingredientes: ["Huevo", "Tomate"], kcal: 220, prot: 16, carb: 4, grasa: 15, preparacion: "Batí los huevos, agregá el tomate picado y volcá en una sartén con un poco de aceite a fuego medio hasta que cuaje de los dos lados." , tipo: "desayuno" },
+  { nombre: "Pollo con arroz y lechuga", ingredientes: ["Pollo", "Arroz", "Lechuga"], kcal: 420, prot: 42, carb: 45, grasa: 8, preparacion: "Cociná el pollo a la plancha con sal y limón, herví el arroz aparte, y serví todo junto con la lechuga fresca." , tipo: "almuerzo" },
+  { nombre: "Ensalada de atún con palta", ingredientes: ["Atún", "Palta", "Tomate"], kcal: 310, prot: 26, carb: 8, grasa: 20, preparacion: "Mezclá el atún escurrido con la palta en cubos y el tomate picado; condimentá con sal, limón y un chorrito de aceite de oliva." , tipo: "almuerzo" },
+  { nombre: "Bowl de avena, banana y yogur", ingredientes: ["Avena", "Banana", "Yogur"], kcal: 340, prot: 14, carb: 55, grasa: 7, preparacion: "Cociná la avena con un poco de agua o leche, dejala entibiar y agregá la banana en rodajas y el yogur arriba." , tipo: "desayuno" },
+  { nombre: "Carne picada con batata al horno", ingredientes: ["Carne picada", "Batata"], kcal: 460, prot: 30, carb: 40, grasa: 20, preparacion: "Dorá la carne picada en una sartén con sal y condimentos, y horneá la batata en rodajas hasta que esté tierna." , tipo: "cena" },
+  { nombre: "Sandwich de pollo y queso", ingredientes: ["Pollo", "Pan", "Queso"], kcal: 380, prot: 32, carb: 30, grasa: 14, preparacion: "Armá el sandwich con el pollo cocido (desmenuzado o en fetas) y el queso; podés tostarlo si querés." , tipo: "almuerzo" },
+  { nombre: "Lentejas con arroz", ingredientes: ["Lentejas", "Arroz"], kcal: 350, prot: 18, carb: 60, grasa: 3, preparacion: "Cociná las lentejas hasta que estén tiernas y mezclá con el arroz ya hervido; podés sumar un sofrito de cebolla." , tipo: "cena" },
+  { nombre: "Huevos revueltos con palta", ingredientes: ["Huevo", "Palta"], kcal: 300, prot: 18, carb: 6, grasa: 24, preparacion: "Batí los huevos y cociná revolviendo a fuego bajo hasta que cuajen; serví con la palta en rodajas o pisada." , tipo: "desayuno" },
+  { nombre: "Ensalada de pollo, lechuga y tomate", ingredientes: ["Pollo", "Lechuga", "Tomate"], kcal: 260, prot: 38, carb: 6, grasa: 8, preparacion: "Cociná el pollo a la plancha, cortalo en tiras y mezclá con la lechuga y el tomate; condimentá a gusto." , tipo: "almuerzo" },
+  { nombre: "Yogur con banana", ingredientes: ["Yogur", "Banana"], kcal: 205, prot: 7, carb: 35, grasa: 5, preparacion: "Cortá la banana en rodajas y mezclala con el yogur. Así de simple." , tipo: "colacion" },
+  { nombre: "Atún con arroz", ingredientes: ["Atún", "Arroz"], kcal: 290, prot: 28, carb: 35, grasa: 4, preparacion: "Herví el arroz y mezclalo con el atún escurrido; podés sumar un chorrito de aceite de oliva." , tipo: "almuerzo" },
+  { nombre: "Tostadas con queso y tomate", ingredientes: ["Pan", "Queso", "Tomate"], kcal: 270, prot: 14, carb: 28, grasa: 11, preparacion: "Tostá el pan y agregá el queso y el tomate en rodajas encima." , tipo: "merienda" },
+  { nombre: "Cerdo salteado con zanahoria y cebolla", ingredientes: ["Carne de cerdo", "Zanahoria", "Cebolla"], kcal: 400, prot: 34, carb: 12, grasa: 22, preparacion: "Cortá la carne de cerdo en tiras y salteala en una sartén con la zanahoria y la cebolla cortadas finas." , tipo: "cena" },
+  { nombre: "Pescado al horno con zapallo", ingredientes: ["Pescado", "Zapallo"], kcal: 280, prot: 32, carb: 14, grasa: 9, preparacion: "Horneá el pescado con sal y limón junto con el zapallo en cubos, unos 20-25 minutos a fuego medio." , tipo: "cena" },
+  { nombre: "Fideos con champiñones y queso", ingredientes: ["Fideos", "Champiñones", "Queso"], kcal: 430, prot: 18, carb: 55, grasa: 15, preparacion: "Herví los fideos, salteá los champiñones aparte y mezclá todo con el queso rallado." , tipo: "cena" },
+  { nombre: "Quinoa con garbanzos y espinaca", ingredientes: ["Quinoa", "Garbanzos", "Espinaca"], kcal: 380, prot: 16, carb: 58, grasa: 8, preparacion: "Cociná la quinoa según el paquete y mezclala con los garbanzos y la espinaca salteada." , tipo: "almuerzo" },
+  { nombre: "Tostadas con queso untable y manzana", ingredientes: ["Pan", "Queso untable", "Manzana"], kcal: 260, prot: 9, carb: 38, grasa: 8, preparacion: "Untá el pan con el queso untable y agregá láminas finas de manzana arriba." , tipo: "merienda" },
+  { nombre: "Choclo con pollo y espinaca", ingredientes: ["Choclo", "Pollo", "Espinaca"], kcal: 350, prot: 34, carb: 30, grasa: 9, preparacion: "Cociná el pollo a la plancha, salteá la espinaca, y mezclá todo con el choclo (fresco, en lata o hervido)." , tipo: "almuerzo" },
+  { nombre: "Yogur con frutos secos y miel", ingredientes: ["Yogur", "Frutos secos", "Miel"], kcal: 280, prot: 10, carb: 30, grasa: 13, preparacion: "Mezclá el yogur con un puñado de frutos secos y un chorrito de miel arriba." , tipo: "colacion" },
+  { nombre: "Omelette de queso, cebolla y champiñones", ingredientes: ["Huevo", "Queso", "Cebolla", "Champiñones"], kcal: 340, prot: 22, carb: 6, grasa: 25, preparacion: "Salteá la cebolla y los champiñones, batí los huevos con el queso y volcá todo en la sartén hasta que cuaje." , tipo: "desayuno" },
+  { nombre: "Licuado de banana, leche y avena", ingredientes: ["Banana", "Leche", "Avena"], kcal: 290, prot: 11, carb: 50, grasa: 6, preparacion: "Licuá la banana con la leche y la avena hasta que quede cremoso." , tipo: "colacion" },
+  { nombre: "Ensalada de garbanzos, tomate y cebolla", ingredientes: ["Garbanzos", "Tomate", "Cebolla"], kcal: 250, prot: 12, carb: 38, grasa: 6, preparacion: "Mezclá los garbanzos cocidos con el tomate y la cebolla picados finos; condimentá con aceite, sal y limón." , tipo: "almuerzo" },
+];
+
+// Orden y "fotito" (emoji, ante la falta de fotos reales) de cada momento del día.
+const TIPOS_COMIDA = [
+  { id: "desayuno", label: "Desayuno", emoji: "🍳" },
+  { id: "almuerzo", label: "Almuerzo", emoji: "🍽️" },
+  { id: "merienda", label: "Merienda", emoji: "🥪" },
+  { id: "cena", label: "Cena", emoji: "🍲" },
+  { id: "colacion", label: "Colación", emoji: "🍎" },
 ];
 
 function sugerirDesdeHeladera(seleccion, misMenus = []) {
@@ -2355,7 +2364,9 @@ function ordenarRecetasPorObjetivo(objetivo) {
 function PanelRecetas({ onAgregar, objetivo }) {
   const [abierta, setAbierta] = useState(null);
   const [agregada, setAgregada] = useState(null);
-  const recetas = ordenarRecetasPorObjetivo(objetivo);
+  const [tipoFiltro, setTipoFiltro] = useState("todas");
+  const ordenadas = ordenarRecetasPorObjetivo(objetivo);
+  const recetas = tipoFiltro === "todas" ? ordenadas : ordenadas.filter((r) => r.tipo === tipoFiltro);
 
   const agregar = (r) => {
     onAgregar({ nombre: r.nombre, kcal: r.kcal, prot: r.prot, carb: r.carb, grasa: r.grasa });
@@ -2372,17 +2383,54 @@ function PanelRecetas({ onAgregar, objetivo }) {
       <p className="text-xs mb-3" style={{ color: C.muted }}>
         Ideas simples y rápidas, ordenadas para tu objetivo de {NOMBRE_OBJETIVO[objetivo] || NOMBRE_OBJETIVO.mantener}. Tocá una para ver los ingredientes y cómo prepararla.
       </p>
+      <div className="flex flex-wrap gap-2 mb-3">
+        <button
+          onClick={() => setTipoFiltro("todas")}
+          className="px-3 py-1 rounded-full text-xs"
+          style={{
+            background: tipoFiltro === "todas" ? C.food : C.panelAlt,
+            color: tipoFiltro === "todas" ? C.bg : C.muted,
+            border: `1px solid ${tipoFiltro === "todas" ? C.food : C.border}`,
+          }}
+        >
+          Todas
+        </button>
+        {TIPOS_COMIDA.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTipoFiltro(t.id)}
+            className="px-3 py-1 rounded-full text-xs"
+            style={{
+              background: tipoFiltro === t.id ? C.food : C.panelAlt,
+              color: tipoFiltro === t.id ? C.bg : C.muted,
+              border: `1px solid ${tipoFiltro === t.id ? C.food : C.border}`,
+            }}
+          >
+            {t.emoji} {t.label}
+          </button>
+        ))}
+      </div>
       <div className="flex flex-col gap-2">
         {recetas.map((r) => {
           const abiertaAhora = abierta === r.nombre;
+          const tipoInfo = TIPOS_COMIDA.find((t) => t.id === r.tipo);
           return (
             <div key={r.nombre} className="rounded" style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}>
               <button
                 onClick={() => setAbierta(abiertaAhora ? null : r.nombre)}
-                className="w-full flex items-center justify-between px-3 py-2 text-left"
+                className="w-full flex items-center gap-3 px-3 py-2 text-left"
               >
-                <span className="text-sm">{r.nombre}</span>
-                <span className="text-xs mono" style={{ color: C.food }}>{r.kcal} kcal</span>
+                <div
+                  className="flex items-center justify-center flex-shrink-0"
+                  style={{ width: 36, height: 36, borderRadius: 8, background: C.panel, fontSize: 18 }}
+                >
+                  {tipoInfo?.emoji || "🍽️"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm truncate">{r.nombre}</div>
+                  <div className="text-[9px]" style={{ color: C.muted }}>{tipoInfo?.label || "Comida"}</div>
+                </div>
+                <span className="text-xs mono flex-shrink-0" style={{ color: C.food }}>{r.kcal} kcal</span>
               </button>
               {abiertaAhora && (
                 <div className="px-3 pb-3">
