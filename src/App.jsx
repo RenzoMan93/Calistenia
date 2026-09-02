@@ -2322,9 +2322,24 @@ function PanelComidasDia({ perfil }) {
 }
 
 // ---------- NUTRICION ----------
-function PanelRecetas({ onAgregar }) {
+function ordenarRecetasPorObjetivo(objetivo) {
+  const copia = [...RECETAS];
+  if (objetivo === "bajar") {
+    // Más saciedad por caloría: prioriza proteína alta relativa a las kcal.
+    return copia.sort((a, b) => b.prot / b.kcal - a.prot / a.kcal);
+  }
+  if (objetivo === "subir") {
+    // Más densidad calórica primero, para sumar energía más fácil.
+    return copia.sort((a, b) => b.kcal - a.kcal);
+  }
+  // Mantener: prioriza proteína en términos absolutos, buen default general.
+  return copia.sort((a, b) => b.prot - a.prot);
+}
+
+function PanelRecetas({ onAgregar, objetivo }) {
   const [abierta, setAbierta] = useState(null);
   const [agregada, setAgregada] = useState(null);
+  const recetas = ordenarRecetasPorObjetivo(objetivo);
 
   const agregar = (r) => {
     onAgregar({ nombre: r.nombre, kcal: r.kcal, prot: r.prot, carb: r.carb, grasa: r.grasa });
@@ -2339,10 +2354,10 @@ function PanelRecetas({ onAgregar }) {
         <span className="display text-sm" style={{ color: C.food }}>RECETAS SALUDABLES</span>
       </div>
       <p className="text-xs mb-3" style={{ color: C.muted }}>
-        Ideas simples y rápidas. Tocá una para ver los ingredientes y cómo prepararla.
+        Ideas simples y rápidas, ordenadas para tu objetivo de {NOMBRE_OBJETIVO[objetivo] || NOMBRE_OBJETIVO.mantener}. Tocá una para ver los ingredientes y cómo prepararla.
       </p>
       <div className="flex flex-col gap-2">
-        {RECETAS.map((r) => {
+        {recetas.map((r) => {
           const abiertaAhora = abierta === r.nombre;
           return (
             <div key={r.nombre} className="rounded" style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}>
@@ -2430,7 +2445,7 @@ function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, acceso
         )}
       </Panel>
 
-      <PanelRecetas onAgregar={onAgregar} />
+      <PanelRecetas onAgregar={onAgregar} objetivo={perfil.objetivo} />
 
       <PanelComidasDia perfil={perfil} />
 
@@ -3202,7 +3217,7 @@ function Onboarding({ onCompletar, storageDisponible }) {
   const finalizar = () => {
     const calculado = calcularObjetivoDiario({ ...datos, objetivo });
     const base = calculado || { kcal: 2200, prot: 150, carb: 220, grasa: 70 };
-    const perfilNuevo = { ...base, objetivo, nombre: nombre.trim() };
+    const perfilNuevo = { ...base, objetivo, nombre: nombre.trim(), ...datos };
     const progresionNueva = NIVEL_OPCIONES.find((n) => n.id === nivel)?.progresion || NIVEL_OPCIONES[0].progresion;
     onCompletar({ perfilNuevo, progresionNueva, codigoInvitacion });
   };
@@ -3343,12 +3358,37 @@ function Onboarding({ onCompletar, storageDisponible }) {
 // ---------- MODAL PERFIL ----------
 function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda }) {
   const [form, setForm] = useState(perfil);
-  const [datos, setDatos] = useState({ peso: "", altura: "", edad: "", sexo: "hombre", actividad: "ligero", objetivo: perfil.objetivo || "mantener" });
+  const [datos, setDatos] = useState({
+    peso: perfil.peso || "",
+    altura: perfil.altura || "",
+    edad: perfil.edad || "",
+    sexo: perfil.sexo || "hombre",
+    actividad: perfil.actividad || "ligero",
+    objetivo: perfil.objetivo || "mantener",
+  });
   const [mostrarCalc, setMostrarCalc] = useState(false);
+  const [avisoObjetivo, setAvisoObjetivo] = useState(null);
+  const datosCompletos = Boolean(datos.peso && datos.altura && datos.edad);
 
   const calcular = () => {
     const res = calcularObjetivoDiario(datos);
     if (res) setForm({ ...form, ...res, objetivo: datos.objetivo });
+  };
+
+  const cambiarObjetivo = (nuevoObjetivo) => {
+    const nuevosDatos = { ...datos, objetivo: nuevoObjetivo };
+    setDatos(nuevosDatos);
+    if (datosCompletos) {
+      const res = calcularObjetivoDiario(nuevosDatos);
+      if (res) {
+        setForm({ ...form, ...res, objetivo: nuevoObjetivo });
+        setAvisoObjetivo({ ok: true, texto: "Recalculamos tus calorías y macros para el nuevo objetivo." });
+        return;
+      }
+    }
+    setForm({ ...form, objetivo: nuevoObjetivo });
+    setAvisoObjetivo({ ok: false, texto: "Completá tu peso, altura y edad en la calculadora de abajo para recalcular tus calorías automáticamente." });
+    setMostrarCalc(true);
   };
 
   return (
@@ -3365,7 +3405,7 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
             {OBJETIVOS.map((o) => (
               <button
                 key={o.id}
-                onClick={() => setForm({ ...form, objetivo: o.id })}
+                onClick={() => cambiarObjetivo(o.id)}
                 className="flex-1 text-xs py-2 rounded text-center"
                 style={{
                   background: form.objetivo === o.id ? C.train : C.panelAlt,
@@ -3377,9 +3417,13 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
               </button>
             ))}
           </div>
-          <p className="text-[9px] mt-1" style={{ color: C.muted }}>
-            ¿Ya llegaste a tu meta? Cambiá el objetivo cuando quieras — tus calorías y macros los podés ajustar abajo o recalcular con la calculadora.
-          </p>
+          {avisoObjetivo ? (
+            <p className="text-[9px] mt-1" style={{ color: avisoObjetivo.ok ? C.food : C.train }}>{avisoObjetivo.texto}</p>
+          ) : (
+            <p className="text-[9px] mt-1" style={{ color: C.muted }}>
+              ¿Ya llegaste a tu meta? Cambiá el objetivo cuando quieras: si ya cargaste tu peso, altura y edad, recalculamos tus calorías solas.
+            </p>
+          )}
         </div>
 
         <button
@@ -3437,7 +3481,16 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
           ))}
         </div>
         <button
-          onClick={() => onGuardar(form)}
+          onClick={() =>
+            onGuardar({
+              ...form,
+              peso: datos.peso,
+              altura: datos.altura,
+              edad: datos.edad,
+              sexo: datos.sexo,
+              actividad: datos.actividad,
+            })
+          }
           className="w-full mt-4 py-2 rounded font-medium"
           style={{ background: C.train, color: C.panel }}
         >
