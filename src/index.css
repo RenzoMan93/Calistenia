@@ -5,3 +5,15 @@
 html, body, #root {
   height: 100%;
 }
+
+/* Evita que Safari/iOS haga zoom automático de toda la pantalla al tocar un
+   input con letra chica (los inputs de la app usan text-xs/text-sm, menores
+   a los 16px que iOS exige para no disparar el zoom). El tamaño visual del
+   input en pantalla no cambia, esto solo afecta cómo lo mide el navegador. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
