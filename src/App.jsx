@@ -174,6 +174,66 @@ function GuiaTecnica({ figuras, size = 56, color }) {
   );
 }
 
+// Versión animada tipo "GIF" de la figura de técnica: si el ejercicio tiene
+// posición inicial y final, la anima en loop entre las dos (SVG nativo, sin
+// video ni imágenes reales). Si es un ejercicio de sostener (una sola
+// posición), muestra la figura fija.
+function FiguraAnimada({ figuras, size = 84, color }) {
+  if (!figuras || figuras.length === 0) return null;
+  if (figuras.length === 1) return <FiguraTecnica figura={figuras[0]} size={size} color={color} />;
+
+  const a = FIGURAS[figuras[0]];
+  const b = FIGURAS[figuras[1]];
+  if (!a || !b) return null;
+  const trazo = color || C.train;
+  const dur = "1.3s";
+  const puntos = (f) => `${f.hombro[0]},${f.hombro[1]} ${f.codo[0]},${f.codo[1]} ${f.mano[0]},${f.mano[1]}`;
+  const puntosPierna = (f) => `${f.cadera[0]},${f.cadera[1]} ${f.rodilla[0]},${f.rodilla[1]} ${f.pie[0]},${f.pie[1]}`;
+
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} style={{ flexShrink: 0 }}>
+      {a.pisoY != null && <line x1="0" y1={a.pisoY} x2="100" y2={a.pisoY} stroke={C.border} strokeWidth="2" />}
+      {a.barraY != null && <line x1="18" y1={a.barraY} x2="82" y2={a.barraY} stroke={C.border} strokeWidth="4" strokeLinecap="round" />}
+
+      <polyline fill="none" stroke={trazo} strokeWidth="13" strokeLinecap="round" strokeLinejoin="round">
+        <animate attributeName="points" values={`${puntosPierna(a)};${puntosPierna(b)};${puntosPierna(a)}`} dur={dur} repeatCount="indefinite" />
+      </polyline>
+      <polyline fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round">
+        <animate attributeName="points" values={`${puntosPierna(a)};${puntosPierna(b)};${puntosPierna(a)}`} dur={dur} repeatCount="indefinite" />
+      </polyline>
+
+      <line stroke={trazo} strokeWidth="19" strokeLinecap="round">
+        <animate attributeName="x1" values={`${a.hombro[0]};${b.hombro[0]};${a.hombro[0]}`} dur={dur} repeatCount="indefinite" />
+        <animate attributeName="y1" values={`${a.hombro[1]};${b.hombro[1]};${a.hombro[1]}`} dur={dur} repeatCount="indefinite" />
+        <animate attributeName="x2" values={`${a.cadera[0]};${b.cadera[0]};${a.cadera[0]}`} dur={dur} repeatCount="indefinite" />
+        <animate attributeName="y2" values={`${a.cadera[1]};${b.cadera[1]};${a.cadera[1]}`} dur={dur} repeatCount="indefinite" />
+      </line>
+      <line stroke="rgba(255,255,255,0.18)" strokeWidth="7" strokeLinecap="round">
+        <animate attributeName="x1" values={`${a.hombro[0]};${b.hombro[0]};${a.hombro[0]}`} dur={dur} repeatCount="indefinite" />
+        <animate attributeName="y1" values={`${a.hombro[1]};${b.hombro[1]};${a.hombro[1]}`} dur={dur} repeatCount="indefinite" />
+        <animate attributeName="x2" values={`${a.cadera[0]};${b.cadera[0]};${a.cadera[0]}`} dur={dur} repeatCount="indefinite" />
+        <animate attributeName="y2" values={`${a.cadera[1]};${b.cadera[1]};${a.cadera[1]}`} dur={dur} repeatCount="indefinite" />
+      </line>
+
+      <polyline fill="none" stroke={trazo} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
+        <animate attributeName="points" values={`${puntos(a)};${puntos(b)};${puntos(a)}`} dur={dur} repeatCount="indefinite" />
+      </polyline>
+      <polyline fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round">
+        <animate attributeName="points" values={`${puntos(a)};${puntos(b)};${puntos(a)}`} dur={dur} repeatCount="indefinite" />
+      </polyline>
+
+      <circle r="11" fill={trazo}>
+        <animate attributeName="cx" values={`${a.cabeza[0]};${b.cabeza[0]};${a.cabeza[0]}`} dur={dur} repeatCount="indefinite" />
+        <animate attributeName="cy" values={`${a.cabeza[1]};${b.cabeza[1]};${a.cabeza[1]}`} dur={dur} repeatCount="indefinite" />
+      </circle>
+      <circle r="3.5" fill="rgba(255,255,255,0.25)">
+        <animate attributeName="cx" values={`${a.cabeza[0] - 3};${b.cabeza[0] - 3};${a.cabeza[0] - 3}`} dur={dur} repeatCount="indefinite" />
+        <animate attributeName="cy" values={`${a.cabeza[1] - 3};${b.cabeza[1] - 3};${a.cabeza[1] - 3}`} dur={dur} repeatCount="indefinite" />
+      </circle>
+    </svg>
+  );
+}
+
 const ALIMENTOS = [
   { nombre: "Milanesa (150g)", kcal: 380, prot: 32, carb: 12, grasa: 22 },
   { nombre: "Arroz cocido (100g)", kcal: 130, prot: 2.7, carb: 28, grasa: 0.3 },
@@ -1298,7 +1358,7 @@ function QuickAddEjercicio({ progresion, onAgregar, onCerrar }) {
           ))}
         </div>
         <div className="flex items-center gap-3 mb-3">
-          <GuiaTecnica figuras={ejercicioActual.figura} size={64} />
+          <FiguraAnimada figuras={ejercicioActual.figura} size={64} />
           <div className="text-sm">{ejercicioActual.nombre}</div>
         </div>
 
@@ -1975,7 +2035,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           ))}
         </div>
         <div className="flex items-center gap-3 mb-1">
-          <GuiaTecnica figuras={ejercicioActual.figura} size={84} />
+          <FiguraAnimada figuras={ejercicioActual.figura} size={84} />
           <div>
             <div className="text-sm font-medium">{ejercicioActual.nombre}</div>
             <p className="text-xs mt-0.5" style={{ color: C.muted }}>{ejercicioActual.tip}</p>
