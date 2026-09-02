@@ -1918,6 +1918,13 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   const [contadorReps, setContadorReps] = useState(0);
   const [serieActual, setSerieActual] = useState(1);
   const [historialEj, setHistorialEj] = useState(null);
+  // Conteo automático: al no tener las manos libres para tocar la pantalla en
+  // cada repetición (empuje, flexiones, dominadas, etc.), por defecto la app
+  // suma sola a un ritmo elegido; "Manual" queda como alternativa para quien
+  // prefiera tocar cada rep.
+  const [modoAuto, setModoAuto] = useState(true);
+  const [cadenciaSeg, setCadenciaSeg] = useState(2);
+  const [autoCorriendo, setAutoCorriendo] = useState(false);
 
   useEffect(() => {
     setModoTiempo(Boolean(ejercicioActual.porTiempo));
@@ -1925,7 +1932,17 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
     setCronoCorriendo(false);
     setContadorReps(0);
     setSerieActual(1);
+    setAutoCorriendo(false);
   }, [ejercicioActual.nombre]);
+
+  useEffect(() => {
+    if (!autoCorriendo) return;
+    const id = setInterval(() => {
+      setContadorReps((r) => r + 1);
+      try { navigator.vibrate?.(15); } catch {}
+    }, cadenciaSeg * 1000);
+    return () => clearInterval(id);
+  }, [autoCorriendo, cadenciaSeg]);
 
   useEffect(() => {
     let cancelado = false;
@@ -2094,7 +2111,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             Repeticiones
           </button>
           <button
-            onClick={() => setModoTiempo(true)}
+            onClick={() => { setModoTiempo(true); setAutoCorriendo(false); }}
             className="px-3 py-1 rounded text-xs"
             style={{ background: modoTiempo ? C.train : C.panelAlt, color: modoTiempo ? C.panel : C.muted }}
           >
@@ -2121,6 +2138,23 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
 
         {!modoTiempo ? (
           <div className="flex flex-col items-center gap-3 mb-3">
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setModoAuto(true); setAutoCorriendo(false); }}
+                className="px-3 py-1 rounded text-xs"
+                style={{ background: modoAuto ? C.food : C.panelAlt, color: modoAuto ? C.bg : C.muted }}
+              >
+                Automático
+              </button>
+              <button
+                onClick={() => { setModoAuto(false); setAutoCorriendo(false); }}
+                className="px-3 py-1 rounded text-xs"
+                style={{ background: !modoAuto ? C.food : C.panelAlt, color: !modoAuto ? C.bg : C.muted }}
+              >
+                Manual
+              </button>
+            </div>
+
             <div
               key={contadorReps}
               className="mono font-bold"
@@ -2129,16 +2163,46 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
               {contadorReps}
             </div>
             <span className="text-[10px]" style={{ color: C.muted }}>REPETICIONES</span>
-            <button
-              onClick={() => {
-                setContadorReps((r) => r + 1);
-                try { navigator.vibrate?.(20); } catch {}
-              }}
-              className="w-full py-8 rounded-md font-bold text-2xl active:scale-95"
-              style={{ background: C.train, color: C.panel }}
-            >
-              + REP
-            </button>
+
+            {modoAuto ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px]" style={{ color: C.muted }}>RITMO</span>
+                  {[1.5, 2, 2.5, 3].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setCadenciaSeg(s)}
+                      className="px-2 py-1 rounded text-xs mono"
+                      style={{ background: cadenciaSeg === s ? C.train : C.panelAlt, color: cadenciaSeg === s ? C.panel : C.muted }}
+                    >
+                      {s}s
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-center" style={{ color: C.muted }}>
+                  Suma sola a ese ritmo, no hace falta tocar la pantalla en cada repetición. Apretá Iniciar y arrancá a entrenar.
+                </p>
+                <button
+                  onClick={() => setAutoCorriendo((c) => !c)}
+                  className="w-full py-8 rounded-md font-bold text-2xl active:scale-95"
+                  style={{ background: autoCorriendo ? C.panelAlt : C.train, color: autoCorriendo ? C.text : C.panel, border: autoCorriendo ? `1px solid ${C.border}` : "none" }}
+                >
+                  {autoCorriendo ? "PAUSAR" : "INICIAR"}
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  setContadorReps((r) => r + 1);
+                  try { navigator.vibrate?.(20); } catch {}
+                }}
+                className="w-full py-8 rounded-md font-bold text-2xl active:scale-95"
+                style={{ background: C.train, color: C.panel }}
+              >
+                + REP
+              </button>
+            )}
+
             <div className="flex gap-2 w-full">
               <button
                 onClick={() => setContadorReps((r) => Math.max(0, r - 1))}
@@ -2153,6 +2217,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
                   onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, series: 1, reps: contadorReps });
                   setContadorReps(0);
                   setSerieActual((s) => s + 1);
+                  setAutoCorriendo(false);
                   iniciarDescanso();
                 }}
                 disabled={contadorReps <= 0}
