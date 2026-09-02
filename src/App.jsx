@@ -2738,8 +2738,28 @@ function PanelRecetas({ onAgregar, objetivo }) {
   );
 }
 
+function FilaColapsable({ icon: Icon, color, titulo, abierto, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center justify-between rounded-md px-4 py-3 mb-4"
+      style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}
+    >
+      <span className="text-sm font-medium flex items-center gap-2" style={{ color: C.text }}>
+        <Icon size={16} color={color} /> {titulo}
+      </span>
+      <span className="text-xs mono" style={{ color: C.muted }}>{abierto ? "▲" : "▾"}</span>
+    </button>
+  );
+}
+
 function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, accesoPremium, onBloqueado }) {
   const [custom, setCustom] = useState({ nombre: "", kcal: "", prot: "", carb: "", grasa: "" });
+  const [verRecetas, setVerRecetas] = useState(false);
+  const [verHeladera, setVerHeladera] = useState(false);
+  const [verComidasDia, setVerComidasDia] = useState(false);
+  const [verAgregarRapido, setVerAgregarRapido] = useState(false);
+  const [verPersonalizado, setVerPersonalizado] = useState(false);
 
   const barra = (valor, objetivo, color) => (
     <div className="mb-2">
@@ -2791,31 +2811,39 @@ function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, acceso
         )}
       </Panel>
 
-      <PanelRecetas onAgregar={onAgregar} objetivo={perfil.objetivo} />
+      <FilaColapsable icon={Apple} color={C.food} titulo="Ver recetas" abierto={verRecetas} onClick={() => setVerRecetas((v) => !v)} />
+      {verRecetas && <PanelRecetas onAgregar={onAgregar} objetivo={perfil.objetivo} />}
 
-      <PanelHeladera restanteKcal={Math.max(perfil.kcal - totales.kcal, 0)} onAgregarComida={onAgregar} accesoPremium={accesoPremium} onBloqueado={onBloqueado} />
+      <FilaColapsable icon={Apple} color={C.food} titulo="En la heladera tengo..." abierto={verHeladera} onClick={() => setVerHeladera((v) => !v)} />
+      {verHeladera && (
+        <PanelHeladera restanteKcal={Math.max(perfil.kcal - totales.kcal, 0)} onAgregarComida={onAgregar} accesoPremium={accesoPremium} onBloqueado={onBloqueado} />
+      )}
 
-      <PanelComidasDia perfil={perfil} />
+      <FilaColapsable icon={Settings} color={C.muted} titulo="Cuánto debés comer por día" abierto={verComidasDia} onClick={() => setVerComidasDia((v) => !v)} />
+      {verComidasDia && <PanelComidasDia perfil={perfil} />}
 
+      <FilaColapsable icon={Plus} color={C.food} titulo="Agregar rápido" abierto={verAgregarRapido} onClick={() => setVerAgregarRapido((v) => !v)} />
+      {verAgregarRapido && (
+        <Panel>
+          <div className="grid grid-cols-2 gap-2">
+            {ALIMENTOS.map((a) => (
+              <button
+                key={a.nombre}
+                onClick={() => onAgregar(a)}
+                className="text-left p-2 rounded"
+                style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}
+              >
+                <div className="text-xs">{a.nombre}</div>
+                <div className="text-[10px] mono" style={{ color: C.food }}>{a.kcal} kcal</div>
+              </button>
+            ))}
+          </div>
+        </Panel>
+      )}
+
+      <FilaColapsable icon={Plus} color={C.food} titulo="Cargar alimento personalizado" abierto={verPersonalizado} onClick={() => setVerPersonalizado((v) => !v)} />
+      {verPersonalizado && (
       <Panel>
-        <div className="display text-sm mb-3" style={{ color: C.muted }}>AGREGAR RÁPIDO</div>
-        <div className="grid grid-cols-2 gap-2">
-          {ALIMENTOS.map((a) => (
-            <button
-              key={a.nombre}
-              onClick={() => onAgregar(a)}
-              className="text-left p-2 rounded"
-              style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}
-            >
-              <div className="text-xs">{a.nombre}</div>
-              <div className="text-[10px] mono" style={{ color: C.food }}>{a.kcal} kcal</div>
-            </button>
-          ))}
-        </div>
-      </Panel>
-
-      <Panel>
-        <div className="display text-sm mb-3" style={{ color: C.muted }}>CARGAR ALIMENTO PERSONALIZADO</div>
         {accesoPremium ? (
           <div className="flex flex-col gap-2">
             <input placeholder="Nombre" value={custom.nombre} onChange={(e) => setCustom({ ...custom, nombre: e.target.value })} className="rounded px-2 py-2 text-sm" style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }} />
@@ -2854,6 +2882,7 @@ function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, acceso
           <Locked titulo="Alimentos personalizados ilimitados" onBloqueado={onBloqueado} />
         )}
       </Panel>
+      )}
 
       <Panel>
         <div className="display text-sm mb-3" style={{ color: C.muted }}>COMIDAS CARGADAS</div>
