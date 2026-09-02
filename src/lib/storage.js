@@ -170,6 +170,18 @@ export async function listarCodigosPremium() {
   return data || [];
 }
 
+export async function adminListarUsuarios() {
+  const { data, error } = await supabase.rpc("admin_listar_usuarios");
+  if (error) throw error;
+  return data || [];
+}
+
+export async function adminActivarPremium(email, dias = 30) {
+  const { data, error } = await supabase.rpc("admin_activar_premium", { p_email: email, p_dias: dias });
+  if (error) throw error;
+  return data;
+}
+
 const MENSAJES_PREMIUM = {
   not_found: "Ese código no existe. Revisá que esté bien escrito.",
   already_used: "Ese código ya fue usado.",
