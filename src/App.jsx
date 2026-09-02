@@ -302,15 +302,18 @@ const PLAN_FREE = [
   "Alimentos rápidos y barras de macros",
   "Consejos saludables generales",
 ];
+const PREMIUM_TITULO = "Dejá de entrenar a ciegas";
+const PREMIUM_SUBTITULO = "Progresión guiada, comida resuelta y tu progreso real a la vista — no solo una lista de ejercicios.";
+
 const PLAN_PREMIUM = [
-  "Progresiones completas (niveles 4 a 6): muscle-up, pistol, front lever y más",
-  "'En la heladera tengo...': recetas armadas con lo que tenés a mano",
-  "Recomendación 'Qué comer ahora' según tus macros restantes",
-  "Coach virtual: consultá dudas de técnica y nutrición al toque",
-  "Carga de alimentos personalizados ilimitada",
-  "Seguimiento de peso corporal con gráfico de evolución",
-  "Logros e insignias por constancia y progresión",
-  "Gráfico de progreso semanal y racha de entrenamiento",
+  "Llegá a movimientos avanzados de verdad (muscle-up, pistol squat, front lever) con progresión guiada paso a paso, sin quemar etapas",
+  "Nunca te quedás sin saber qué comer: recetas armadas con lo que ya tenés en la heladera",
+  "Sabé exactamente qué comer en cada momento del día para llegar justo a tus macros",
+  "Resolvé cualquier duda de técnica o nutrición al instante, como tener un coach en el bolsillo",
+  "Registrá cualquier comida que hagas, sin límites",
+  "Viví tu progreso real: gráfico de peso corporal y tu mejor marca en cada ejercicio",
+  "Logros e insignias que te mantienen constante",
+  "Racha semanal para no perder el ritmo",
 ];
 
 const diasEntre = (desde, hasta) => Math.floor((new Date(hasta) - new Date(desde)) / 86400000);
@@ -934,6 +937,11 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
           <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
         </div>
 
+        <div className="mb-4">
+          <div className="display text-lg font-bold">{PREMIUM_TITULO}</div>
+          <p className="text-xs mt-1" style={{ color: C.muted }}>{PREMIUM_SUBTITULO}</p>
+        </div>
+
         <div className="rounded-md p-3 mb-3" style={{ background: C.panelAlt, border: `1px solid ${C.border}` }}>
           <div className="display text-sm mb-2">Gratis</div>
           <div className="flex flex-col gap-1">
@@ -990,6 +998,11 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
             </button>
             {avisoVerificacion && (
               <p className="text-xs" style={{ color: avisoVerificacion.ok ? C.food : C.danger }}>{avisoVerificacion.texto}</p>
+            )}
+            {avisoVerificacion && !avisoVerificacion.ok && (
+              <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="text-xs underline" style={{ color: C.food }}>
+                ¿Seguís con problemas para pagar? Escribinos por WhatsApp
+              </a>
             )}
 
             <div className="text-center text-[10px] mt-1" style={{ color: C.muted }}>— ¿Tenés un código de activación? —</div>
@@ -3298,6 +3311,15 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos }) {
         >
           Guardar
         </button>
+        <a
+          href={WHATSAPP_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1 w-full text-center text-[10px] mt-3 underline"
+          style={{ color: C.food }}
+        >
+          <MessageCircle size={11} /> ¿Necesitás ayuda? Escribinos por WhatsApp
+        </a>
         <button onClick={onVerTerminos} className="w-full text-center text-[10px] mt-3 underline" style={{ color: C.muted }}>
           Términos y Privacidad
         </button>
