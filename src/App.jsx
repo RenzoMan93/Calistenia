@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Lightbulb, HelpCircle, Star, Trash2, CalendarDays, BookOpen } from "lucide-react";
+import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Lightbulb, HelpCircle, Star, Trash2, CalendarDays, BookOpen, Volume2, VolumeX } from "lucide-react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, ReferenceLine, ResponsiveContainer, Tooltip } from "recharts";
 import {
   safeGet,
@@ -1868,6 +1868,23 @@ function reproducirBeep() {
   }
 }
 
+// Coach por voz: usa la síntesis de voz del navegador (sin costo, sin API
+// externa) para poder entrenar sin mirar ni tocar la pantalla. Cancela lo que
+// esté diciendo antes de hablar de nuevo para no acumular frases atrasadas
+// cuando el ritmo de repeticiones es rápido.
+function hablar(texto) {
+  try {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(texto);
+    utt.lang = "es-ES";
+    utt.rate = 1.05;
+    window.speechSynthesis.speak(utt);
+  } catch {
+    // sin soporte de voz en el navegador; no rompe el resto del entrenamiento
+  }
+}
+
 const DURACIONES_DESCANSO = [15, 30, 45, 60, 90, 120];
 
 // Repeticiones sugeridas por ronda: arranca más alto en la primera serie y
@@ -1964,10 +1981,11 @@ function PanelDescanso({ total, restante, corriendo, onElegirDuracion, onIniciar
   );
 }
 
-function CuentaRegresiva({ onTerminar }) {
+function CuentaRegresiva({ onTerminar, vozActiva }) {
   const [n, setN] = useState(3);
 
   useEffect(() => {
+    if (vozActiva) hablar(n > 0 ? String(n) : "¡A entrenar!");
     if (n <= 0) {
       const t = setTimeout(onTerminar, 600);
       return () => clearTimeout(t);
@@ -2017,6 +2035,9 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   const [cadenciaSeg, setCadenciaSeg] = useState(2);
   const [autoCorriendo, setAutoCorriendo] = useState(false);
   const [verMasConsejos, setVerMasConsejos] = useState(false);
+  // Coach por voz: cuenta las repeticiones y avisa en voz alta para poder
+  // entrenar sin tener que mirar el celular en el piso.
+  const [vozActiva, setVozActiva] = useState(true);
 
   useEffect(() => {
     setModoTiempo(Boolean(ejercicioActual.porTiempo));
@@ -2031,11 +2052,15 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   useEffect(() => {
     if (!autoCorriendo) return;
     const id = setInterval(() => {
-      setContadorReps((r) => r + 1);
+      setContadorReps((r) => {
+        const nuevo = r + 1;
+        if (vozActiva) hablar(String(nuevo));
+        return nuevo;
+      });
       try { navigator.vibrate?.(15); } catch {}
     }, cadenciaSeg * 1000);
     return () => clearInterval(id);
-  }, [autoCorriendo, cadenciaSeg]);
+  }, [autoCorriendo, cadenciaSeg, vozActiva]);
 
   useEffect(() => {
     let cancelado = false;
@@ -2081,6 +2106,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             setCorriendo(false);
             try { navigator.vibrate?.(300); } catch {}
             reproducirBeep();
+            if (vozActiva) hablar("¡Arranca la próxima serie!");
             return 0;
           }
           return prev - 1;
@@ -2088,7 +2114,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
       }, 1000);
     }
     return () => clearInterval(intervalRef.current);
-  }, [corriendo]);
+  }, [corriendo, vozActiva]);
 
   const elegirDuracion = (seg) => {
     setDescansoTotal(seg);
@@ -2100,6 +2126,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
     setDescansoTotal(duracion);
     setDescansoRestante(duracion);
     setCorriendo(true);
+    if (vozActiva) hablar(`Serie completa. Descansa ${duracion} segundos.`);
   };
   const pausarReanudar = () => setCorriendo((c) => !c);
   const reiniciarDescanso = () => {
@@ -2109,8 +2136,20 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
 
   return (
     <div>
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={() => setVozActiva((v) => !v)}
+          className="flex items-center gap-1 text-[11px] mono px-2 py-1 rounded"
+          style={{ background: C.panelAlt, color: vozActiva ? C.food : C.muted, border: `1px solid ${C.border}` }}
+        >
+          {vozActiva ? <Volume2 size={12} /> : <VolumeX size={12} />}
+          {vozActiva ? "Coach con voz" : "Sin voz"}
+        </button>
+      </div>
+
       {contando && (
         <CuentaRegresiva
+          vozActiva={vozActiva}
           onTerminar={() => {
             setContando(false);
             setSesionActiva(true);
