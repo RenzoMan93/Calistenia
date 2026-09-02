@@ -638,8 +638,9 @@ export default function App() {
           <h1 className="display text-2xl font-bold" style={{ color: C.text }}>CALISTENIA <span style={{ color: C.train }}>/</span> NUTRICIÓN</h1>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={() => setMostrarAyuda(true)} aria-label="Cómo usar la app">
-            <HelpCircle size={20} color={C.muted} />
+          <button onClick={() => setMostrarAyuda(true)} aria-label="Cómo usar la app" className="flex items-center gap-1">
+            <HelpCircle size={18} color={C.food} />
+            <span className="text-[11px] mono" style={{ color: C.food }}>¿Cómo funciona?</span>
           </button>
           <button onClick={() => setEditandoPerfil(true)} aria-label="Configurar objetivos">
             <Settings size={20} color={C.muted} />
