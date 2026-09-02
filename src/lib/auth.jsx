@@ -37,7 +37,7 @@ function LoginScreen() {
       } else if (modo === "signup") {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        setMensaje({ ok: true, texto: "¡Cuenta creada! Si tu proyecto pide confirmación, revisá tu email." });
+        setMensaje({ ok: true, texto: "¡Cuenta creada! Si tu proyecto pide confirmación, revisa tu email." });
       } else if (modo === "recuperar") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: window.location.origin,
@@ -46,7 +46,7 @@ function LoginScreen() {
         setMensaje({ ok: true, texto: "Te mandamos un email para restablecer tu contraseña." });
       }
     } catch (err) {
-      setMensaje({ ok: false, texto: err.message || "Algo salió mal. Probá de nuevo." });
+      setMensaje({ ok: false, texto: err.message || "Algo salió mal. Prueba de nuevo." });
     } finally {
       setCargando(false);
     }
@@ -66,8 +66,8 @@ function LoginScreen() {
           CALISTENIA <span style={{ color: C.train }}>/</span> NUTRICIÓN
         </h1>
         <p className="text-xs text-center mb-5" style={{ color: C.muted }}>
-          {modo === "login" && "Iniciá sesión para ver tu progreso"}
-          {modo === "signup" && "Creá tu cuenta para empezar tu prueba gratis"}
+          {modo === "login" && "Inicia sesión para ver tu progreso"}
+          {modo === "signup" && "Crea tu cuenta para empezar tu prueba gratis"}
           {modo === "recuperar" && "Te mandamos un link para recuperar tu contraseña"}
         </p>
 
@@ -119,7 +119,7 @@ function LoginScreen() {
           {modo === "login" && (
             <>
               <button onClick={() => setModo("signup")} className="underline">
-                ¿No tenés cuenta? Creá una
+                ¿No tienes cuenta? Crea una
               </button>
               <button onClick={() => setModo("recuperar")} className="underline">
                 Olvidé mi contraseña
@@ -157,7 +157,7 @@ function NuevaContrasenaScreen({ onListo }) {
       if (error) throw error;
       onListo();
     } catch (err) {
-      setMensaje({ ok: false, texto: err.message || "No se pudo cambiar la contraseña. Probá de nuevo." });
+      setMensaje({ ok: false, texto: err.message || "No se pudo cambiar la contraseña. Prueba de nuevo." });
     } finally {
       setCargando(false);
     }
@@ -172,7 +172,7 @@ function NuevaContrasenaScreen({ onListo }) {
         <h1 className="display text-xl font-bold text-center mb-1">
           CALISTENIA <span style={{ color: C.train }}>/</span> NUTRICIÓN
         </h1>
-        <p className="text-xs text-center mb-5" style={{ color: C.muted }}>Elegí tu nueva contraseña</p>
+        <p className="text-xs text-center mb-5" style={{ color: C.muted }}>Elige tu nueva contraseña</p>
 
         <form onSubmit={submit} className="flex flex-col gap-3">
           <input
@@ -189,7 +189,7 @@ function NuevaContrasenaScreen({ onListo }) {
             type="password"
             required
             minLength={6}
-            placeholder="Repetí la contraseña nueva"
+            placeholder="Repite la contraseña nueva"
             value={confirmacion}
             onChange={(e) => setConfirmacion(e.target.value)}
             className="rounded px-3 py-2 text-sm"

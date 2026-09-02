@@ -43,61 +43,61 @@ const TRACKS = {
   empuje: {
     nombre: "Empuje",
     ejercicios: [
-      { nombre: "Flexiones de rodillas", tip: "Apoyá las rodillas, espalda recta y bajá el pecho cerca del piso sin arquear la zona lumbar.", figura: ["empuje_rodillas_bajo", "empuje_rodillas_arriba"] },
+      { nombre: "Flexiones de rodillas", tip: "Apoya las rodillas, espalda recta y baja el pecho cerca del piso sin arquear la zona lumbar.", figura: ["empuje_rodillas_bajo", "empuje_rodillas_arriba"] },
       { nombre: "Flexiones completas", tip: "Cuerpo en línea recta de cabeza a talones, codos a 45° del torso, no dejes caer la cadera.", figura: ["empuje_bajo", "empuje_arriba"] },
-      { nombre: "Flexiones con manos juntas", tip: "Manos juntas formando un diamante bajo el pecho; sumás trabajo de tríceps, controlá la bajada.", figura: ["empuje_bajo", "empuje_arriba"] },
-      { nombre: "Fondos en banco o paralelas", tip: "Bajá hasta que los hombros queden a la altura de los codos, no más, para cuidar el hombro.", figura: ["empuje_bajo", "empuje_arriba"], sinEquipo: "Sin banco ni paralelas, usá dos sillas resistentes de la misma altura, o el borde firme de una cama o sofá bajo." },
-      { nombre: "Flexiones con un brazo extendido", tip: "Un brazo se extiende al costado mientras el otro empuja; alterná lados en cada repetición.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Flexiones con manos juntas", tip: "Manos juntas formando un diamante bajo el pecho; sumas trabajo de tríceps, controla la bajada.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Fondos en banco o paralelas", tip: "Baja hasta que los hombros queden a la altura de los codos, no más, para cuidar el hombro.", figura: ["empuje_bajo", "empuje_arriba"], sinEquipo: "Sin banco ni paralelas, usa dos sillas resistentes de la misma altura, o el borde firme de una cama o sofá bajo." },
+      { nombre: "Flexiones con un brazo extendido", tip: "Un brazo se extiende al costado mientras el otro empuja; alterna lados en cada repetición.", figura: ["empuje_bajo", "empuje_arriba"] },
       { nombre: "Flexión a un solo brazo (asistida)", tip: "La mano libre apoya solo de sostén, el peso real lo lleva el brazo de trabajo.", figura: ["empuje_bajo", "empuje_arriba"] },
-      { nombre: "Flexión pike (pica)", tip: "Cadera elevada formando una V invertida, bajá la cabeza hacia el piso entre las manos: empieza a preparar el hombro para el pino.", figura: ["empuje_pike", "empuje_pike_arriba"] },
+      { nombre: "Flexión pike (pica)", tip: "Cadera elevada formando una V invertida, baja la cabeza hacia el piso entre las manos: empieza a preparar el hombro para el pino.", figura: ["empuje_pike", "empuje_pike_arriba"] },
       { nombre: "Flexión pike con pies elevados", tip: "Pies apoyados en una silla o banco, cuanto más elevados más peso llevan los hombros.", figura: ["empuje_pike", "empuje_pike_arriba"] },
-      { nombre: "Flexión en pino asistida (contra la pared)", tip: "Apoyate en la pared con los pies, bajá la cabeza controlado hasta rozar el piso y empujá de nuevo arriba.", figura: ["empuje_pino", "empuje_pino_arriba"] },
-      { nombre: "Flexión a un solo brazo (completa)", tip: "Pies bien separados para dar base, empujá con todo el cuerpo tenso como una tabla, sin rotar la cadera.", figura: ["empuje_bajo", "empuje_arriba"] },
+      { nombre: "Flexión en pino asistida (contra la pared)", tip: "Apóyate en la pared con los pies, baja la cabeza controlado hasta rozar el piso y empuja de nuevo arriba.", figura: ["empuje_pino", "empuje_pino_arriba"] },
+      { nombre: "Flexión a un solo brazo (completa)", tip: "Pies bien separados para dar base, empuja con todo el cuerpo tenso como una tabla, sin rotar la cadera.", figura: ["empuje_bajo", "empuje_arriba"] },
     ],
   },
   traccion: {
     nombre: "Tracción",
     ejercicios: [
-      { nombre: "Remo con el cuerpo inclinado", tip: "Cuerpo recto, tirá con los codos pegados al torso y apretá los omóplatos arriba.", figura: ["remo_bajo", "remo_arriba"], sinEquipo: "Si no tenés una barra baja, usá el borde de una mesa resistente, un escritorio firme, o dos sillas fuertes con un palo de escoba apoyado entre los respaldos a la altura justa." },
-      { nombre: "Dominadas asistidas (con banda)", tip: "Usá banda o apoyo en los pies, priorizá el rango completo antes que la velocidad.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Sin barra fija funciona igual una barra de dominadas para marco de puerta (no hace falta atornillarla) o una rama gruesa y firme si entrenás al aire libre." },
-      { nombre: "Dominadas completas", tip: "Arrancá desde brazos extendidos, subí hasta que el mentón pase la barra, sin hamacarte.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Mismo reemplazo: barra de marco de puerta, estructura de juegos en una plaza, o una rama gruesa y firme." },
-      { nombre: "Dominadas con peso extra", tip: "Sumá peso extra solo cuando puedas hacer 8-10 dominadas limpias sin lastre.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Usá el mismo reemplazo de barra (marco de puerta o plaza) y sumá peso con una mochila cargada." },
-      { nombre: "Subida completa a la barra, asistida", tip: "Usá banda para el impulso; practicá primero el tirón alto y el agarre girado.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Una barra de marco de puerta o los juegos de una plaza sirven igual para practicar la subida." },
+      { nombre: "Remo con el cuerpo inclinado", tip: "Cuerpo recto, tira con los codos pegados al torso y aprieta los omóplatos arriba.", figura: ["remo_bajo", "remo_arriba"], sinEquipo: "Si no tienes una barra baja, usa el borde de una mesa resistente, un escritorio firme, o dos sillas fuertes con un palo de escoba apoyado entre los respaldos a la altura justa." },
+      { nombre: "Dominadas asistidas (con banda)", tip: "Usa banda o apoyo en los pies, prioriza el rango completo antes que la velocidad.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Sin barra fija funciona igual una barra de dominadas para marco de puerta (no hace falta atornillarla) o una rama gruesa y firme si entrenas al aire libre." },
+      { nombre: "Dominadas completas", tip: "Arranca desde brazos extendidos, sube hasta que el mentón pase la barra, sin hamacarte.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Mismo reemplazo: barra de marco de puerta, estructura de juegos en una plaza, o una rama gruesa y firme." },
+      { nombre: "Dominadas con peso extra", tip: "Suma peso extra solo cuando puedas hacer 8-10 dominadas limpias sin lastre.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Usa el mismo reemplazo de barra (marco de puerta o plaza) y suma peso con una mochila cargada." },
+      { nombre: "Subida completa a la barra, asistida", tip: "Usa banda para el impulso; practica primero el tirón alto y el agarre girado.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Una barra de marco de puerta o los juegos de una plaza sirven igual para practicar la subida." },
       { nombre: "Subida completa a la barra", tip: "Sin impulso de piernas: tirón explosivo y transición rápida de muñeca sobre la barra.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta o una plaza con barras firmes." },
-      { nombre: "Muscle-up con peso extra", tip: "Sumá peso solo cuando el muscle-up de barra te salga limpio y controlado varias veces seguidas.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Este necesita una barra bien firme y alta por la transición: mejor en una plaza con barras o en un gimnasio, no en el marco de una puerta común." },
-      { nombre: "Dominada arquero (archer)", tip: "Un brazo casi extendido al costado, el otro hace casi todo el trabajo de tracción; alterná lados.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta o plaza, igual que las dominadas normales." },
-      { nombre: "Dominada a un brazo, asistida (con banda)", tip: "La banda saca peso del brazo de trabajo; enfocate en no rotar el torso durante la subida.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta o plaza; atá la banda arriba de la misma forma." },
-      { nombre: "Dominada a un solo brazo (completa)", tip: "Agarrate la muñeca del brazo libre para dar algo de estabilidad al principio; tirá parejo, sin tirones bruscos.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta bien firme, o plaza con barras." },
+      { nombre: "Muscle-up con peso extra", tip: "Suma peso solo cuando el muscle-up de barra te salga limpio y controlado varias veces seguidas.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Este necesita una barra bien firme y alta por la transición: mejor en una plaza con barras o en un gimnasio, no en el marco de una puerta común." },
+      { nombre: "Dominada arquero (archer)", tip: "Un brazo casi extendido al costado, el otro hace casi todo el trabajo de tracción; alterna lados.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta o plaza, igual que las dominadas normales." },
+      { nombre: "Dominada a un brazo, asistida (con banda)", tip: "La banda saca peso del brazo de trabajo; enfócate en no rotar el torso durante la subida.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta o plaza; ata la banda arriba de la misma forma." },
+      { nombre: "Dominada a un solo brazo (completa)", tip: "Agárrate la muñeca del brazo libre para dar algo de estabilidad al principio; tira parejo, sin tirones bruscos.", figura: ["traccion_colgado", "traccion_arriba"], sinEquipo: "Barra de marco de puerta bien firme, o plaza con barras." },
     ],
   },
   piernas: {
     nombre: "Piernas",
     ejercicios: [
-      { nombre: "Sentadilla con las dos piernas", tip: "Rodillas en línea con los pies, bajá hasta que los muslos queden paralelos al piso.", figura: ["piernas_de_pie", "piernas_abajo"] },
-      { nombre: "Sentadilla con una pierna atrás elevada", tip: "Pie trasero elevado, bajá recto, sin que la rodilla delantera pase mucho la punta del pie.", figura: ["piernas_de_pie", "piernas_abajo"] },
-      { nombre: "Zancada con salto", tip: "Aterrizá suave, controlá la rodilla y alterná piernas en el aire.", figura: ["piernas_de_pie", "piernas_salto"], adaptacionVeterano: "Para cuidar las rodillas podés hacerla sin el salto: bajás y subís controlado alternando piernas, con casi el mismo trabajo muscular y mucho menos impacto." },
-      { nombre: "Sentadilla a una pierna, asistida", tip: "Sostenete de algo (marco de puerta, barra) para trabajar equilibrio y rango completo.", figura: ["piernas_de_pie", "piernas_abajo"] },
-      { nombre: "Sentadilla a una pierna completa", tip: "Pierna libre extendida al frente, bajá controlado, sin rebotar abajo.", figura: ["piernas_de_pie", "piernas_abajo"] },
-      { nombre: "Sentadilla a una pierna con peso", tip: "Sumá una mancuerna solo cuando te salga limpia varias veces seguidas sin peso.", figura: ["piernas_de_pie", "piernas_abajo"] },
-      { nombre: "Sentadilla búlgara con salto", tip: "Pie trasero elevado como en la búlgara, pero salta y aterrizá suave con la misma pierna adelante.", figura: ["piernas_de_pie", "piernas_salto"], adaptacionVeterano: "Podés sacarle el salto y hacerla controlada, sin despegar los pies del piso, para cuidar rodillas y tobillos." },
-      { nombre: "Sentadilla a una pierna en déficit", tip: "Parate sobre un cajón o escalón para bajar más profundo de lo normal; exige más movilidad de tobillo.", figura: ["piernas_de_pie", "piernas_abajo"] },
-      { nombre: "Shrimp squat asistido", tip: "Sostenete el pie trasero con la mano del mismo lado y ayudate con la otra mano en algo fijo para bajar controlado.", figura: ["piernas_de_pie", "piernas_abajo"] },
-      { nombre: "Shrimp squat completo", tip: "Sin apoyo de manos: bajá la rodilla trasera casi hasta tocar el talón, manteniendo el torso erguido.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Sentadilla con las dos piernas", tip: "Rodillas en línea con los pies, baja hasta que los muslos queden paralelos al piso.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Sentadilla con una pierna atrás elevada", tip: "Pie trasero elevado, baja recto, sin que la rodilla delantera pase mucho la punta del pie.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Zancada con salto", tip: "Aterriza suave, controla la rodilla y alterna piernas en el aire.", figura: ["piernas_de_pie", "piernas_salto"], adaptacionVeterano: "Para cuidar las rodillas puedes hacerla sin el salto: bajas y subes controlado alternando piernas, con casi el mismo trabajo muscular y mucho menos impacto." },
+      { nombre: "Sentadilla a una pierna, asistida", tip: "Sostente de algo (marco de puerta, barra) para trabajar equilibrio y rango completo.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Sentadilla a una pierna completa", tip: "Pierna libre extendida al frente, baja controlado, sin rebotar abajo.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Sentadilla a una pierna con peso", tip: "Suma una mancuerna solo cuando te salga limpia varias veces seguidas sin peso.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Sentadilla búlgara con salto", tip: "Pie trasero elevado como en la búlgara, pero salta y aterriza suave con la misma pierna adelante.", figura: ["piernas_de_pie", "piernas_salto"], adaptacionVeterano: "Puedes sacarle el salto y hacerla controlada, sin despegar los pies del piso, para cuidar rodillas y tobillos." },
+      { nombre: "Sentadilla a una pierna en déficit", tip: "Párate sobre un cajón o escalón para bajar más profundo de lo normal; exige más movilidad de tobillo.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Shrimp squat asistido", tip: "Sostente el pie trasero con la mano del mismo lado y ayúdate con la otra mano en algo fijo para bajar controlado.", figura: ["piernas_de_pie", "piernas_abajo"] },
+      { nombre: "Shrimp squat completo", tip: "Sin apoyo de manos: baja la rodilla trasera casi hasta tocar el talón, manteniendo el torso erguido.", figura: ["piernas_de_pie", "piernas_abajo"] },
     ],
   },
   core: {
     nombre: "Core",
     ejercicios: [
       { nombre: "Plancha abdominal", tip: "Cuerpo en línea recta, abdomen contraído, no dejes caer la cadera.", porTiempo: true, figura: ["core_plancha"] },
-      { nombre: "Subir las piernas colgado de la barra", tip: "Colgado de la barra, subí las piernas sin balancearte, controlá la bajada.", figura: ["traccion_colgado", "core_colgado_arriba"], sinEquipo: "Mismo reemplazo que las dominadas: barra de marco de puerta o plaza." },
+      { nombre: "Subir las piernas colgado de la barra", tip: "Colgado de la barra, sube las piernas sin balancearte, controla la bajada.", figura: ["traccion_colgado", "core_colgado_arriba"], sinEquipo: "Mismo reemplazo que las dominadas: barra de marco de puerta o plaza." },
       { nombre: "Sostenerse con las piernas rectas al frente", tip: "Piernas extendidas al frente en forma de L, hombros activos empujando hacia abajo.", porTiempo: true, figura: ["core_lsit"] },
-      { nombre: "Rueda abdominal desde rodillas", tip: "Rodillas apoyadas, extendé controlado y sin arquear la zona lumbar.", figura: ["core_rueda_inicio", "core_rueda"] },
-      { nombre: "Bajada controlada del cuerpo, recto", tip: "Solo los hombros apoyados, bajá el cuerpo recto lo más lento posible.", porTiempo: true, figura: ["core_negativa"] },
-      { nombre: "Cuerpo horizontal colgado, piernas encogidas", tip: "Colgado, llevá las rodillas al pecho con el cuerpo horizontal, activando dorsales y core.", porTiempo: true, figura: ["core_frontlever"], sinEquipo: "Necesitás algo bien firme para colgarte: barra de marco de puerta reforzada o plaza con barras." },
-      { nombre: "Rueda abdominal de pie", tip: "Arrancás parado en vez de arrodillado: mucho más exigente, controlá la zona lumbar en todo momento.", figura: ["core_rueda_inicio", "core_rueda"] },
+      { nombre: "Rueda abdominal desde rodillas", tip: "Rodillas apoyadas, extiende controlado y sin arquear la zona lumbar.", figura: ["core_rueda_inicio", "core_rueda"] },
+      { nombre: "Bajada controlada del cuerpo, recto", tip: "Solo los hombros apoyados, baja el cuerpo recto lo más lento posible.", porTiempo: true, figura: ["core_negativa"] },
+      { nombre: "Cuerpo horizontal colgado, piernas encogidas", tip: "Colgado, lleva las rodillas al pecho con el cuerpo horizontal, activando dorsales y core.", porTiempo: true, figura: ["core_frontlever"], sinEquipo: "Necesitas algo bien firme para colgarte: barra de marco de puerta reforzada o plaza con barras." },
+      { nombre: "Rueda abdominal de pie", tip: "Arrancas parado en vez de arrodillado: mucho más exigente, controla la zona lumbar en todo momento.", figura: ["core_rueda_inicio", "core_rueda"] },
       { nombre: "V-sit", tip: "Piernas y torso forman una V, más cerrada que el L-sit; hombros activos y abdomen bien contraído.", porTiempo: true, figura: ["core_lsit"] },
-      { nombre: "Front lever con una pierna extendida", tip: "Cuerpo horizontal colgado, una pierna estirada y la otra encogida; alterná para trabajar parejo.", porTiempo: true, figura: ["core_frontlever"], sinEquipo: "Mismo reemplazo: barra de marco de puerta reforzada o plaza." },
-      { nombre: "Front lever completo", tip: "Cuerpo totalmente horizontal y recto, colgado de la barra; apretá dorsales, glúteos y abdomen a la vez.", porTiempo: true, figura: ["core_frontlever"], sinEquipo: "Barra de marco de puerta bien firme o plaza; este exige mucho agarre, asegurate que no se mueva." },
+      { nombre: "Front lever con una pierna extendida", tip: "Cuerpo horizontal colgado, una pierna estirada y la otra encogida; alterna para trabajar parejo.", porTiempo: true, figura: ["core_frontlever"], sinEquipo: "Mismo reemplazo: barra de marco de puerta reforzada o plaza." },
+      { nombre: "Front lever completo", tip: "Cuerpo totalmente horizontal y recto, colgado de la barra; aprieta dorsales, glúteos y abdomen a la vez.", porTiempo: true, figura: ["core_frontlever"], sinEquipo: "Barra de marco de puerta bien firme o plaza; este exige mucho agarre, asegúrate que no se mueva." },
     ],
   },
 };
@@ -265,28 +265,28 @@ const HELADERA_ITEMS = [
 ];
 
 const RECETAS = [
-  { nombre: "Tortilla de huevo con tomate", ingredientes: ["Huevo", "Tomate"], kcal: 220, prot: 16, carb: 4, grasa: 15, preparacion: "Batí los huevos, agregá el tomate picado y volcá en una sartén con un poco de aceite a fuego medio hasta que cuaje de los dos lados." , tipo: "desayuno" },
-  { nombre: "Pollo con arroz y lechuga", ingredientes: ["Pollo", "Arroz", "Lechuga"], kcal: 420, prot: 42, carb: 45, grasa: 8, preparacion: "Cociná el pollo a la plancha con sal y limón, herví el arroz aparte, y serví todo junto con la lechuga fresca." , tipo: "almuerzo" },
-  { nombre: "Ensalada de atún con palta", ingredientes: ["Atún", "Palta", "Tomate"], kcal: 310, prot: 26, carb: 8, grasa: 20, preparacion: "Mezclá el atún escurrido con la palta en cubos y el tomate picado; condimentá con sal, limón y un chorrito de aceite de oliva." , tipo: "almuerzo" },
-  { nombre: "Bowl de avena, banana y yogur", ingredientes: ["Avena", "Banana", "Yogur"], kcal: 340, prot: 14, carb: 55, grasa: 7, preparacion: "Cociná la avena con un poco de agua o leche, dejala entibiar y agregá la banana en rodajas y el yogur arriba." , tipo: "desayuno" },
-  { nombre: "Carne picada con batata al horno", ingredientes: ["Carne picada", "Batata"], kcal: 460, prot: 30, carb: 40, grasa: 20, preparacion: "Dorá la carne picada en una sartén con sal y condimentos, y horneá la batata en rodajas hasta que esté tierna." , tipo: "cena" },
-  { nombre: "Sandwich de pollo y queso", ingredientes: ["Pollo", "Pan", "Queso"], kcal: 380, prot: 32, carb: 30, grasa: 14, preparacion: "Armá el sandwich con el pollo cocido (desmenuzado o en fetas) y el queso; podés tostarlo si querés." , tipo: "almuerzo" },
-  { nombre: "Lentejas con arroz", ingredientes: ["Lentejas", "Arroz"], kcal: 350, prot: 18, carb: 60, grasa: 3, preparacion: "Cociná las lentejas hasta que estén tiernas y mezclá con el arroz ya hervido; podés sumar un sofrito de cebolla." , tipo: "cena" },
-  { nombre: "Huevos revueltos con palta", ingredientes: ["Huevo", "Palta"], kcal: 300, prot: 18, carb: 6, grasa: 24, preparacion: "Batí los huevos y cociná revolviendo a fuego bajo hasta que cuajen; serví con la palta en rodajas o pisada." , tipo: "desayuno" },
-  { nombre: "Ensalada de pollo, lechuga y tomate", ingredientes: ["Pollo", "Lechuga", "Tomate"], kcal: 260, prot: 38, carb: 6, grasa: 8, preparacion: "Cociná el pollo a la plancha, cortalo en tiras y mezclá con la lechuga y el tomate; condimentá a gusto." , tipo: "almuerzo" },
-  { nombre: "Yogur con banana", ingredientes: ["Yogur", "Banana"], kcal: 205, prot: 7, carb: 35, grasa: 5, preparacion: "Cortá la banana en rodajas y mezclala con el yogur. Así de simple." , tipo: "colacion" },
-  { nombre: "Atún con arroz", ingredientes: ["Atún", "Arroz"], kcal: 290, prot: 28, carb: 35, grasa: 4, preparacion: "Herví el arroz y mezclalo con el atún escurrido; podés sumar un chorrito de aceite de oliva." , tipo: "almuerzo" },
-  { nombre: "Tostadas con queso y tomate", ingredientes: ["Pan", "Queso", "Tomate"], kcal: 270, prot: 14, carb: 28, grasa: 11, preparacion: "Tostá el pan y agregá el queso y el tomate en rodajas encima." , tipo: "merienda" },
-  { nombre: "Cerdo salteado con zanahoria y cebolla", ingredientes: ["Carne de cerdo", "Zanahoria", "Cebolla"], kcal: 400, prot: 34, carb: 12, grasa: 22, preparacion: "Cortá la carne de cerdo en tiras y salteala en una sartén con la zanahoria y la cebolla cortadas finas." , tipo: "cena" },
-  { nombre: "Pescado al horno con zapallo", ingredientes: ["Pescado", "Zapallo"], kcal: 280, prot: 32, carb: 14, grasa: 9, preparacion: "Horneá el pescado con sal y limón junto con el zapallo en cubos, unos 20-25 minutos a fuego medio." , tipo: "cena" },
-  { nombre: "Fideos con champiñones y queso", ingredientes: ["Fideos", "Champiñones", "Queso"], kcal: 430, prot: 18, carb: 55, grasa: 15, preparacion: "Herví los fideos, salteá los champiñones aparte y mezclá todo con el queso rallado." , tipo: "cena" },
-  { nombre: "Quinoa con garbanzos y espinaca", ingredientes: ["Quinoa", "Garbanzos", "Espinaca"], kcal: 380, prot: 16, carb: 58, grasa: 8, preparacion: "Cociná la quinoa según el paquete y mezclala con los garbanzos y la espinaca salteada." , tipo: "almuerzo" },
-  { nombre: "Tostadas con queso untable y manzana", ingredientes: ["Pan", "Queso untable", "Manzana"], kcal: 260, prot: 9, carb: 38, grasa: 8, preparacion: "Untá el pan con el queso untable y agregá láminas finas de manzana arriba." , tipo: "merienda" },
-  { nombre: "Choclo con pollo y espinaca", ingredientes: ["Choclo", "Pollo", "Espinaca"], kcal: 350, prot: 34, carb: 30, grasa: 9, preparacion: "Cociná el pollo a la plancha, salteá la espinaca, y mezclá todo con el choclo (fresco, en lata o hervido)." , tipo: "almuerzo" },
-  { nombre: "Yogur con frutos secos y miel", ingredientes: ["Yogur", "Frutos secos", "Miel"], kcal: 280, prot: 10, carb: 30, grasa: 13, preparacion: "Mezclá el yogur con un puñado de frutos secos y un chorrito de miel arriba." , tipo: "colacion" },
-  { nombre: "Omelette de queso, cebolla y champiñones", ingredientes: ["Huevo", "Queso", "Cebolla", "Champiñones"], kcal: 340, prot: 22, carb: 6, grasa: 25, preparacion: "Salteá la cebolla y los champiñones, batí los huevos con el queso y volcá todo en la sartén hasta que cuaje." , tipo: "desayuno" },
-  { nombre: "Licuado de banana, leche y avena", ingredientes: ["Banana", "Leche", "Avena"], kcal: 290, prot: 11, carb: 50, grasa: 6, preparacion: "Licuá la banana con la leche y la avena hasta que quede cremoso." , tipo: "colacion" },
-  { nombre: "Ensalada de garbanzos, tomate y cebolla", ingredientes: ["Garbanzos", "Tomate", "Cebolla"], kcal: 250, prot: 12, carb: 38, grasa: 6, preparacion: "Mezclá los garbanzos cocidos con el tomate y la cebolla picados finos; condimentá con aceite, sal y limón." , tipo: "almuerzo" },
+  { nombre: "Tortilla de huevo con tomate", ingredientes: ["Huevo", "Tomate"], kcal: 220, prot: 16, carb: 4, grasa: 15, preparacion: "Bate los huevos, agrega el tomate picado y vuelca en una sartén con un poco de aceite a fuego medio hasta que cuaje de los dos lados." , tipo: "desayuno" },
+  { nombre: "Pollo con arroz y lechuga", ingredientes: ["Pollo", "Arroz", "Lechuga"], kcal: 420, prot: 42, carb: 45, grasa: 8, preparacion: "Cocina el pollo a la plancha con sal y limón, hierve el arroz aparte, y sirve todo junto con la lechuga fresca." , tipo: "almuerzo" },
+  { nombre: "Ensalada de atún con palta", ingredientes: ["Atún", "Palta", "Tomate"], kcal: 310, prot: 26, carb: 8, grasa: 20, preparacion: "Mezcla el atún escurrido con la palta en cubos y el tomate picado; condimenta con sal, limón y un chorrito de aceite de oliva." , tipo: "almuerzo" },
+  { nombre: "Bowl de avena, banana y yogur", ingredientes: ["Avena", "Banana", "Yogur"], kcal: 340, prot: 14, carb: 55, grasa: 7, preparacion: "Cocina la avena con un poco de agua o leche, déjala entibiar y agrega la banana en rodajas y el yogur arriba." , tipo: "desayuno" },
+  { nombre: "Carne picada con batata al horno", ingredientes: ["Carne picada", "Batata"], kcal: 460, prot: 30, carb: 40, grasa: 20, preparacion: "Dora la carne picada en una sartén con sal y condimentos, y hornea la batata en rodajas hasta que esté tierna." , tipo: "cena" },
+  { nombre: "Sandwich de pollo y queso", ingredientes: ["Pollo", "Pan", "Queso"], kcal: 380, prot: 32, carb: 30, grasa: 14, preparacion: "Arma el sandwich con el pollo cocido (desmenuzado o en fetas) y el queso; puedes tostarlo si quieres." , tipo: "almuerzo" },
+  { nombre: "Lentejas con arroz", ingredientes: ["Lentejas", "Arroz"], kcal: 350, prot: 18, carb: 60, grasa: 3, preparacion: "Cocina las lentejas hasta que estén tiernas y mezcla con el arroz ya hervido; puedes sumar un sofrito de cebolla." , tipo: "cena" },
+  { nombre: "Huevos revueltos con palta", ingredientes: ["Huevo", "Palta"], kcal: 300, prot: 18, carb: 6, grasa: 24, preparacion: "Bate los huevos y cocina revolviendo a fuego bajo hasta que cuajen; sirve con la palta en rodajas o pisada." , tipo: "desayuno" },
+  { nombre: "Ensalada de pollo, lechuga y tomate", ingredientes: ["Pollo", "Lechuga", "Tomate"], kcal: 260, prot: 38, carb: 6, grasa: 8, preparacion: "Cocina el pollo a la plancha, córtalo en tiras y mezcla con la lechuga y el tomate; condimenta a gusto." , tipo: "almuerzo" },
+  { nombre: "Yogur con banana", ingredientes: ["Yogur", "Banana"], kcal: 205, prot: 7, carb: 35, grasa: 5, preparacion: "Corta la banana en rodajas y mézclala con el yogur. Así de simple." , tipo: "colacion" },
+  { nombre: "Atún con arroz", ingredientes: ["Atún", "Arroz"], kcal: 290, prot: 28, carb: 35, grasa: 4, preparacion: "Hierve el arroz y mézclalo con el atún escurrido; puedes sumar un chorrito de aceite de oliva." , tipo: "almuerzo" },
+  { nombre: "Tostadas con queso y tomate", ingredientes: ["Pan", "Queso", "Tomate"], kcal: 270, prot: 14, carb: 28, grasa: 11, preparacion: "Tosta el pan y agrega el queso y el tomate en rodajas encima." , tipo: "merienda" },
+  { nombre: "Cerdo salteado con zanahoria y cebolla", ingredientes: ["Carne de cerdo", "Zanahoria", "Cebolla"], kcal: 400, prot: 34, carb: 12, grasa: 22, preparacion: "Corta la carne de cerdo en tiras y saltéala en una sartén con la zanahoria y la cebolla cortadas finas." , tipo: "cena" },
+  { nombre: "Pescado al horno con zapallo", ingredientes: ["Pescado", "Zapallo"], kcal: 280, prot: 32, carb: 14, grasa: 9, preparacion: "Hornea el pescado con sal y limón junto con el zapallo en cubos, unos 20-25 minutos a fuego medio." , tipo: "cena" },
+  { nombre: "Fideos con champiñones y queso", ingredientes: ["Fideos", "Champiñones", "Queso"], kcal: 430, prot: 18, carb: 55, grasa: 15, preparacion: "Hierve los fideos, saltea los champiñones aparte y mezcla todo con el queso rallado." , tipo: "cena" },
+  { nombre: "Quinoa con garbanzos y espinaca", ingredientes: ["Quinoa", "Garbanzos", "Espinaca"], kcal: 380, prot: 16, carb: 58, grasa: 8, preparacion: "Cocina la quinoa según el paquete y mézclala con los garbanzos y la espinaca salteada." , tipo: "almuerzo" },
+  { nombre: "Tostadas con queso untable y manzana", ingredientes: ["Pan", "Queso untable", "Manzana"], kcal: 260, prot: 9, carb: 38, grasa: 8, preparacion: "Unta el pan con el queso untable y agrega láminas finas de manzana arriba." , tipo: "merienda" },
+  { nombre: "Choclo con pollo y espinaca", ingredientes: ["Choclo", "Pollo", "Espinaca"], kcal: 350, prot: 34, carb: 30, grasa: 9, preparacion: "Cocina el pollo a la plancha, saltea la espinaca, y mezcla todo con el choclo (fresco, en lata o hervido)." , tipo: "almuerzo" },
+  { nombre: "Yogur con frutos secos y miel", ingredientes: ["Yogur", "Frutos secos", "Miel"], kcal: 280, prot: 10, carb: 30, grasa: 13, preparacion: "Mezcla el yogur con un puñado de frutos secos y un chorrito de miel arriba." , tipo: "colacion" },
+  { nombre: "Omelette de queso, cebolla y champiñones", ingredientes: ["Huevo", "Queso", "Cebolla", "Champiñones"], kcal: 340, prot: 22, carb: 6, grasa: 25, preparacion: "Saltea la cebolla y los champiñones, bate los huevos con el queso y vuelca todo en la sartén hasta que cuaje." , tipo: "desayuno" },
+  { nombre: "Licuado de banana, leche y avena", ingredientes: ["Banana", "Leche", "Avena"], kcal: 290, prot: 11, carb: 50, grasa: 6, preparacion: "Licua la banana con la leche y la avena hasta que quede cremoso." , tipo: "colacion" },
+  { nombre: "Ensalada de garbanzos, tomate y cebolla", ingredientes: ["Garbanzos", "Tomate", "Cebolla"], kcal: 250, prot: 12, carb: 38, grasa: 6, preparacion: "Mezcla los garbanzos cocidos con el tomate y la cebolla picados finos; condimenta con aceite, sal y limón." , tipo: "almuerzo" },
 ];
 
 // Orden y "fotito" (emoji, ante la falta de fotos reales) de cada momento del día.
@@ -326,8 +326,8 @@ function sugerirDesdeHeladera(seleccion, misMenus = []) {
 //
 // Cada ingrediente de HELADERA_ITEMS (salvo "Pan", que se trata aparte) cae
 // en exactamente una categoría, para que el texto generado sea consistente
-// sin importar la combinación: nunca decimos "cociná" algo que se come
-// crudo, ni "ponelo arriba del pan" algo que no funciona como relleno.
+// sin importar la combinación: nunca decimos "cocina" algo que se come
+// crudo, ni "ponlo arriba del pan" algo que no funciona como relleno.
 const HELADERA_DULCE = new Set(["Avena", "Banana", "Manzana", "Yogur", "Leche", "Miel", "Frutos secos"]);
 const HELADERA_SALADO_FRIO = new Set(["Palta", "Queso", "Queso untable", "Tomate", "Lechuga", "Atún"]);
 const HELADERA_PROTEINA_COCIDA = new Set(["Huevo", "Pollo", "Carne picada", "Carne de cerdo", "Pescado"]);
@@ -355,52 +355,52 @@ function sugerirCombinacionLibre(seleccion) {
 
   if (tienePan) {
     if (!hayCocinable && !hayProteina) {
-      return `Con ${lista} armá un sandwich o unas tostadas: no hace falta cocinar nada, solo tostar el pan y poner el resto arriba o adentro. ${cierre}`;
+      return `Con ${lista} arma un sandwich o unas tostadas: no hace falta cocinar nada, solo tostar el pan y poner el resto arriba o adentro. ${cierre}`;
     }
     if (!hayCocinable) {
       const aCocinar = otros.filter((i) => categoriaIngrediente(i) === "proteina_cocida").join(" y ");
-      return `Con ${lista} armá un sandwich: cociná primero ${aCocinar}, tostá el pan, y armalo con el resto arriba o adentro. ${cierre}`;
+      return `Con ${lista} arma un sandwich: cocina primero ${aCocinar}, tosta el pan, y ármalo con el resto arriba o adentro. ${cierre}`;
     }
     const paraCocinar = otros.filter((i) => categoriaIngrediente(i) === "cocinable" || categoriaIngrediente(i) === "proteina_cocida");
     const fresco = otros.filter((i) => categoriaIngrediente(i) === "dulce" || categoriaIngrediente(i) === "salado_frio");
     const extra = fresco.length > 0 ? ` Sumale ${fresco.join(" y ")} fresco, sin cocinar.` : "";
-    return `El pan te sirve de acompañamiento; con ${paraCocinar.join(", ")} armá un salteado, guiso o ensalada tibia, cocinando todo junto con un poco de aceite, sal y las especias que tengas.${extra} ${cierre}`;
+    return `El pan te sirve de acompañamiento; con ${paraCocinar.join(", ")} arma un salteado, guiso o ensalada tibia, cocinando todo junto con un poco de aceite, sal y las especias que tengas.${extra} ${cierre}`;
   }
 
   if (!hayCocinable && !hayProteina && !haySaladoFrio) {
-    return `Con ${lista} armá un bowl o licuado dulce: mezclá todo (podés licuar lo líquido junto con el resto, o servirlo en capas). ${cierre}`;
+    return `Con ${lista} arma un bowl o licuado dulce: mezcla todo (puedes licuar lo líquido junto con el resto, o servirlo en capas). ${cierre}`;
   }
   if (!hayCocinable && !hayProteina) {
-    return `Con ${lista} armá una ensalada o plato frío: mezclá todo y condimentá con sal, limón y un chorrito de aceite de oliva. ${cierre}`;
+    return `Con ${lista} arma una ensalada o plato frío: mezcla todo y condimenta con sal, limón y un chorrito de aceite de oliva. ${cierre}`;
   }
   const paraCocinar = otros.filter((i) => categoriaIngrediente(i) === "cocinable" || categoriaIngrediente(i) === "proteina_cocida");
   const fresco = otros.filter((i) => categoriaIngrediente(i) === "dulce" || categoriaIngrediente(i) === "salado_frio");
   const extra = fresco.length > 0 ? ` Sumale ${fresco.join(" y ")} fresco, sin cocinar.` : "";
-  return `Con ${paraCocinar.join(", ")} podés armar un salteado, guiso o ensalada tibia: cociná todo junto con un poco de aceite, sal y las especias que tengas.${extra} ${cierre}`;
+  return `Con ${paraCocinar.join(", ")} puedes armar un salteado, guiso o ensalada tibia: cocina todo junto con un poco de aceite, sal y las especias que tengas.${extra} ${cierre}`;
 }
 
 const CONSEJOS_BASE = [
-  "Tomá al menos 2 litros de agua por día, más si entrenás fuerte o hace calor.",
-  "No saltees comidas para 'ahorrar' calorías: llegás con más hambre y comés peor a la noche.",
+  "Toma al menos 2 litros de agua por día, más si entrenas fuerte o hace calor.",
+  "No saltees comidas para 'ahorrar' calorías: llegas con más hambre y comes peor a la noche.",
   "Un plato equilibrado: mitad vegetales, un cuarto proteína, un cuarto carbohidrato.",
-  "Dormí bien: la falta de sueño afecta tanto la recuperación muscular como el apetito.",
+  "Duerme bien: la falta de sueño afecta tanto la recuperación muscular como el apetito.",
 ];
 
 const CONSEJOS_POR_OBJETIVO = {
   bajar: [
-    "Priorizá alimentos que dan saciedad con pocas calorías: vegetales, proteína magra, legumbres.",
+    "Prioriza alimentos que dan saciedad con pocas calorías: vegetales, proteína magra, legumbres.",
     "No bajes de golpe muchas calorías: un déficit moderado se sostiene, uno extremo te hace comer mal a los pocos días.",
-    "El hambre entre comidas suele ser sed o ansiedad, no siempre calorías de menos: tomá agua antes de sumar un snack.",
+    "El hambre entre comidas suele ser sed o ansiedad, no siempre calorías de menos: toma agua antes de sumar un snack.",
   ],
   mantener: [
-    "Priorizá proteína en cada comida (carne, pollo, huevo, yogur) para acompañar la calistenia.",
-    "Elegí carbohidratos con fibra (arroz, batata, avena, frutas) en vez de harinas refinadas.",
-    "Dejá espacio para grasas buenas: palta, frutos secos, aceite de oliva.",
+    "Prioriza proteína en cada comida (carne, pollo, huevo, yogur) para acompañar la calistenia.",
+    "Elige carbohidratos con fibra (arroz, batata, avena, frutas) en vez de harinas refinadas.",
+    "Deja espacio para grasas buenas: palta, frutos secos, aceite de oliva.",
   ],
   subir: [
-    "No le tengas miedo a las calorías extra: sumá un puñado de frutos secos o una fruta más si te cuesta llegar al objetivo.",
-    "Priorizá carbohidratos y grasas de calidad para llegar a las calorías sin sentirte 'lleno' todo el día.",
-    "Comé más seguido en el día (5 comidas chicas) si te cuesta llegar al objetivo en 3 comidas grandes.",
+    "No le tengas miedo a las calorías extra: suma un puñado de frutos secos o una fruta más si te cuesta llegar al objetivo.",
+    "Prioriza carbohidratos y grasas de calidad para llegar a las calorías sin sentirte 'lleno' todo el día.",
+    "Come más seguido en el día (5 comidas chicas) si te cuesta llegar al objetivo en 3 comidas grandes.",
   ],
 };
 
@@ -425,7 +425,7 @@ function recomendarComida(totales, perfil) {
     const mensajeLimite =
       objetivo === "subir"
         ? "Ya llegaste a tu objetivo de calorías de hoy. Si te queda margen, sumar algo más te ayuda a subir de peso más rápido."
-        : "Ya llegaste a tu objetivo de calorías de hoy. Si tenés hambre, priorizá algo liviano en vegetales o proteína magra.";
+        : "Ya llegaste a tu objetivo de calorías de hoy. Si tienes hambre, prioriza algo liviano en vegetales o proteína magra.";
     return { mensaje: mensajeLimite, sugerencias: [] };
   }
   const pctCubierto = {
@@ -448,7 +448,7 @@ function recomendarComida(totales, perfil) {
   const etiqueta = { prot: "proteína", carb: "carbohidratos", grasa: "grasas" }[macroFaltante];
   const intro =
     objetivo === "subir"
-      ? `Te quedan ${Math.round(restanteKcal)} kcal para llegar a tu objetivo de subir de peso. Sumá algo con energía:`
+      ? `Te quedan ${Math.round(restanteKcal)} kcal para llegar a tu objetivo de subir de peso. Suma algo con energía:`
       : objetivo === "bajar"
       ? `Te quedan ${Math.round(restanteKcal)} kcal hoy y estás más atrasado en ${etiqueta}. Opciones livianas que suman lo que falta:`
       : `Te quedan ${Math.round(restanteKcal)} kcal hoy y estás más atrasado en ${etiqueta}. Buenas opciones:`;
@@ -469,15 +469,15 @@ const PLAN_FREE = [
   "Alimentos rápidos y barras de macros",
   "Consejos saludables generales",
 ];
-const PREMIUM_TITULO = "Dejá de entrenar a ciegas";
+const PREMIUM_TITULO = "Deja de entrenar a ciegas";
 const PREMIUM_SUBTITULO = "Progresión guiada, comida resuelta y tu progreso real a la vista — no solo una lista de ejercicios.";
 
 const PLAN_PREMIUM = [
-  "Llegá a movimientos avanzados de verdad (muscle-up, pistol squat, front lever) con progresión guiada paso a paso, sin quemar etapas",
-  "Nunca te quedás sin saber qué comer: recetas armadas con lo que ya tenés en la heladera",
-  "Sabé exactamente qué comer en cada momento del día para llegar justo a tus macros",
-  "Registrá cualquier comida que hagas, sin límites",
-  "Viví tu progreso real: gráfico de peso corporal y tu mejor marca en cada ejercicio",
+  "Llega a movimientos avanzados de verdad (muscle-up, pistol squat, front lever) con progresión guiada paso a paso, sin quemar etapas",
+  "Nunca te quedas sin saber qué comer: recetas armadas con lo que ya tienes en la heladera",
+  "Sabe exactamente qué comer en cada momento del día para llegar justo a tus macros",
+  "Registra cualquier comida que hagas, sin límites",
+  "Vive tu progreso real: gráfico de peso corporal y tu mejor marca en cada ejercicio",
   "Logros e insignias que te mantienen constante",
   "Racha semanal para no perder el ritmo",
 ];
@@ -979,7 +979,7 @@ function Panel({ children, style }) {
 function BannerStorage() {
   return (
     <div className="rounded-md px-3 py-2 mt-3 text-xs" style={{ background: C.trainDim, border: `1px solid ${C.train}`, color: C.text }}>
-      <span style={{ color: C.train }}>⚠ Tu progreso no se está guardando.</span> Revisá tu conexión a internet. Si el problema sigue, cerrá sesión y volvé a entrar.
+      <span style={{ color: C.train }}>⚠ Tu progreso no se está guardando.</span> Revisa tu conexión a internet. Si el problema sigue, cierra sesión y vuelve a entrar.
     </div>
   );
 }
@@ -1116,7 +1116,7 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
       window.open(url, "_blank", "noopener,noreferrer");
     } catch (e) {
       console.error(e);
-      setAvisoVerificacion({ ok: false, texto: "No pudimos iniciar el pago. Probá de nuevo en un momento." });
+      setAvisoVerificacion({ ok: false, texto: "No pudimos iniciar el pago. Prueba de nuevo en un momento." });
     } finally {
       setPagando(false);
     }
@@ -1130,7 +1130,7 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
       setAvisoVerificacion({ ok: true, texto: "¡Pago confirmado! Premium activado." });
       setTimeout(() => onCerrar(), 900);
     } else {
-      setAvisoVerificacion({ ok: false, texto: "Todavía no detectamos el pago. Esperá unos segundos después de pagar y volvé a intentar." });
+      setAvisoVerificacion({ ok: false, texto: "Todavía no detectamos el pago. Espera unos segundos después de pagar y vuelve a intentar." });
     }
   };
 
@@ -1193,19 +1193,19 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
             ))}
           </div>
           <p className="text-[10px] mt-3" style={{ color: C.muted }}>
-            {DIAS_PRUEBA} días de prueba gratis para usuarios nuevos, después se factura mensual. Cancelás cuando quieras.
+            {DIAS_PRUEBA} días de prueba gratis para usuarios nuevos, después se factura mensual. Cancelas cuando quieras.
           </p>
         </div>
 
         {esPremium && (
           <div className="text-center text-sm mb-3" style={{ color: C.food }}>
-            Ya tenés Premium activo — vence en {diasPremiumRestantes} día{diasPremiumRestantes !== 1 ? "s" : ""} ✓
+            Ya tienes Premium activo — vence en {diasPremiumRestantes} día{diasPremiumRestantes !== 1 ? "s" : ""} ✓
           </div>
         )}
         {(!esPremium || diasPremiumRestantes <= 7) && (
           <div className="flex flex-col gap-3">
             {esPremium && (
-              <div className="text-center text-[10px]" style={{ color: C.muted }}>Podés renovar antes de que venza:</div>
+              <div className="text-center text-[10px]" style={{ color: C.muted }}>Puedes renovar antes de que venza:</div>
             )}
             <button
               onClick={irAPagar}
@@ -1228,16 +1228,16 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
             )}
             {avisoVerificacion && !avisoVerificacion.ok && (
               <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="text-xs underline" style={{ color: C.food }}>
-                ¿Seguís con problemas para pagar? Escribinos por WhatsApp
+                ¿Sigues con problemas para pagar? Escríbenos por WhatsApp
               </a>
             )}
 
-            <div className="text-center text-[10px] mt-1" style={{ color: C.muted }}>— ¿Tenés un código de activación? —</div>
+            <div className="text-center text-[10px] mt-1" style={{ color: C.muted }}>— ¿Tienes un código de activación? —</div>
             <div className="flex gap-2">
               <input
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
-                placeholder="Ingresá tu código"
+                placeholder="Ingresa tu código"
                 className="flex-1 rounded px-3 py-2 text-sm mono"
                 style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
               />
@@ -1298,7 +1298,7 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
           <div className="display text-sm mb-1" style={{ color: C.muted }}>PLAN DE HOY</div>
           <div className="text-base font-semibold mb-1">Día de descanso 😌</div>
           <p className="text-xs mb-3" style={{ color: C.muted }}>
-            Tu cuerpo también progresa recuperándose. Aprovechá para estirar o simplemente descansar.
+            Tu cuerpo también progresa recuperándose. Aprovecha para estirar o simplemente descansar.
           </p>
           <button onClick={() => onIrAEntrenar(Object.keys(TRACKS)[0])} className="text-xs mono underline" style={{ color: C.food }}>
             Igual quiero entrenar
@@ -1378,7 +1378,7 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
           <span className="display text-sm" style={{ color: C.muted }}>ENTRENAMIENTO DE HOY</span>
         </div>
         {registro.entrenamiento.length === 0 ? (
-          <p className="text-sm" style={{ color: C.muted }}>Todavía no registraste ejercicios. Usá el botón "+ Ejercicio" de arriba.</p>
+          <p className="text-sm" style={{ color: C.muted }}>Todavía no registraste ejercicios. Usa el botón "+ Ejercicio" de arriba.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {registro.entrenamiento.map((e) => (
@@ -1394,7 +1394,7 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
           <span className="display text-sm" style={{ color: C.muted }}>COMIDAS DE HOY</span>
         </div>
         {registro.comidas.length === 0 ? (
-          <p className="text-sm" style={{ color: C.muted }}>Todavía no cargaste comidas. Usá el botón "+ Comida" de arriba.</p>
+          <p className="text-sm" style={{ color: C.muted }}>Todavía no cargaste comidas. Usa el botón "+ Comida" de arriba.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {registro.comidas.map((c) => (
@@ -1410,7 +1410,7 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
         style={{ background: C.trainDim, border: `1px solid ${C.train}` }}
       >
         <span className="text-sm font-medium flex items-center gap-2" style={{ color: C.text }}>
-          <Flame size={16} color={C.train} /> Invitá y ganá días gratis
+          <Flame size={16} color={C.train} /> Invita y gana días gratis
         </span>
         <span className="text-xs mono" style={{ color: C.muted }}>›</span>
       </button>
@@ -1585,7 +1585,7 @@ function QuickAddComida({ onAgregar, onCerrar }) {
             </button>
           ))}
         </div>
-        <p className="text-[10px] mt-3 text-center" style={{ color: C.muted }}>¿No está lo que buscás? Cargalo desde la pestaña Nutrición.</p>
+        <p className="text-[10px] mt-3 text-center" style={{ color: C.muted }}>¿No está lo que buscas? Cárgalo desde la pestaña Nutrición.</p>
       </div>
     </div>
   );
@@ -1599,7 +1599,7 @@ function PanelReferidos({ referido, onCanjear }) {
 
   if (!referido) return null;
 
-  const mensaje = `Estoy usando esta app de calistenia + nutrición 💪🥗 Sumate con mi código ${referido.miCodigo} y los dos ganamos ${BONUS_DIAS_REFERIDO} días gratis de Premium.`;
+  const mensaje = `Estoy usando esta app de calistenia + nutrición 💪🥗 Súmate con mi código ${referido.miCodigo} y los dos ganamos ${BONUS_DIAS_REFERIDO} días gratis de Premium.`;
   const linkWhatsapp = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
 
   const copiar = async () => {
@@ -1627,7 +1627,7 @@ function PanelReferidos({ referido, onCanjear }) {
         <span className="display text-sm" style={{ color: C.muted }}>INVITÁ Y GANÁ DÍAS GRATIS</span>
       </div>
       <p className="text-xs mb-3" style={{ color: C.muted }}>
-        Compartí tu código. Cuando alguien lo use, ambos suman {BONUS_DIAS_REFERIDO} días extra de Premium.
+        Comparte tu código. Cuando alguien lo use, ambos suman {BONUS_DIAS_REFERIDO} días extra de Premium.
       </p>
 
       <div className="flex items-center justify-between rounded px-3 py-2 mb-2" style={{ background: C.panelAlt }}>
@@ -1654,7 +1654,7 @@ function PanelReferidos({ referido, onCanjear }) {
           <input
             value={codigoInput}
             onChange={(e) => setCodigoInput(e.target.value)}
-            placeholder="¿Alguien te invitó? Ingresá su código"
+            placeholder="¿Alguien te invitó? Ingresa su código"
             className="flex-1 rounded px-3 py-2 text-xs mono"
             style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
           />
@@ -1691,7 +1691,7 @@ function PanelHeladera({ restanteKcal, onAgregarComida, accesoPremium, onBloquea
     return (
       <Panel>
         <div className="display text-sm mb-3" style={{ color: C.muted }}>EN LA HELADERA TENGO...</div>
-        <Locked titulo="Recetas armadas con lo que tenés en tu heladera" onBloqueado={onBloqueado} />
+        <Locked titulo="Recetas armadas con lo que tienes en tu heladera" onBloqueado={onBloqueado} />
       </Panel>
     );
   }
@@ -1741,7 +1741,7 @@ function PanelHeladera({ restanteKcal, onAgregarComida, accesoPremium, onBloquea
         <Apple size={16} color={C.food} />
         <span className="display text-sm" style={{ color: C.food }}>EN LA HELADERA TENGO...</span>
       </div>
-      <p className="text-xs mb-3" style={{ color: C.muted }}>Marcá lo que tenés y te digo qué podés preparar sin pasarte de tus calorías de hoy.</p>
+      <p className="text-xs mb-3" style={{ color: C.muted }}>Marca lo que tienes y te digo qué puedes preparar sin pasarte de tus calorías de hoy.</p>
 
       <div className="flex flex-wrap gap-2 mb-3">
         {HELADERA_ITEMS.map((item) => {
@@ -1764,7 +1764,7 @@ function PanelHeladera({ restanteKcal, onAgregarComida, accesoPremium, onBloquea
       </div>
 
       {seleccion.length === 0 && (
-        <p className="text-xs" style={{ color: C.muted }}>Elegí al menos un ingrediente para ver sugerencias.</p>
+        <p className="text-xs" style={{ color: C.muted }}>Elige al menos un ingrediente para ver sugerencias.</p>
       )}
 
       {completas.length > 0 && (
@@ -1801,8 +1801,8 @@ function PanelHeladera({ restanteKcal, onAgregarComida, accesoPremium, onBloquea
         <div className="flex flex-col gap-2">
           <p className="text-xs" style={{ color: C.muted }}>
             {combinacionLibre
-              ? "También tenés estas recetas ya armadas (no usan todo lo que elegiste, pero traen las calorías calculadas):"
-              : "No llega a ninguna receta completa, pero estas son las que mejor podés armar con lo que tenés:"}
+              ? "También tienes estas recetas ya armadas (no usan todo lo que elegiste, pero traen las calorías calculadas):"
+              : "No llega a ninguna receta completa, pero estas son las que mejor puedes armar con lo que tienes:"}
           </p>
           {casiCompletas.map((r) => (
             <div key={r.nombre} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
@@ -1817,7 +1817,7 @@ function PanelHeladera({ restanteKcal, onAgregarComida, accesoPremium, onBloquea
       )}
 
       {seleccion.length > 0 && completas.length === 0 && casiCompletas.length === 0 && (
-        <p className="text-xs" style={{ color: C.muted }}>No encontré una receta con esa combinación. Probá agregar algún ingrediente más.</p>
+        <p className="text-xs" style={{ color: C.muted }}>No encontré una receta con esa combinación. Prueba agregar algún ingrediente más.</p>
       )}
 
       <div className="mt-4 pt-3" style={{ borderTop: `1px solid ${C.border}` }}>
@@ -1963,8 +1963,8 @@ function sugerirDescanso(nivel) {
   if (nivel <= 2) return { segundos: 15, texto: "Es un ejercicio de base, más de resistencia: con 15 segundos de descanso alcanza para seguir con buen ritmo." };
   if (nivel <= 4) return { segundos: 30, texto: "Nivel intermedio: 30 segundos de descanso son un buen equilibrio entre esfuerzo y recuperación." };
   if (nivel <= 6) return { segundos: 45, texto: "Ejercicio más exigente: dale 45 segundos para llegar fresco a la próxima serie." };
-  if (nivel <= 8) return { segundos: 60, texto: "Movimiento avanzado: descansá 60 segundos para mantener la técnica en la próxima serie." };
-  return { segundos: 90, texto: "Es un movimiento de fuerza máxima o de habilidad avanzada: descansá 90 segundos para recuperar bien antes de ir de nuevo." };
+  if (nivel <= 8) return { segundos: 60, texto: "Movimiento avanzado: descansa 60 segundos para mantener la técnica en la próxima serie." };
+  return { segundos: 90, texto: "Es un movimiento de fuerza máxima o de habilidad avanzada: descansa 90 segundos para recuperar bien antes de ir de nuevo." };
 }
 
 function PanelDescanso({ total, restante, corriendo, onElegirDuracion, onIniciar, onPausarReanudar, onReiniciar }) {
@@ -2023,7 +2023,7 @@ function PanelDescanso({ total, restante, corriendo, onElegirDuracion, onIniciar
         </div>
       </div>
       {terminado && <p className="text-xs mt-2" style={{ color: C.food }}>¡Descanso terminado! A la próxima serie.</p>}
-      <p className="text-[10px] mt-2" style={{ color: C.muted }}>Se inicia solo cada vez que registrás una serie más abajo.</p>
+      <p className="text-[10px] mt-2" style={{ color: C.muted }}>Se inicia solo cada vez que registras una serie más abajo.</p>
     </Panel>
   );
 }
@@ -2187,7 +2187,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           <Dumbbell size={28} color={C.train} style={{ margin: "0 auto 8px" }} />
           <div className="display text-base font-bold mb-1">¿Listo para entrenar?</div>
           <p className="text-xs mb-4" style={{ color: C.muted }}>
-            Elegí el grupo muscular de hoy y arrancá con una cuenta regresiva para prepararte.
+            Elige el grupo muscular de hoy y arranca con una cuenta regresiva para prepararte.
           </p>
           <button
             onClick={() => setContando(true)}
@@ -2228,7 +2228,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
               <p className="text-xs mt-1 font-medium" style={{ color: C.train }}>
                 {serieActual === 1
                   ? `${objetivoRepsRonda(nivelActual, 1)} repeticiones en la primera vuelta`
-                  : `Ronda ${serieActual}: apuntá a ${objetivoRepsRonda(nivelActual, serieActual)} repeticiones`}
+                  : `Ronda ${serieActual}: apunta a ${objetivoRepsRonda(nivelActual, serieActual)} repeticiones`}
               </p>
             )}
           </div>
@@ -2253,7 +2253,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
               <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.muted}` }}>
                 <HelpCircle size={14} color={C.muted} className="flex-shrink-0 mt-0.5" />
                 <span className="text-[11px]" style={{ color: C.text }}>
-                  <b>¿No tenés el equipo?</b> {ejercicioActual.sinEquipo}
+                  <b>¿No tienes el equipo?</b> {ejercicioActual.sinEquipo}
                 </span>
               </div>
             )}
@@ -2272,7 +2272,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
         {historialEj !== null && (
           <div className="mb-3">
             {historialEj.length === 0 ? (
-              <p className="text-xs" style={{ color: C.muted }}>Todavía no tenés marcas en este ejercicio. ¡Esta va a ser tu primera! 💪</p>
+              <p className="text-xs" style={{ color: C.muted }}>Todavía no tienes marcas en este ejercicio. ¡Esta va a ser tu primera! 💪</p>
             ) : (
               <>
                 <div className="flex items-center justify-between mb-1">
@@ -2374,7 +2374,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
                   ))}
                 </div>
                 <p className="text-[10px] text-center" style={{ color: C.muted }}>
-                  Suma sola a ese ritmo, no hace falta tocar la pantalla en cada repetición. Apretá Iniciar y arrancá a entrenar.
+                  Suma sola a ese ritmo, no hace falta tocar la pantalla en cada repetición. Aprieta Iniciar y arranca a entrenar.
                 </p>
                 <button
                   onClick={() => setAutoCorriendo((c) => !c)}
@@ -2621,7 +2621,7 @@ function PanelComidasDia({ perfil }) {
         </button>
       </div>
       <p className="text-xs mb-3" style={{ color: C.muted }}>
-        Objetivo diario: {perfil.kcal} kcal · P{perfil.prot}g · C{perfil.carb}g · G{perfil.grasa}g. Esto es una sugerencia, repartila como te quede más cómoda.
+        Objetivo diario: {perfil.kcal} kcal · P{perfil.prot}g · C{perfil.carb}g · G{perfil.grasa}g. Esto es una sugerencia, repártela como te quede más cómoda.
       </p>
 
       {!editando ? (
@@ -2711,7 +2711,7 @@ function PanelRecetas({ onAgregar, objetivo }) {
         <span className="display text-sm" style={{ color: C.food }}>RECETAS SALUDABLES</span>
       </div>
       <p className="text-xs mb-3" style={{ color: C.muted }}>
-        Ideas simples y rápidas, ordenadas para tu objetivo de {NOMBRE_OBJETIVO[objetivo] || NOMBRE_OBJETIVO.mantener}. Tocá una para ver los ingredientes y cómo prepararla.
+        Ideas simples y rápidas, ordenadas para tu objetivo de {NOMBRE_OBJETIVO[objetivo] || NOMBRE_OBJETIVO.mantener}. Toca una para ver los ingredientes y cómo prepararla.
       </p>
       <div className="flex flex-wrap gap-2 mb-3">
         <button
@@ -2867,7 +2867,7 @@ function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, acceso
         <PanelHeladera restanteKcal={Math.max(perfil.kcal - totales.kcal, 0)} onAgregarComida={onAgregar} accesoPremium={accesoPremium} onBloqueado={onBloqueado} />
       )}
 
-      <FilaColapsable icon={Settings} color={C.muted} titulo="Cuánto debés comer por día" abierto={verComidasDia} onClick={() => setVerComidasDia((v) => !v)} />
+      <FilaColapsable icon={Settings} color={C.muted} titulo="Cuánto debes comer por día" abierto={verComidasDia} onClick={() => setVerComidasDia((v) => !v)} />
       {verComidasDia && <PanelComidasDia perfil={perfil} />}
 
       <FilaColapsable icon={Plus} color={C.food} titulo="Agregar rápido" abierto={verAgregarRapido} onClick={() => setVerAgregarRapido((v) => !v)} />
@@ -2955,7 +2955,7 @@ function PanelPlanSemanal({ progresion }) {
     <Panel>
       <div className="display text-sm mb-1" style={{ color: C.muted }}>PLAN SEMANAL SUGERIDO</div>
       <p className="text-[10px] mb-3" style={{ color: C.muted }}>
-        Una idea para no tener que pensar qué entrenar cada día. Es una sugerencia, no una obligación: en Entreno podés elegir el grupo que quieras, cualquier día.
+        Una idea para no tener que pensar qué entrenar cada día. Es una sugerencia, no una obligación: en Entreno puedes elegir el grupo que quieras, cualquier día.
       </p>
       <div className="flex flex-col gap-2">
         {[1, 2, 3, 4, 5].map((dia) => {
@@ -2978,7 +2978,7 @@ function PanelPlanSemanal({ progresion }) {
         })}
         <div className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
           <div className="text-xs font-medium" style={{ color: C.muted }}>Sábado y domingo</div>
-          <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>Descanso, o entrená igual si tenés ganas.</p>
+          <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>Descanso, o entrena igual si tienes ganas.</p>
         </div>
       </div>
     </Panel>
@@ -3014,7 +3014,7 @@ function VistaConsejos({ perfil, progresion }) {
           <Dumbbell size={16} color={C.train} />
           <span className="display text-sm" style={{ color: C.train }}>TÉCNICA POR GRUPO MUSCULAR</span>
         </div>
-        <p className="text-[10px] mb-3" style={{ color: C.muted }}>Tocá un grupo para ver el consejo de cada ejercicio.</p>
+        <p className="text-[10px] mb-3" style={{ color: C.muted }}>Toca un grupo para ver el consejo de cada ejercicio.</p>
         <div className="flex flex-col gap-2">
           {Object.entries(TRACKS).map(([key, track]) => (
             <div key={key}>
@@ -3108,7 +3108,7 @@ function VistaSugerencias({ perfil }) {
       setEstrellas(5);
       cargar();
     } catch (err) {
-      setMensaje(err.message || "No se pudo publicar. Probá de nuevo.");
+      setMensaje(err.message || "No se pudo publicar. Prueba de nuevo.");
     } finally {
       setEnviando(false);
     }
@@ -3133,7 +3133,7 @@ function VistaSugerencias({ perfil }) {
           <span className="display text-sm" style={{ color: C.food }}>SUGERENCIAS</span>
         </div>
         <p className="text-[10px] mb-3" style={{ color: C.muted }}>
-          Contanos qué te parece la app y qué le agregarías. Lo ve todo el mundo.
+          Cuéntanos qué te parece la app y qué le agregarías. Lo ve todo el mundo.
         </p>
         {promedio !== null && (
           <div className="flex items-center gap-2 mb-3">
@@ -3546,7 +3546,7 @@ function PanelPeso({ objetivo, onEditarObjetivo }) {
         </button>
       </div>
       {ultimos.length < 2 ? (
-        <p className="text-xs" style={{ color: C.muted }}>Registrá tu peso un par de veces para ver la evolución.</p>
+        <p className="text-xs" style={{ color: C.muted }}>Registra tu peso un par de veces para ver la evolución.</p>
       ) : (
         <ResponsiveContainer width="100%" height={160}>
           <LineChart data={ultimos}>
@@ -3729,7 +3729,7 @@ function AdminCodigos({ onCerrar }) {
             {seccion === "codigos" && (
               <div>
                 <p className="text-[10px] mb-3" style={{ color: C.muted }}>
-                  Mercado Pago activa Premium automáticamente al confirmar el pago. Usá esto solo para casos manuales
+                  Mercado Pago activa Premium automáticamente al confirmar el pago. Usa esto solo para casos manuales
                   (promociones, cortesías). Cada código es de un solo uso.
                 </p>
                 <button onClick={generar} disabled={generando} className="w-full py-2 rounded font-medium mb-3" style={{ background: C.food, color: C.bg, opacity: generando ? 0.5 : 1 }}>
@@ -3803,7 +3803,7 @@ function Onboarding({ onCompletar, storageDisponible }) {
             <Dumbbell size={40} color={C.train} />
             <h1 className="display text-2xl font-bold">CALISTENIA <span style={{ color: C.train }}>/</span> NUTRICIÓN</h1>
             <p className="text-sm" style={{ color: C.muted }}>
-              Entrená con progresiones de peso corporal y comé en base a tus calorías, todo en una sola app. Vamos a hacerte unas preguntas rápidas para armar tu plan.
+              Entrena con progresiones de peso corporal y come en base a tus calorías, todo en una sola app. Vamos a hacerte unas preguntas rápidas para armar tu plan.
             </p>
             <div className="rounded-full px-3 py-1.5 mono text-[11px]" style={{ background: C.foodDim, color: C.food, border: `1px solid ${C.food}` }}>
               {DIAS_PRUEBA} días gratis · después {PRECIO_PREMIUM}/mes
@@ -3847,8 +3847,8 @@ function Onboarding({ onCompletar, storageDisponible }) {
         {paso === 2 && (
           <div className="flex-1">
             <div className="display text-sm mb-1" style={{ color: C.muted }}>PASO 2 DE 3</div>
-            <h2 className="text-lg font-semibold mb-1">Contanos de vos</h2>
-            <p className="text-xs mb-4" style={{ color: C.muted }}>Con esto calculamos tu objetivo de calorías y macros (podés ajustarlo cuando quieras).</p>
+            <h2 className="text-lg font-semibold mb-1">Cuéntanos de ti</h2>
+            <p className="text-xs mb-4" style={{ color: C.muted }}>Con esto calculamos tu objetivo de calorías y macros (puedes ajustarlo cuando quieras).</p>
             <div className="flex flex-col gap-2">
               <div className="flex gap-2">
                 <input type="number" placeholder="Peso (kg)" value={datos.peso} onChange={(e) => setDatos({ ...datos, peso: e.target.value })} className="rounded px-3 py-2 text-sm w-full mono" style={{ background: C.panel, color: C.text, border: `1px solid ${C.border}` }} />
@@ -3875,7 +3875,7 @@ function Onboarding({ onCompletar, storageDisponible }) {
         {paso === 3 && (
           <div className="flex-1">
             <div className="display text-sm mb-1" style={{ color: C.muted }}>PASO 3 DE 3</div>
-            <h2 className="text-lg font-semibold mb-4">¿Cómo te describís hoy?</h2>
+            <h2 className="text-lg font-semibold mb-4">¿Cómo te describes hoy?</h2>
             <div className="flex flex-col gap-2">
               {NIVEL_OPCIONES.map((n) => (
                 <button
@@ -3945,7 +3945,7 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
       }
     }
     setForm({ ...form, objetivo: nuevoObjetivo });
-    setAvisoObjetivo({ ok: false, texto: "Completá tu peso, altura y edad en la calculadora de abajo para recalcular tus calorías automáticamente." });
+    setAvisoObjetivo({ ok: false, texto: "Completa tu peso, altura y edad en la calculadora de abajo para recalcular tus calorías automáticamente." });
     setMostrarCalc(true);
   };
 
@@ -3979,7 +3979,7 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
             <p className="text-[9px] mt-1" style={{ color: avisoObjetivo.ok ? C.food : C.train }}>{avisoObjetivo.texto}</p>
           ) : (
             <p className="text-[9px] mt-1" style={{ color: C.muted }}>
-              ¿Ya llegaste a tu meta? Cambiá el objetivo cuando quieras: si ya cargaste tu peso, altura y edad, recalculamos tus calorías solas.
+              ¿Ya llegaste a tu meta? Cambia el objetivo cuando quieras: si ya cargaste tu peso, altura y edad, recalculamos tus calorías solas.
             </p>
           )}
         </div>
@@ -3989,7 +3989,7 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
           className="w-full text-left text-xs mono mb-3 px-3 py-2 rounded"
           style={{ background: C.panelAlt, color: C.food, border: `1px solid ${C.border}` }}
         >
-          {mostrarCalc ? "Ocultar calculadora automática" : "¿No sabés cuántas calorías necesitás? Calculalo acá"}
+          {mostrarCalc ? "Ocultar calculadora automática" : "¿No sabes cuántas calorías necesitas? Calcúlalo acá"}
         </button>
 
         {mostrarCalc && (
@@ -4015,7 +4015,7 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
             <button onClick={calcular} className="py-2 rounded text-sm font-medium" style={{ background: C.food, color: C.bg }}>
               Calcular y completar
             </button>
-            <p className="text-[9px]" style={{ color: C.muted }}>Estimación orientativa (fórmula Mifflin-St Jeor). Ajustala si tenés indicación de un profesional.</p>
+            <p className="text-[9px]" style={{ color: C.muted }}>Estimación orientativa (fórmula Mifflin-St Jeor). Ajústala si tienes indicación de un profesional.</p>
           </div>
         )}
 
@@ -4068,7 +4068,7 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
           className="flex items-center justify-center gap-1 w-full text-center text-[10px] mt-3 underline"
           style={{ color: C.food }}
         >
-          <MessageCircle size={11} /> ¿Necesitás ayuda? Escribinos por WhatsApp
+          <MessageCircle size={11} /> ¿Necesitas ayuda? Escríbenos por WhatsApp
         </a>
         <button onClick={onVerTerminos} className="w-full text-center text-[10px] mt-3 underline" style={{ color: C.muted }}>
           Términos y Privacidad
@@ -4089,7 +4089,7 @@ const AYUDA_SECCIONES = [
     puntos: [
       "Calorías del día, plan de entrenamiento sugerido y lo que ya cargaste.",
       "\"+ Ejercicio\" / \"+ Comida\" cargan algo puntual sin cambiar de pestaña.",
-      "\"Invitá y ganá días gratis\" comparte tu código para sumar Premium extra.",
+      "\"Invita y gana días gratis\" comparte tu código para sumar Premium extra.",
     ],
   },
   {
@@ -4097,7 +4097,7 @@ const AYUDA_SECCIONES = [
     color: "train",
     titulo: "Entreno",
     puntos: [
-      "Elegí el grupo muscular y tocá \"Iniciar entrenamiento\" (cuenta regresiva 3-2-1).",
+      "Elige el grupo muscular y toca \"Iniciar entrenamiento\" (cuenta regresiva 3-2-1).",
       "El contador de repeticiones suma solo al ritmo que elijas; \"Serie terminada\" la guarda y arranca el descanso.",
       "Niveles 1 a 3 de cada grupo son gratis; del 4 en adelante, Premium.",
     ],
@@ -4109,8 +4109,8 @@ const AYUDA_SECCIONES = [
     puntos: [
       "Macros del día y accesos rápidos para cargar comidas o buscar alimentos.",
       "\"Qué comer ahora\" recomienda según lo que te falta de macros hoy (Premium).",
-      "\"En la heladera tengo...\": marcá ingredientes y te sugiere qué recetas armar (Premium).",
-      "Editá cómo repartís las calorías entre desayuno, almuerzo, merienda y cena.",
+      "\"En la heladera tengo...\": marca ingredientes y te sugiere qué recetas armar (Premium).",
+      "Edita cómo repartes las calorías entre desayuno, almuerzo, merienda y cena.",
     ],
   },
   {
@@ -4133,7 +4133,7 @@ const AYUDA_SECCIONES = [
     icon: Star,
     color: "food",
     titulo: "Sugerir",
-    puntos: ["Dejá tu opinión con estrellas: la ven todos los usuarios, con tu nombre. Podés borrar la tuya cuando quieras."],
+    puntos: ["Deja tu opinión con estrellas: la ven todos los usuarios, con tu nombre. Puedes borrar la tuya cuando quieras."],
   },
   {
     icon: Crown,
@@ -4142,7 +4142,7 @@ const AYUDA_SECCIONES = [
     puntos: [
       `${DIAS_PRUEBA} días de prueba gratis con acceso completo.`,
       `Después, ${PRECIO_PREMIUM}/mes vía Mercado Pago (se renueva solo cada 30 días), o con un código de activación.`,
-      "Invitá amigos con tu código (panel en Hoy) y ambos ganan días extra.",
+      "Invita amigos con tu código (panel en Hoy) y ambos ganan días extra.",
     ],
   },
 ];
@@ -4156,7 +4156,7 @@ function ModalAyuda({ onCerrar }) {
           <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
         </div>
         <p className="text-[11px] mb-4" style={{ color: C.muted }}>
-          Una guía rápida de qué encontrás en cada pestaña.
+          Una guía rápida de qué encuentras en cada pestaña.
         </p>
         <div className="flex flex-col gap-4">
           {AYUDA_SECCIONES.map((s) => {
@@ -4184,7 +4184,7 @@ function ModalAyuda({ onCerrar }) {
           className="flex items-center justify-center gap-1 w-full text-center text-[10px] mt-4 underline"
           style={{ color: C.food }}
         >
-          <MessageCircle size={11} /> ¿Seguís con dudas? Escribinos por WhatsApp
+          <MessageCircle size={11} /> ¿Sigues con dudas? Escríbenos por WhatsApp
         </a>
       </div>
     </div>
@@ -4203,25 +4203,25 @@ function ModalTerminos({ onCerrar }) {
           <div>
             <div className="font-medium mb-1" style={{ color: C.food }}>Qué es esta app</div>
             <p style={{ color: C.muted }}>
-              Calistenia + Nutrición es una herramienta de entrenamiento y registro alimentario. No reemplaza el asesoramiento de un médico, nutricionista o entrenador con matrícula. Si tenés una condición de salud preexistente, consultá a un profesional antes de empezar cualquier rutina.
+              Calistenia + Nutrición es una herramienta de entrenamiento y registro alimentario. No reemplaza el asesoramiento de un médico, nutricionista o entrenador con matrícula. Si tienes una condición de salud preexistente, consulta a un profesional antes de empezar cualquier rutina.
             </p>
           </div>
           <div>
             <div className="font-medium mb-1" style={{ color: C.food }}>Qué datos guardamos</div>
             <p style={{ color: C.muted }}>
-              Guardamos lo que cargás vos: perfil (objetivo, peso, altura, calorías), tus registros de entrenamiento y comidas, y tu código de referido. Esta información se guarda asociada a tu cuenta y no se comparte ni se vende a terceros.
+              Guardamos lo que cargas tú: perfil (objetivo, peso, altura, calorías), tus registros de entrenamiento y comidas, y tu código de referido. Esta información se guarda asociada a tu cuenta y no se comparte ni se vende a terceros.
             </p>
           </div>
           <div>
             <div className="font-medium mb-1" style={{ color: C.food }}>Suscripción Premium</div>
             <p style={{ color: C.muted }}>
-              Incluye {DIAS_PRUEBA} días de prueba gratis. Pasado ese período, el plan Premium se cobra por mes a través de Mercado Pago. Podés dejar de usarla cuando quieras: no se renueva sola sin que actives un nuevo pago.
+              Incluye {DIAS_PRUEBA} días de prueba gratis. Pasado ese período, el plan Premium se cobra por mes a través de Mercado Pago. Puedes dejar de usarla cuando quieras: no se renueva sola sin que actives un nuevo pago.
             </p>
           </div>
           <div>
             <div className="font-medium mb-1" style={{ color: C.food }}>Borrar tus datos o contactarnos</div>
             <p style={{ color: C.muted }}>
-              Si en algún momento querés que borremos tu información, o tenés cualquier duda, escribinos por WhatsApp al{" "}
+              Si en algún momento quieres que borremos tu información, o tienes cualquier duda, escríbenos por WhatsApp al{" "}
               <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" style={{ color: C.food }}>
                 +598 92 778 233
               </a>
