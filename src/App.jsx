@@ -706,7 +706,14 @@ export default function App() {
           />
         )}
         {tab === "progreso" && (
-          <VistaProgreso semana={semana} perfil={perfil} progresion={progresion} accesoPremium={accesoPremium} onBloqueado={() => setMostrarPlanes(true)} />
+          <VistaProgreso
+            semana={semana}
+            perfil={perfil}
+            progresion={progresion}
+            accesoPremium={accesoPremium}
+            onBloqueado={() => setMostrarPlanes(true)}
+            onEditarObjetivo={() => setEditandoPerfil(true)}
+          />
         )}
         {tab === "consejos" && <VistaConsejos perfil={perfil} />}
       </main>
@@ -2562,7 +2569,7 @@ function VistaConsejos({ perfil }) {
   );
 }
 
-function VistaProgreso({ semana, perfil, progresion, accesoPremium, onBloqueado }) {
+function VistaProgreso({ semana, perfil, progresion, accesoPremium, onBloqueado, onEditarObjetivo }) {
   if (!accesoPremium) {
     return (
       <Panel>
@@ -2604,7 +2611,7 @@ function VistaProgreso({ semana, perfil, progresion, accesoPremium, onBloqueado 
 
       <PanelCalendario />
 
-      <PanelPeso objetivo={perfil.objetivo} />
+      <PanelPeso objetivo={perfil.objetivo} onEditarObjetivo={onEditarObjetivo} />
 
       <Panel>
         <div className="display text-sm mb-3" style={{ color: C.muted }}>CALORÍAS ÚLTIMOS 7 DÍAS</div>
@@ -2796,7 +2803,7 @@ function PanelCalendario() {
   );
 }
 
-function PanelPeso({ objetivo }) {
+function PanelPeso({ objetivo, onEditarObjetivo }) {
   const [historial, setHistorial] = useState(null);
   const [pesoHoy, setPesoHoy] = useState("");
   const [guardando, setGuardando] = useState(false);
@@ -2842,10 +2849,11 @@ function PanelPeso({ objetivo }) {
   const ultimoPeso = historial.length > 0 ? historial[historial.length - 1].kg : null;
 
   let mensajeMeta = null;
+  let yaLlegoMeta = false;
   if (metaPeso && ultimoPeso !== null) {
     const faltante = ultimoPeso - metaPeso.kg;
-    const yaLlego = objetivo === "subir" ? faltante >= 0 : objetivo === "bajar" ? faltante <= 0 : Math.abs(faltante) < 0.5;
-    if (yaLlego) {
+    yaLlegoMeta = objetivo === "subir" ? faltante >= 0 : objetivo === "bajar" ? faltante <= 0 : Math.abs(faltante) < 0.5;
+    if (yaLlegoMeta) {
       mensajeMeta = "¡Llegaste a tu meta de peso! 🎉";
     } else {
       mensajeMeta = `Te ${Math.abs(faltante) === 1 ? "falta" : "faltan"} ${Math.abs(faltante).toFixed(1)} kg para llegar a tu meta de ${metaPeso.kg} kg.`;
@@ -2893,7 +2901,16 @@ function PanelPeso({ objetivo }) {
       )}
 
       {mensajeMeta && (
-        <p className="text-xs mb-3" style={{ color: C.food }}>{mensajeMeta}</p>
+        <p className="text-xs mb-2" style={{ color: C.food }}>{mensajeMeta}</p>
+      )}
+      {yaLlegoMeta && (
+        <button
+          onClick={onEditarObjetivo}
+          className="w-full flex items-center justify-center gap-1 py-2 rounded text-xs font-medium mb-3"
+          style={{ background: C.foodDim, color: C.food, border: `1px solid ${C.food}` }}
+        >
+          <Crown size={12} /> ¿Y ahora? Cambiar mi objetivo
+        </button>
       )}
 
       <div className="flex gap-2 mb-3">
@@ -3339,6 +3356,29 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
         <div className="flex justify-between items-center mb-4">
           <span className="display text-sm" style={{ color: C.muted }}>OBJETIVOS DIARIOS</span>
           <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+
+        <div className="mb-4">
+          <div className="text-xs mb-2" style={{ color: C.muted }}>Tu objetivo</div>
+          <div className="flex gap-2">
+            {OBJETIVOS.map((o) => (
+              <button
+                key={o.id}
+                onClick={() => setForm({ ...form, objetivo: o.id })}
+                className="flex-1 text-xs py-2 rounded text-center"
+                style={{
+                  background: form.objetivo === o.id ? C.train : C.panelAlt,
+                  color: form.objetivo === o.id ? C.panel : C.muted,
+                  border: `1px solid ${form.objetivo === o.id ? C.train : C.border}`,
+                }}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-[9px] mt-1" style={{ color: C.muted }}>
+            ¿Ya llegaste a tu meta? Cambiá el objetivo cuando quieras — tus calorías y macros los podés ajustar abajo o recalcular con la calculadora.
+          </p>
         </div>
 
         <button
