@@ -1872,12 +1872,38 @@ function reproducirBeep() {
 // externa) para poder entrenar sin mirar ni tocar la pantalla. Cancela lo que
 // esté diciendo antes de hablar de nuevo para no acumular frases atrasadas
 // cuando el ritmo de repeticiones es rápido.
+
+// Busca entre las voces en español que ofrece el navegador/celular una que
+// suene masculina por nombre (varía según el dispositivo: "Jorge", "Pablo",
+// "Diego", "Carlos"...). Si no encuentra ninguna, se usa la voz por defecto
+// pero igual se le baja el tono (ver utt.pitch en hablar()) para que suene
+// más grave.
+let vozCoach = null;
+function elegirVozCoach() {
+  try {
+    if (!("speechSynthesis" in window)) return null;
+    const voces = window.speechSynthesis.getVoices();
+    if (!voces.length) return null;
+    const esVoces = voces.filter((v) => v.lang && v.lang.toLowerCase().startsWith("es"));
+    const candidatas = esVoces.length ? esVoces : voces;
+    const nombreMasculino = /jorge|pablo|diego|carlos|miguel|raul|raúl|juan|male|hombre/i;
+    return candidatas.find((v) => nombreMasculino.test(v.name)) || candidatas[0] || null;
+  } catch {
+    return null;
+  }
+}
+
 if (typeof window !== "undefined" && "speechSynthesis" in window) {
   // Dispara la carga de voces del navegador apenas arranca la app: si se
   // llama a speak() antes de que las voces terminen de cargar (algo
   // frecuente en Chrome de escritorio), la primera frase se pierde en
-  // silencio.
+  // silencio. La lista suele llegar de forma asíncrona (evento
+  // "voiceschanged"), por eso se vuelve a elegir voz cuando eso pasa.
   window.speechSynthesis.getVoices();
+  vozCoach = elegirVozCoach();
+  window.speechSynthesis.addEventListener("voiceschanged", () => {
+    vozCoach = elegirVozCoach();
+  });
 }
 
 function hablar(texto) {
@@ -1888,6 +1914,8 @@ function hablar(texto) {
       const utt = new SpeechSynthesisUtterance(texto);
       utt.lang = "es-ES";
       utt.rate = 1.05;
+      utt.pitch = 0.75;
+      if (vozCoach) utt.voice = vozCoach;
       synth.speak(utt);
     };
     // Cancelar y hablar en el mismo instante deja la síntesis de voz
@@ -2071,16 +2099,23 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
 
   useEffect(() => {
     if (!autoCorriendo) return;
+    // Se frena solo al llegar a las repeticiones objetivo de esta ronda (ej.
+    // 12 en la primera vuelta) y cierra la serie sin que haya que tocar nada.
+    const objetivo = objetivoRepsRonda(nivelActual, serieActual);
     const id = setInterval(() => {
       setContadorReps((r) => {
         const nuevo = r + 1;
         if (vozActiva) hablar(String(nuevo));
+        if (nuevo >= objetivo) {
+          clearInterval(id);
+          setTimeout(() => completarSerieReps(nuevo), 400);
+        }
         return nuevo;
       });
       try { navigator.vibrate?.(15); } catch {}
     }, cadenciaSeg * 1000);
     return () => clearInterval(id);
-  }, [autoCorriendo, cadenciaSeg, vozActiva]);
+  }, [autoCorriendo, cadenciaSeg, vozActiva, nivelActual, serieActual]);
 
   useEffect(() => {
     let cancelado = false;
@@ -2126,10 +2161,14 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             setCorriendo(false);
             try { navigator.vibrate?.(300); } catch {}
             reproducirBeep();
-            if (vozActiva) hablar("¡Arranca la próxima serie!");
+            if (vozActiva) hablar("¡Comienza de nuevo!");
             return 0;
           }
-          return prev - 1;
+          const restanteNuevo = prev - 1;
+          // Cuenta en voz alta los últimos segundos del descanso para no
+          // tener que mirar la pantalla y saber justo cuándo arrancar.
+          if (vozActiva && restanteNuevo <= 5) hablar(String(restanteNuevo));
+          return restanteNuevo;
         });
       }, 1000);
     }
@@ -2147,6 +2186,18 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
     setDescansoRestante(duracion);
     setCorriendo(true);
     if (vozActiva) hablar(`Serie completa. Descansa ${duracion} segundos.`);
+  };
+
+  // Cierra la serie de repeticiones (a mano con "Serie terminada" o sola
+  // cuando el conteo automático llega al objetivo de la ronda) y arranca el
+  // descanso.
+  const completarSerieReps = (repsFinal) => {
+    if (repsFinal <= 0) return;
+    onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, series: 1, reps: repsFinal });
+    setContadorReps(0);
+    setSerieActual((s) => s + 1);
+    setAutoCorriendo(false);
+    iniciarDescanso();
   };
   const pausarReanudar = () => setCorriendo((c) => !c);
   const reiniciarDescanso = () => {
@@ -2410,14 +2461,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
                 -1
               </button>
               <button
-                onClick={() => {
-                  if (contadorReps <= 0) return;
-                  onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, series: 1, reps: contadorReps });
-                  setContadorReps(0);
-                  setSerieActual((s) => s + 1);
-                  setAutoCorriendo(false);
-                  iniciarDescanso();
-                }}
+                onClick={() => completarSerieReps(contadorReps)}
                 disabled={contadorReps <= 0}
                 className="flex-[2] flex items-center justify-center gap-1 py-2 rounded font-medium disabled:opacity-40"
                 style={{ background: C.food, color: C.bg }}
