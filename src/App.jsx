@@ -2009,6 +2009,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   const [modoAuto, setModoAuto] = useState(true);
   const [cadenciaSeg, setCadenciaSeg] = useState(2);
   const [autoCorriendo, setAutoCorriendo] = useState(false);
+  const [verMasConsejos, setVerMasConsejos] = useState(false);
 
   useEffect(() => {
     setModoTiempo(Boolean(ejercicioActual.porTiempo));
@@ -2017,6 +2018,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
     setContadorReps(0);
     setSerieActual(1);
     setAutoCorriendo(false);
+    setVerMasConsejos(false);
   }, [ejercicioActual.nombre]);
 
   useEffect(() => {
@@ -2161,27 +2163,39 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           </div>
         </div>
 
-        <div className="flex items-start gap-2 rounded px-3 py-2 mb-3 mt-2" style={{ background: C.panelAlt, border: `1px dashed ${C.food}` }}>
-          <Lightbulb size={14} color={C.food} className="flex-shrink-0 mt-0.5" />
-          <span className="text-[11px]" style={{ color: C.text }}>{sugerirDescanso(nivelActual).texto}</span>
-        </div>
+        <button
+          onClick={() => setVerMasConsejos((v) => !v)}
+          className="flex items-center gap-1 text-[11px] mono mb-3 mt-2"
+          style={{ color: C.food }}
+        >
+          {verMasConsejos ? "▲ Ocultar consejos" : "▾ Ver consejos (descanso, equipo)"}
+        </button>
 
-        {ejercicioActual.sinEquipo && (
-          <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.muted}` }}>
-            <HelpCircle size={14} color={C.muted} className="flex-shrink-0 mt-0.5" />
-            <span className="text-[11px]" style={{ color: C.text }}>
-              <b>¿No tenés el equipo?</b> {ejercicioActual.sinEquipo}
-            </span>
-          </div>
-        )}
+        {verMasConsejos && (
+          <>
+            <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.food}` }}>
+              <Lightbulb size={14} color={C.food} className="flex-shrink-0 mt-0.5" />
+              <span className="text-[11px]" style={{ color: C.text }}>{sugerirDescanso(nivelActual).texto}</span>
+            </div>
 
-        {esVeterano && ejercicioActual.adaptacionVeterano && (
-          <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.train}` }}>
-            <Lightbulb size={14} color={C.train} className="flex-shrink-0 mt-0.5" />
-            <span className="text-[11px]" style={{ color: C.text }}>
-              <b>Cuidando las articulaciones:</b> {ejercicioActual.adaptacionVeterano}
-            </span>
-          </div>
+            {ejercicioActual.sinEquipo && (
+              <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.muted}` }}>
+                <HelpCircle size={14} color={C.muted} className="flex-shrink-0 mt-0.5" />
+                <span className="text-[11px]" style={{ color: C.text }}>
+                  <b>¿No tenés el equipo?</b> {ejercicioActual.sinEquipo}
+                </span>
+              </div>
+            )}
+
+            {esVeterano && ejercicioActual.adaptacionVeterano && (
+              <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.train}` }}>
+                <Lightbulb size={14} color={C.train} className="flex-shrink-0 mt-0.5" />
+                <span className="text-[11px]" style={{ color: C.text }}>
+                  <b>Cuidando las articulaciones:</b> {ejercicioActual.adaptacionVeterano}
+                </span>
+              </div>
+            )}
+          </>
         )}
 
         {historialEj !== null && (
