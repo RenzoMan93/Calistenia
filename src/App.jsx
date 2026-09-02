@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Send, Lightbulb, HelpCircle, Star, Trash2 } from "lucide-react";
+import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Lightbulb, HelpCircle, Star, Trash2 } from "lucide-react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, ReferenceLine, ResponsiveContainer, Tooltip } from "recharts";
 import {
   safeGet,
@@ -17,7 +17,6 @@ import {
   adminActivarPremium,
   redeemPremiumCode,
   crearPreferenciaPago,
-  llamarCoach,
   usuarioActualId,
   listarSugerencias,
   crearSugerencia,
@@ -415,7 +414,6 @@ const PLAN_PREMIUM = [
   "Llegá a movimientos avanzados de verdad (muscle-up, pistol squat, front lever) con progresión guiada paso a paso, sin quemar etapas",
   "Nunca te quedás sin saber qué comer: recetas armadas con lo que ya tenés en la heladera",
   "Sabé exactamente qué comer en cada momento del día para llegar justo a tus macros",
-  "Resolvé cualquier duda de técnica o nutrición al instante, como tener un coach en el bolsillo",
   "Registrá cualquier comida que hagas, sin límites",
   "Viví tu progreso real: gráfico de peso corporal y tu mejor marca en cada ejercicio",
   "Logros e insignias que te mantienen constante",
@@ -519,7 +517,6 @@ export default function App() {
   const [mostrarPlanes, setMostrarPlanes] = useState(false);
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [mostrarAyuda, setMostrarAyuda] = useState(false);
-  const [mostrarChat, setMostrarChat] = useState(false);
   const [onboarding, setOnboarding] = useState(null);
   const [mostrarAdmin, setMostrarAdmin] = useState(false);
   const [tapsLogo, setTapsLogo] = useState(0);
@@ -846,16 +843,6 @@ export default function App() {
       )}
       {mostrarTerminos && <ModalTerminos onCerrar={() => setMostrarTerminos(false)} />}
       {mostrarAyuda && <ModalAyuda onCerrar={() => setMostrarAyuda(false)} />}
-      {mostrarChat && (
-        <ChatCoach
-          accesoPremium={accesoPremium}
-          onBloqueado={() => {
-            setMostrarChat(false);
-            setMostrarPlanes(true);
-          }}
-          onCerrar={() => setMostrarChat(false)}
-        />
-      )}
 
       {mostrarAdmin && <AdminCodigos onCerrar={() => setMostrarAdmin(false)} />}
       {sugerenciaNivel && (
@@ -866,24 +853,6 @@ export default function App() {
           onDescartar={descartarSugerenciaNivel}
         />
       )}
-
-      <button
-        onClick={() => setMostrarChat(true)}
-        aria-label="Consultar al coach"
-        className="fixed flex items-center justify-center"
-        style={{
-          bottom: 74,
-          right: 16,
-          width: 48,
-          height: 48,
-          borderRadius: "50%",
-          background: C.train,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-          zIndex: 40,
-        }}
-      >
-        <MessageCircle size={22} color={C.panel} />
-      </button>
 
       <nav
         className="fixed bottom-0 left-0 right-0 flex justify-around py-2"
@@ -3389,163 +3358,6 @@ function PanelPeso({ objetivo, onEditarObjetivo }) {
   );
 }
 
-const SINONIMOS_TRACK = {
-  empuje: ["empuje", "pecho", "flexion", "flexiones", "triceps", "hombro", "hombros", "fondos"],
-  traccion: ["traccion", "tracción", "espalda", "dominada", "dominadas", "biceps", "remo", "muscle"],
-  piernas: ["pierna", "piernas", "sentadilla", "cuadriceps", "gluteo", "gluteos", "pistol", "zancada"],
-  core: ["core", "abdominal", "abdominales", "abs", "plancha", "dragon", "lever", "l-sit", "lsit"],
-};
-
-const KEYWORDS_CONSEJOS_LOCAL = [
-  { palabras: ["agua", "hidrat", "tomar liquido"], texto: "Tomá al menos 2 litros de agua por día, más si entrenás fuerte o hace calor." },
-  { palabras: ["dormir", "sueno", "sueño", "descanso", "descansar"], texto: "Dormí bien: la falta de sueño afecta tanto la recuperación muscular como el apetito." },
-  { palabras: ["proteina", "proteína"], texto: "Priorizá proteína en cada comida (carne, pollo, huevo, yogur) para acompañar la calistenia." },
-  { palabras: ["carbohidrato", "carbo"], texto: "Elegí carbohidratos con fibra (arroz, batata, avena, frutas) en vez de harinas refinadas." },
-  { palabras: ["grasa"], texto: "Dejá espacio para grasas buenas: palta, frutos secos, aceite de oliva." },
-  { palabras: ["bajar de peso", "adelgazar", "perder peso"], texto: "Para bajar de peso, priorizá alimentos que dan saciedad con pocas calorías: vegetales, proteína magra, legumbres, y un déficit moderado (no extremo)." },
-  { palabras: ["subir de peso", "engordar", "ganar musculo", "ganar masa"], texto: "Para subir de peso, no le tengas miedo a sumar calorías extra: frutos secos, más comidas en el día, carbohidratos y grasas de calidad." },
-  { palabras: ["dolor", "lesion", "lesión", "molestia"], texto: "Si tenés dolor persistente o una molestia que no baja, mejor consultá a un profesional de la salud antes de seguir entrenando esa zona." },
-];
-
-function buscarTrackPorTexto(texto) {
-  for (const [track, palabras] of Object.entries(SINONIMOS_TRACK)) {
-    if (palabras.some((p) => texto.includes(p))) return track;
-  }
-  return null;
-}
-
-function responderLocal(pregunta) {
-  const texto = pregunta.toLowerCase();
-
-  for (const track of Object.values(TRACKS)) {
-    for (const ej of track.ejercicios) {
-      const palabrasEj = ej.nombre.toLowerCase().split(" ").filter((w) => w.length > 3);
-      if (palabrasEj.some((w) => texto.includes(w))) {
-        return `${ej.nombre}: ${ej.tip}`;
-      }
-    }
-  }
-
-  for (const a of ALIMENTOS) {
-    const nombreSimple = a.nombre.toLowerCase().split("(")[0].trim();
-    if (nombreSimple.length > 3 && texto.includes(nombreSimple)) {
-      return `${a.nombre} tiene aproximadamente ${a.kcal} kcal, ${a.prot}g de proteína, ${a.carb}g de carbohidratos y ${a.grasa}g de grasas.`;
-    }
-  }
-
-  const track = buscarTrackPorTexto(texto);
-  if (track) {
-    const info = TRACKS[track];
-    const ejemplos = info.ejercicios.slice(0, 3).map((e) => `• ${e.nombre}: ${e.tip}`).join("\n");
-    return `Para ${info.nombre.toLowerCase()} podés progresar así:\n${ejemplos}`;
-  }
-
-  for (const k of KEYWORDS_CONSEJOS_LOCAL) {
-    if (k.palabras.some((p) => texto.includes(p))) return k.texto;
-  }
-
-  return null;
-}
-
-function ChatCoach({ accesoPremium, onBloqueado, onCerrar }) {
-  const [mensajes, setMensajes] = useState([
-    { rol: "assistant", texto: "Hola, soy tu coach de calistenia. Contame qué duda tenés sobre algún ejercicio o progresión.", saludo: true },
-  ]);
-  const [input, setInput] = useState("");
-  const [cargando, setCargando] = useState(false);
-
-  if (!accesoPremium) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", zIndex: 60 }}>
-        <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-4 w-full max-w-sm">
-          <div className="flex justify-between items-center mb-3">
-            <span className="display text-sm" style={{ color: C.muted }}>COACH VIRTUAL</span>
-            <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
-          </div>
-          <Locked titulo="Consultas ilimitadas a un coach de calistenia" onBloqueado={onBloqueado} />
-        </div>
-      </div>
-    );
-  }
-
-  const enviar = async () => {
-    const texto = input.trim();
-    if (!texto || cargando) return;
-    const nuevos = [...mensajes, { rol: "user", texto }];
-    setMensajes(nuevos);
-    setInput("");
-    setCargando(true);
-
-    // La API exige que la conversación arranque con un turno "user": el saludo
-    // inicial es solo de la interfaz, no se manda como historial. Además se
-    // recortan los últimos 20 mensajes para no arrastrar conversaciones enormes.
-    const historial = nuevos
-      .filter((m) => !m.saludo)
-      .slice(-20)
-      .map((m) => ({ role: m.rol, content: m.texto }));
-
-    try {
-      const texto2 = await llamarCoach(historial);
-      setMensajes((prev) => [...prev, { rol: "assistant", texto: texto2 }]);
-    } catch (e) {
-      console.warn("El coach con IA no está disponible, uso el modo básico:", e);
-      const respuestaLocal = responderLocal(texto);
-      const texto2 = respuestaLocal
-        ? `${respuestaLocal}\n\n(Modo básico: en este momento no pudimos conectar con el coach con IA.)`
-        : "No tengo una respuesta puntual para eso en modo básico. Probá preguntar por un ejercicio o alimento específico.";
-      setMensajes((prev) => [...prev, { rol: "assistant", texto: texto2 }]);
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.6)", zIndex: 60 }}>
-      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-t-md sm:rounded-md w-full max-w-sm h-[75vh] flex flex-col">
-        <div className="flex justify-between items-center p-4" style={{ borderBottom: `1px solid ${C.border}` }}>
-          <div className="flex items-center gap-2">
-            <MessageCircle size={16} color={C.train} />
-            <span className="display text-sm" style={{ color: C.muted }}>COACH VIRTUAL</span>
-          </div>
-          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
-          {mensajes.map((m, i) => (
-            <div
-              key={i}
-              className="max-w-[85%] rounded-md px-3 py-2 text-sm"
-              style={{
-                alignSelf: m.rol === "user" ? "flex-end" : "flex-start",
-                background: m.rol === "user" ? C.train : C.panelAlt,
-                color: m.rol === "user" ? C.panel : C.text,
-              }}
-            >
-              {m.texto}
-            </div>
-          ))}
-          {cargando && (
-            <div className="text-xs mono" style={{ color: C.muted }}>El coach está escribiendo...</div>
-          )}
-        </div>
-
-        <div className="p-3 flex gap-2" style={{ borderTop: `1px solid ${C.border}` }}>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && enviar()}
-            placeholder="Ej: ¿cómo mejoro mi dominada?"
-            className="flex-1 rounded px-3 py-2 text-sm"
-            style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
-          />
-          <button onClick={enviar} disabled={cargando} className="flex items-center justify-center rounded px-3" style={{ background: C.train, color: C.panel, opacity: cargando ? 0.5 : 1 }}>
-            <Send size={16} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function AdminCodigos({ onCerrar }) {
   const [autorizado, setAutorizado] = useState(null);
@@ -4101,12 +3913,6 @@ const AYUDA_SECCIONES = [
     ],
   },
   {
-    icon: MessageCircle,
-    color: "train",
-    titulo: "Coach virtual",
-    puntos: ["Botón naranja flotante: preguntale dudas de técnica o nutrición (Premium)."],
-  },
-  {
     icon: Star,
     color: "food",
     titulo: "Sugerir",
@@ -4181,12 +3987,6 @@ function ModalTerminos({ onCerrar }) {
             <div className="font-medium mb-1" style={{ color: C.food }}>Qué es esta app</div>
             <p style={{ color: C.muted }}>
               Calistenia + Nutrición es una herramienta de entrenamiento y registro alimentario. No reemplaza el asesoramiento de un médico, nutricionista o entrenador con matrícula. Si tenés una condición de salud preexistente, consultá a un profesional antes de empezar cualquier rutina.
-            </p>
-          </div>
-          <div>
-            <div className="font-medium mb-1" style={{ color: C.food }}>Coach virtual</div>
-            <p style={{ color: C.muted }}>
-              Las respuestas del coach (con IA o en modo básico) son orientación general, no un diagnóstico ni una indicación médica. Ante dolor persistente o una lesión, consultá a un profesional de la salud.
             </p>
           </div>
           <div>

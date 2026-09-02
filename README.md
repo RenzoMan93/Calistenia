@@ -10,8 +10,6 @@ propia (Supabase) — ya no depende de tener cuenta paga de Claude.
 - **Backend**: Supabase (Postgres + Auth + Edge Functions).
 - **Pagos**: Mercado Pago (Checkout Pro) con activación automática de Premium
   vía webhook.
-- **Coach con IA**: proxy server-side a la API de Anthropic (Edge Function),
-  gateado a usuarios Premium.
 
 ## 1) Crear el proyecto Supabase
 
@@ -80,14 +78,12 @@ Instalá la [CLI de Supabase](https://supabase.com/docs/guides/cli) y logueate.
 supabase link --project-ref <tu-project-ref>
 
 # Secretos que necesitan las funciones:
-supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 supabase secrets set MP_ACCESS_TOKEN=APP_USR-...
 supabase secrets set APP_URL=https://tu-app.vercel.app
 supabase secrets set PROJECT_ANON_KEY=<tu anon/publishable key, Project Settings > API Keys>
 supabase secrets set PROJECT_SERVICE_KEY=<tu secret key (sb_secret_...), Project Settings > API Keys>
 
 # Deploy:
-supabase functions deploy coach
 supabase functions deploy mercadopago-create-preference
 supabase functions deploy mercadopago-webhook --no-verify-jwt
 ```
@@ -120,15 +116,6 @@ automáticamente, sin que tengas que generar ni mandar ningún código a mano.
 El panel oculto de códigos (5 taps en el logo) sigue disponible como método
 manual de respaldo (cortesías, promociones puntuales).
 
-## 7) Coach con IA
-
-Necesita tu propia API key de Anthropic (con facturación a tu cargo), seteada
-como secreto `ANTHROPIC_API_KEY` en Supabase (paso 6). La Edge Function
-`coach` verifica que quien llama esté autenticado y tenga acceso Premium
-(pago o dentro del trial) antes de gastar créditos. Si no está disponible o
-falla, la app cae automáticamente al respondedor local (`responderLocal` en
-`src/App.jsx`), sin IA.
-
 ## Estructura del proyecto
 
 ```
@@ -141,7 +128,6 @@ src/
 supabase/
   migrations/0001_init.sql   # Esquema completo + RLS + funciones RPC
   functions/
-    coach/                    # Proxy a Anthropic (gateado a Premium)
     mercadopago-create-preference/  # Crea el link de pago
     mercadopago-webhook/            # Activa Premium al confirmar el pago
 ```

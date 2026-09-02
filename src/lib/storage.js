@@ -198,20 +198,13 @@ export async function redeemPremiumCode(codigoIngresado) {
 }
 
 // ---------------------------------------------------------------------------
-// Mercado Pago y coach con IA — funciones del lado del servidor (Edge Functions)
+// Mercado Pago — funciones del lado del servidor (Edge Functions)
 // ---------------------------------------------------------------------------
 
 export async function crearPreferenciaPago() {
   const { data, error } = await supabase.functions.invoke("mercadopago-create-preference");
   if (error) throw error;
   return data?.init_point;
-}
-
-export async function llamarCoach(messages) {
-  const { data, error } = await supabase.functions.invoke("coach", { body: { messages } });
-  if (error) throw error;
-  if (!data?.texto) throw new Error("Respuesta vacía del coach");
-  return data.texto;
 }
 
 // ---------------------------------------------------------------------------
