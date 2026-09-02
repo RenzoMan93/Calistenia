@@ -795,7 +795,7 @@ export default function App() {
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
       `}</style>
 
-      <div className="max-w-md mx-auto">
+      <div className="max-w-2xl mx-auto">
       <header className="px-4 pt-6 pb-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${C.border}` }}>
         <div onClick={tocarLogo}>
           <div className="display text-xs uppercase" style={{ color: C.muted, letterSpacing: "0.15em" }}>Rutina + Plato</div>
@@ -919,7 +919,7 @@ export default function App() {
       )}
 
       <nav
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex justify-around py-2"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl flex justify-around py-2"
         style={{ background: C.panel, borderTop: `1px solid ${C.border}` }}
       >
         <NavBtn icon={Home} label="Hoy" activo={tab === "hoy"} onClick={() => setTab("hoy")} />
