@@ -322,42 +322,61 @@ function sugerirDesdeHeladera(seleccion, misMenus = []) {
 // coinciden en 1 ingrediente cada una (y parece que ignora el resto de lo
 // que elegiste). Para esos casos armamos una sugerencia genérica que sí usa
 // TODO lo seleccionado, a modo de idea rápida (sin macros exactos, así que
-// no se puede registrar como una comida con calorías precisas). El texto
-// cambia según el tipo de ingredientes: no tiene sentido decir "cociná todo
-// junto" si elegiste pan o cosas que se comen crudas.
-const HELADERA_SIN_COCCION = new Set(["Palta", "Queso", "Queso untable", "Tomate", "Lechuga", "Yogur", "Leche", "Banana", "Manzana", "Frutos secos", "Miel", "Atún"]);
+// no se puede registrar como una comida con calorías precisas).
+//
+// Cada ingrediente de HELADERA_ITEMS (salvo "Pan", que se trata aparte) cae
+// en exactamente una categoría, para que el texto generado sea consistente
+// sin importar la combinación: nunca decimos "cociná" algo que se come
+// crudo, ni "ponelo arriba del pan" algo que no funciona como relleno.
 const HELADERA_DULCE = new Set(["Avena", "Banana", "Manzana", "Yogur", "Leche", "Miel", "Frutos secos"]);
-// Rellenos válidos para pan: los que se comen fríos tal cual, y los que sirven
-// de relleno pero primero hay que cocinarlos. Todo lo demás (arroz, avena,
-// lentejas, etc.) no tiene sentido meterlo "arriba del pan".
-const PAN_RELLENO_FRIO = new Set(["Palta", "Queso", "Queso untable", "Tomate", "Lechuga", "Atún", "Miel"]);
-const PAN_RELLENO_COCIDO = new Set(["Huevo", "Pollo", "Carne picada", "Carne de cerdo", "Pescado"]);
+const HELADERA_SALADO_FRIO = new Set(["Palta", "Queso", "Queso untable", "Tomate", "Lechuga", "Atún"]);
+const HELADERA_PROTEINA_COCIDA = new Set(["Huevo", "Pollo", "Carne picada", "Carne de cerdo", "Pescado"]);
+// Todo lo que no cae en las tres categorías de arriba (arroz, fideos, avena
+// ya está en dulce, choclo, lentejas, garbanzos, verduras, etc.) se considera
+// "cocinable": necesita cocción y no funciona como relleno de sandwich.
+function categoriaIngrediente(item) {
+  if (HELADERA_DULCE.has(item)) return "dulce";
+  if (HELADERA_SALADO_FRIO.has(item)) return "salado_frio";
+  if (HELADERA_PROTEINA_COCIDA.has(item)) return "proteina_cocida";
+  return "cocinable";
+}
 
 function sugerirCombinacionLibre(seleccion) {
   if (seleccion.length < 2) return null;
   const lista = seleccion.join(", ");
   const cierre = "No tiene calorías exactas (no es una receta de la base), pero es una forma rápida de aprovechar justo lo que elegiste.";
 
-  if (seleccion.includes("Pan")) {
-    const otros = seleccion.filter((i) => i !== "Pan");
-    if (otros.every((i) => PAN_RELLENO_FRIO.has(i))) {
+  const tienePan = seleccion.includes("Pan");
+  const otros = seleccion.filter((i) => i !== "Pan");
+  const categorias = otros.map(categoriaIngrediente);
+  const hayCocinable = categorias.includes("cocinable");
+  const hayProteina = categorias.includes("proteina_cocida");
+  const haySaladoFrio = categorias.includes("salado_frio");
+
+  if (tienePan) {
+    if (!hayCocinable && !hayProteina) {
       return `Con ${lista} armá un sandwich o unas tostadas: no hace falta cocinar nada, solo tostar el pan y poner el resto arriba o adentro. ${cierre}`;
     }
-    if (otros.every((i) => PAN_RELLENO_FRIO.has(i) || PAN_RELLENO_COCIDO.has(i))) {
-      const aCocinar = otros.filter((i) => PAN_RELLENO_COCIDO.has(i)).join(" y ");
+    if (!hayCocinable) {
+      const aCocinar = otros.filter((i) => categoriaIngrediente(i) === "proteina_cocida").join(" y ");
       return `Con ${lista} armá un sandwich: cociná primero ${aCocinar}, tostá el pan, y armalo con el resto arriba o adentro. ${cierre}`;
     }
-    // El resto no funciona como relleno de sandwich (arroz, avena, lentejas, etc.):
-    // el pan queda como acompañamiento y el resto se cocina aparte.
-    return `El pan te sirve de acompañamiento; con ${otros.join(", ")} armá un salteado, guiso o ensalada tibia, cocinando todo junto con un poco de aceite, sal y las especias que tengas. ${cierre}`;
+    const paraCocinar = otros.filter((i) => categoriaIngrediente(i) === "cocinable" || categoriaIngrediente(i) === "proteina_cocida");
+    const fresco = otros.filter((i) => categoriaIngrediente(i) === "dulce" || categoriaIngrediente(i) === "salado_frio");
+    const extra = fresco.length > 0 ? ` Sumale ${fresco.join(" y ")} fresco, sin cocinar.` : "";
+    return `El pan te sirve de acompañamiento; con ${paraCocinar.join(", ")} armá un salteado, guiso o ensalada tibia, cocinando todo junto con un poco de aceite, sal y las especias que tengas.${extra} ${cierre}`;
   }
-  if (seleccion.every((i) => HELADERA_DULCE.has(i))) {
+
+  if (!hayCocinable && !hayProteina && !haySaladoFrio) {
     return `Con ${lista} armá un bowl o licuado dulce: mezclá todo (podés licuar lo líquido junto con el resto, o servirlo en capas). ${cierre}`;
   }
-  if (seleccion.every((i) => HELADERA_SIN_COCCION.has(i))) {
+  if (!hayCocinable && !hayProteina) {
     return `Con ${lista} armá una ensalada o plato frío: mezclá todo y condimentá con sal, limón y un chorrito de aceite de oliva. ${cierre}`;
   }
-  return `Con ${lista} podés armar un salteado, guiso o ensalada tibia: cociná todo junto con un poco de aceite, sal y las especias que tengas. ${cierre}`;
+  const paraCocinar = otros.filter((i) => categoriaIngrediente(i) === "cocinable" || categoriaIngrediente(i) === "proteina_cocida");
+  const fresco = otros.filter((i) => categoriaIngrediente(i) === "dulce" || categoriaIngrediente(i) === "salado_frio");
+  const extra = fresco.length > 0 ? ` Sumale ${fresco.join(" y ")} fresco, sin cocinar.` : "";
+  return `Con ${paraCocinar.join(", ")} podés armar un salteado, guiso o ensalada tibia: cociná todo junto con un poco de aceite, sal y las especias que tengas.${extra} ${cierre}`;
 }
 
 const CONSEJOS_BASE = [
