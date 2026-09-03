@@ -160,23 +160,37 @@ function FiguraTecnica({ figura, size = 56, color }) {
   );
 }
 
-function GuiaTecnica({ figuras, size = 56, color }) {
-  if (!figuras || figuras.length === 0) return null;
+// Emoji representativo según la familia de movimiento (a partir del prefijo
+// de la figura), como ícono rápido en las listas de técnica: a tamaño chico
+// los pictogramas de trazos se veían como manchas borrosas, un emoji se lee
+// mejor de un vistazo.
+const EMOJI_MOVIMIENTO = [
+  { prefijo: "empuje_", emoji: "💪" },
+  { prefijo: "traccion_", emoji: "🧗" },
+  { prefijo: "remo_", emoji: "🧗" },
+  { prefijo: "piernas_", emoji: "🦵" },
+  { prefijo: "core_", emoji: "🔥" },
+];
+
+function emojiDeFigura(figuraKey) {
+  const match = EMOJI_MOVIMIENTO.find((e) => figuraKey?.startsWith(e.prefijo));
+  return match ? match.emoji : "🏋️";
+}
+
+function IconoEjercicio({ figuras, size = 44 }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex flex-col items-center gap-0.5">
-        <FiguraTecnica figura={figuras[0]} size={size} color={color} />
-        {figuras.length > 1 && <span className="text-[8px]" style={{ color: C.muted }}>INICIO</span>}
-      </div>
-      {figuras.length > 1 && (
-        <>
-          <span style={{ color: C.muted }}>→</span>
-          <div className="flex flex-col items-center gap-0.5">
-            <FiguraTecnica figura={figuras[1]} size={size} color={color} />
-            <span className="text-[8px]" style={{ color: C.muted }}>FINAL</span>
-          </div>
-        </>
-      )}
+    <div
+      className="flex items-center justify-center flex-shrink-0"
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size * 0.28,
+        background: C.trainDim,
+        border: `1px solid ${C.train}`,
+        fontSize: size * 0.5,
+      }}
+    >
+      {emojiDeFigura(figuras?.[0])}
     </div>
   );
 }
@@ -2640,7 +2654,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             <div className="flex flex-col gap-2 mt-2">
               {track.ejercicios.map((ej, i) => (
                 <div key={ej.nombre} className="rounded px-3 py-2 flex items-center gap-3" style={{ background: C.panelAlt }}>
-                  <GuiaTecnica figuras={ej.figura} size={44} color={C.muted} />
+                  <IconoEjercicio figuras={ej.figura} size={44} />
                   <div>
                     <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
                     <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
@@ -3115,7 +3129,7 @@ function VistaConsejos({ perfil, progresion }) {
                 <div className="flex flex-col gap-2 mt-2">
                   {track.ejercicios.map((ej, i) => (
                     <div key={ej.nombre} className="rounded px-3 py-2 flex items-center gap-3" style={{ background: C.panelAlt }}>
-                      <GuiaTecnica figuras={ej.figura} size={44} color={C.muted} />
+                      <IconoEjercicio figuras={ej.figura} size={44} />
                       <div>
                         <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
                         <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
