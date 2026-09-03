@@ -598,6 +598,8 @@ export default function App() {
   const [sugerenciaNivel, setSugerenciaNivel] = useState(null);
   const [storageDisponible, setStorageDisponible] = useState(null);
   const [mostrarRecordatorio, setMostrarRecordatorio] = useState(false);
+  const [logrosVistos, setLogrosVistos] = useState(null);
+  const [colaLogros, setColaLogros] = useState([]);
   const fecha = hoy();
 
   const tocarLogo = () => {
@@ -616,18 +618,20 @@ export default function App() {
       const disponible = await verificarStorage();
       setStorageDisponible(disponible);
 
-      const [p, pr, reg, sus, onb, ps] = await Promise.all([
+      const [p, pr, reg, sus, onb, ps, lv] = await Promise.all([
         safeGet("perfil"),
         safeGet("progresion"),
         safeGet(`registro:${fecha}`),
         safeGet("suscripcion"),
         safeGet("onboarding"),
         safeGet("progresoSeries"),
+        safeGet("logrosVistos"),
       ]);
       if (p) setPerfil(p);
       if (pr) setProgresion(pr);
       if (reg) setRegistro(reg);
       if (ps) setProgresoSeries(ps);
+      setLogrosVistos(lv || []);
 
       let susActual = sus;
       if (!susActual) {
@@ -700,6 +704,14 @@ export default function App() {
   };
   const agregarEjercicio = (ej) => {
     guardarRegistro({ ...registro, entrenamiento: [...registro.entrenamiento, { ...ej, id: uid() }] });
+    // Marca hoy como entrenado en "semana" al toque, sin esperar a recargar:
+    // así la racha (y los logros que dependen de ella) reaccionan enseguida.
+    setSemana((prev) => {
+      if (!prev || prev.length === 0 || prev[prev.length - 1].entreno) return prev;
+      const copia = [...prev];
+      copia[copia.length - 1] = { ...copia[copia.length - 1], entreno: true };
+      return copia;
+    });
     const nuevoConteo = { ...progresoSeries, [ej.track]: (progresoSeries[ej.track] || 0) + Number(ej.series || 1) };
     setProgresoSeries(nuevoConteo);
     safeSet("progresoSeries", nuevoConteo);
@@ -772,6 +784,29 @@ export default function App() {
     }
     return dias;
   })();
+
+  // Detecta logros recién desbloqueados (racha, nivel, etc.) para festejarlos
+  // en el momento en vez de que el usuario los descubra solo si entra a
+  // Progreso. "logrosVistos" (persistido) evita festejar de nuevo algo que
+  // ya se mostró antes.
+  useEffect(() => {
+    if (!semana || logrosVistos === null) return;
+    let racha = 0;
+    for (let i = semana.length - 1; i >= 0; i--) {
+      if (semana[i].entreno) racha++;
+      else break;
+    }
+    const diasEntrenados = semana.filter((d) => d.entreno).length;
+    const nivelMaximo = Math.max(...Object.values(progresion || {}));
+    const ctx = { racha, diasEntrenados, nivelMaximo, progresion };
+    const cumplidosAhora = LOGROS_DEF.filter((l) => l.cumple(ctx)).map((l) => l.id);
+    const nuevos = cumplidosAhora.filter((id) => !logrosVistos.includes(id));
+    if (nuevos.length === 0) return;
+    const vistosNuevo = [...logrosVistos, ...nuevos];
+    setLogrosVistos(vistosNuevo);
+    safeSet("logrosVistos", vistosNuevo);
+    setColaLogros((cola) => [...cola, ...LOGROS_DEF.filter((l) => nuevos.includes(l.id))]);
+  }, [semana, progresion, logrosVistos]);
 
   const totales = registro.comidas.reduce(
     (acc, c) => ({
@@ -939,6 +974,9 @@ export default function App() {
           }}
           onCerrar={() => setMostrarRecordatorio(false)}
         />
+      )}
+      {colaLogros.length > 0 && (
+        <ModalLogro logro={colaLogros[0]} onCerrar={() => setColaLogros((cola) => cola.slice(1))} />
       )}
 
       {mostrarAdmin && <AdminCodigos onCerrar={() => setMostrarAdmin(false)} />}
@@ -3371,6 +3409,47 @@ const LOGROS_DEF = [
   { id: "nivel10", nombre: "Nivel máximo", desc: "Llegaste al nivel 10 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 10 },
   { id: "todoterreno", nombre: "Todo terreno", desc: "Nivel 2 o más en los 4 grupos", cumple: (ctx) => Object.values(ctx.progresion || {}).every((n) => n >= 2) },
 ];
+
+// Festejo en el momento de desbloquear un logro (en vez de que el usuario lo
+// descubra solo si entra a Progreso) — ver el useEffect en App que arma la
+// cola de logros nuevos.
+function ModalLogro({ logro, onCerrar }) {
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.75)", zIndex: 95 }}
+      onClick={onCerrar}
+    >
+      <div
+        className="w-full max-w-sm rounded-lg p-6 text-center"
+        style={{
+          background: `linear-gradient(160deg, ${C.foodDim}, ${C.panel})`,
+          border: `1px solid ${C.food}`,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+          animation: "popIn 0.35s ease-out",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="mx-auto mb-3 flex items-center justify-center"
+          style={{ width: 64, height: 64, borderRadius: "50%", background: C.food }}
+        >
+          <Crown size={32} color={C.bg} />
+        </div>
+        <div className="display text-xs mb-1" style={{ color: C.food }}>¡LOGRO DESBLOQUEADO!</div>
+        <div className="text-lg font-bold mb-1">{logro.nombre}</div>
+        <p className="text-sm mb-5" style={{ color: C.muted }}>{logro.desc}</p>
+        <button
+          onClick={onCerrar}
+          className="w-full py-2.5 rounded-md font-medium"
+          style={{ background: C.food, color: C.bg }}
+        >
+          ¡Genial!
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function PanelLogros({ racha, diasEntrenados, nivelMaximo, progresion }) {
   const ctx = { racha, diasEntrenados, nivelMaximo, progresion };
