@@ -29,8 +29,8 @@ const C = {
   border: "#2B3B32",
   text: "#F2EEE3",
   muted: "#8FA396",
-  train: "#FF6B4A",
-  trainDim: "#4A2C22",
+  train: "#B3F23D",
+  trainDim: "#33421A",
   food: "#FFC145",
   foodDim: "#4A3D1E",
   danger: "#E8503A",
@@ -1462,7 +1462,7 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
               <button
                 onClick={() => onIrAEntrenar(siguienteGrupo)}
                 className="w-full py-3 rounded-md font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
-                style={{ background: `linear-gradient(135deg, ${C.train}, #E8503A)`, color: C.panel, boxShadow: "0 8px 20px rgba(255,107,74,0.32)" }}
+                style={{ background: `linear-gradient(135deg, ${C.train}, #7ED321)`, color: C.panel, boxShadow: "0 8px 20px rgba(179,242,61,0.32)" }}
               >
                 {gruposHechosHoy.length > 0 ? "Seguir entrenando" : "Empezar mi entrenamiento"}
               </button>
@@ -2537,7 +2537,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           <button
             onClick={() => setContando(true)}
             className="w-full py-4 rounded-md font-bold text-lg tracking-wide active:scale-[0.98] transition-transform"
-            style={{ background: `linear-gradient(135deg, ${C.train}, #E8503A)`, color: C.panel, boxShadow: "0 8px 24px rgba(255,107,74,0.35)" }}
+            style={{ background: `linear-gradient(135deg, ${C.train}, #7ED321)`, color: C.panel, boxShadow: "0 8px 24px rgba(179,242,61,0.35)" }}
           >
             INICIAR ENTRENAMIENTO
           </button>
