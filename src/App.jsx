@@ -2314,7 +2314,11 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
         if (vozActiva) hablar(String(nuevo));
         if (nuevo >= objetivo) {
           clearInterval(id);
-          setTimeout(() => completarSerieReps(nuevo), 400);
+          // Espera a que termine de decir el último número antes de avisar
+          // "Serie completa": hablar() cancela lo que esté sonando apenas se
+          // le pide una frase nueva, así que un margen corto cortaba el
+          // número final a mitad de camino.
+          setTimeout(() => completarSerieReps(nuevo), 900);
         }
         return nuevo;
       });
