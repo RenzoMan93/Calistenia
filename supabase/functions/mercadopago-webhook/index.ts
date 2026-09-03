@@ -6,6 +6,12 @@
 // (ver mercadopago-create-preference). Si ya tenía Premium activo, extiende
 // desde la fecha de vencimiento actual, no desde hoy, para no perder días.
 //
+// El registro de idempotencia (mp_pagos_procesados) y la extensión de
+// Premium se hacen en una sola transacción del lado del servidor (RPC
+// procesar_pago_mercadopago, ver migración 0005): así, si extender falla por
+// algo transitorio, el pago no queda marcado como "procesado" y un reintento
+// puede recuperarlo, en vez de perder los 30 días pagados en silencio.
+//
 // Configurá esta URL como "notification_url" en tu cuenta de Mercado Pago:
 //   https://<tu-proyecto>.supabase.co/functions/v1/mercadopago-webhook
 //
@@ -60,39 +66,20 @@ Deno.serve(async (req) => {
         Deno.env.get("PROJECT_SERVICE_KEY")!
       );
 
-      // Idempotencia: si Mercado Pago reenvía esta misma notificación, el
-      // insert falla por PK duplicada y no volvemos a sumar 30 días.
-      const { error: yaProcesado } = await supabaseAdmin
-        .from("mp_pagos_procesados")
-        .insert({ payment_id: String(paymentId), user_id: userId });
-      if (yaProcesado) {
-        console.log(`Pago ${paymentId} ya procesado antes, no se vuelve a extender.`);
-        return new Response("ok", { status: 200 });
+      // Idempotencia + extensión de Premium en una sola transacción del lado
+      // del servidor: si Mercado Pago reenvía esta misma notificación, la
+      // función devuelve false y no se vuelve a sumar 30 días; si extender
+      // falla, el registro de idempotencia también se revierte (ver
+      // migración 0005) en vez de quedar el pago marcado como procesado sin
+      // haber extendido nada.
+      const { error: procesarError } = await supabaseAdmin.rpc("procesar_pago_mercadopago", {
+        p_payment_id: String(paymentId),
+        p_user_id: userId,
+        p_dias: DIAS_PREMIUM,
+      });
+      if (procesarError) {
+        console.error(`No se pudo procesar el pago ${paymentId}:`, procesarError);
       }
-
-      const hoy = new Date().toISOString().slice(0, 10);
-      const { data: existing } = await supabaseAdmin
-        .from("user_data")
-        .select("value")
-        .eq("user_id", userId)
-        .eq("key", "suscripcion")
-        .maybeSingle();
-
-      const vencimientoActual: string | undefined = existing?.value?.premiumHasta;
-      const base = vencimientoActual && vencimientoActual > hoy ? vencimientoActual : hoy;
-      const fechaBase = new Date(`${base}T00:00:00Z`);
-      fechaBase.setUTCDate(fechaBase.getUTCDate() + DIAS_PREMIUM);
-      const premiumHasta = fechaBase.toISOString().slice(0, 10);
-
-      const nuevaSuscripcion = {
-        trialStart: existing?.value?.trialStart || hoy,
-        diasBonus: existing?.value?.diasBonus || 0,
-        premiumHasta,
-      };
-
-      await supabaseAdmin
-        .from("user_data")
-        .upsert({ user_id: userId, key: "suscripcion", value: nuevaSuscripcion }, { onConflict: "user_id,key" });
     }
 
     return new Response("ok", { status: 200 });

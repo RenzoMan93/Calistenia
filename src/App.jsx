@@ -598,7 +598,7 @@ export default function App() {
   const [sugerenciaNivel, setSugerenciaNivel] = useState(null);
   const [storageDisponible, setStorageDisponible] = useState(null);
   const [mostrarRecordatorio, setMostrarRecordatorio] = useState(false);
-  const [logrosVistos, setLogrosVistos] = useState(null);
+  const [logrosVistos, setLogrosVistos] = useState(undefined); // undefined = todavía no se cargó de Supabase
   const [colaLogros, setColaLogros] = useState([]);
   const fecha = hoy();
 
@@ -631,7 +631,11 @@ export default function App() {
       if (pr) setProgresion(pr);
       if (reg) setRegistro(reg);
       if (ps) setProgresoSeries(ps);
-      setLogrosVistos(lv || []);
+      // null (clave nunca guardada, usuario nuevo o ya existente de antes de
+      // esta función) se deja tal cual en vez de convertirlo en [] acá: el
+      // useEffect de más abajo necesita distinguir ese caso para no festejar
+      // de una logros que ya tenía cumplidos hace rato.
+      setLogrosVistos(lv);
 
       let susActual = sus;
       if (!susActual) {
@@ -790,7 +794,7 @@ export default function App() {
   // Progreso. "logrosVistos" (persistido) evita festejar de nuevo algo que
   // ya se mostró antes.
   useEffect(() => {
-    if (!semana || logrosVistos === null) return;
+    if (!semana || logrosVistos === undefined) return;
     let racha = 0;
     for (let i = semana.length - 1; i >= 0; i--) {
       if (semana[i].entreno) racha++;
@@ -800,6 +804,19 @@ export default function App() {
     const nivelMaximo = Math.max(...Object.values(progresion || {}));
     const ctx = { racha, diasEntrenados, nivelMaximo, progresion };
     const cumplidosAhora = LOGROS_DEF.filter((l) => l.cumple(ctx)).map((l) => l.id);
+
+    if (logrosVistos === null) {
+      // Primera vez que existe "logrosVistos" para esta cuenta (usuario
+      // nuevo, o alguien que ya usaba la app de antes de que existiera este
+      // festejo): se guardan como ya vistos los logros que ya tenía
+      // cumplidos sin festejarlos, para no bombardear con popups de "¡logro
+      // desbloqueado!" cosas que en realidad logró hace tiempo. De acá en
+      // más sí se festeja cualquier logro nuevo.
+      setLogrosVistos(cumplidosAhora);
+      safeSet("logrosVistos", cumplidosAhora);
+      return;
+    }
+
     const nuevos = cumplidosAhora.filter((id) => !logrosVistos.includes(id));
     if (nuevos.length === 0) return;
     const vistosNuevo = [...logrosVistos, ...nuevos];
@@ -2250,6 +2267,30 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   const [cadenciaSeg, setCadenciaSeg] = useState(2);
   const [autoCorriendo, setAutoCorriendo] = useState(false);
   const [verMasConsejos, setVerMasConsejos] = useState(false);
+  // Refs "espejo" de series/modoTiempo/modoAuto para que el intervalo de
+  // descanso (más abajo) siempre lea el valor más reciente: ese efecto solo
+  // se vuelve a crear cuando cambian "corriendo" o "vozActiva", así que si
+  // leyera estos valores directo del closure quedarían pegados a como
+  // estaban cuando arrancó el descanso, aunque el usuario cambie de modo o
+  // de cantidad de series mientras descansa.
+  const seriesRef = useRef(series);
+  const modoTiempoRef = useRef(modoTiempo);
+  const modoAutoRef = useRef(modoAuto);
+  const serieActualRef = useRef(serieActual);
+  useEffect(() => { seriesRef.current = series; }, [series]);
+  useEffect(() => { modoTiempoRef.current = modoTiempo; }, [modoTiempo]);
+  useEffect(() => { modoAutoRef.current = modoAuto; }, [modoAuto]);
+  useEffect(() => { serieActualRef.current = serieActual; }, [serieActual]);
+  // Evita cerrar la misma serie dos veces: el cierre automático (al llegar
+  // al objetivo de reps) queda encolado 900ms antes de aplicarse para dejar
+  // terminar de hablar el último número; si en ese margen el usuario toca
+  // "Serie terminada" a mano, sin esta guarda se agregaba el ejercicio dos
+  // veces y se saltaba una ronda entera.
+  const cierreEnCursoRef = useRef(false);
+  const cierreAutoTimeoutRef = useRef(null);
+  useEffect(() => {
+    cierreEnCursoRef.current = false;
+  }, [serieActual, ejercicioActual.nombre]);
   // Coach por voz: cuenta las repeticiones y avisa en voz alta para poder
   // entrenar sin tener que mirar el celular en el piso.
   const [vozActiva, setVozActiva] = useState(true);
@@ -2318,7 +2359,10 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           // "Serie completa": hablar() cancela lo que esté sonando apenas se
           // le pide una frase nueva, así que un margen corto cortaba el
           // número final a mitad de camino.
-          setTimeout(() => completarSerieReps(nuevo), 900);
+          cierreAutoTimeoutRef.current = setTimeout(() => {
+            cierreAutoTimeoutRef.current = null;
+            completarSerieReps(nuevo);
+          }, 900);
         }
         return nuevo;
       });
@@ -2374,10 +2418,14 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             if (vozActiva) hablar("¡Comienza de nuevo!");
             // Si todavía quedan series, arranca solo la próxima (conteo
             // automático de reps o el cronómetro, según el modo) sin que
-            // haya que tocar nada.
-            if (serieActual <= Number(series)) {
-              if (!modoTiempo && modoAuto) setAutoCorriendo(true);
-              else if (modoTiempo) setCronoCorriendo(true);
+            // haya que tocar nada. Lee los refs (no el closure) porque este
+            // efecto solo se recrea con "corriendo"/"vozActiva": si el
+            // usuario cambia de modo o de cantidad de series mientras
+            // descansa, serieActual/series/modoTiempo/modoAuto de acá
+            // quedarían pegados a como estaban cuando arrancó el descanso.
+            if (serieActualRef.current <= Number(seriesRef.current)) {
+              if (!modoTiempoRef.current && modoAutoRef.current) setAutoCorriendo(true);
+              else if (modoTiempoRef.current) setCronoCorriendo(true);
             }
             return 0;
           }
@@ -2410,6 +2458,12 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   // descanso.
   const completarSerieReps = (repsFinal) => {
     if (repsFinal <= 0) return;
+    if (cierreEnCursoRef.current) return;
+    cierreEnCursoRef.current = true;
+    if (cierreAutoTimeoutRef.current) {
+      clearTimeout(cierreAutoTimeoutRef.current);
+      cierreAutoTimeoutRef.current = null;
+    }
     onAgregar({ track: trackSel, ejercicio: ejercicioActual.nombre, series: 1, reps: repsFinal });
     setContadorReps(0);
     setSerieActual((s) => s + 1);
@@ -2420,6 +2474,16 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   const reiniciarDescanso = () => {
     setCorriendo(false);
     setDescansoRestante(descansoTotal);
+  };
+  // Al terminar la sesión hay que frenar todo lo que siga corriendo en
+  // segundo plano (conteo automático de reps, cronómetro, descanso): si no,
+  // el coach por voz sigue contando y anunciando series aunque el panel ya
+  // esté oculto, y podía terminar registrando un ejercicio solo.
+  const terminarSesion = () => {
+    setSesionActiva(false);
+    setAutoCorriendo(false);
+    setCronoCorriendo(false);
+    setCorriendo(false);
   };
 
   return (
@@ -2484,7 +2548,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
       <Panel style={{ borderColor: C.train }}>
         <div className="flex items-center justify-between mb-3">
           <span className="display text-sm" style={{ color: C.train }}>ENTRENAMIENTO EN CURSO</span>
-          <button onClick={() => setSesionActiva(false)} className="text-xs mono underline" style={{ color: C.muted }}>
+          <button onClick={terminarSesion} className="text-xs mono underline" style={{ color: C.muted }}>
             Terminar
           </button>
         </div>
