@@ -1490,15 +1490,21 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
           </div>
         </div>
         <div className="flex-1">
-          <div className="display text-sm" style={{ color: C.muted }}>COMBUSTIBLE DE HOY</div>
+          <div className="display text-sm" style={{ color: C.muted }}>CALORÍAS DE HOY</div>
           <div className="text-lg font-semibold mt-1">
             {restante > 0 ? `Quedan ${Math.round(restante)} kcal` : "Objetivo alcanzado"}
           </div>
-          <div className="flex gap-3 mt-2 text-xs mono" style={{ color: C.muted }}>
-            <span>P {Math.round(totales.prot)}/{perfil.prot}g</span>
-            <span>C {Math.round(totales.carb)}/{perfil.carb}g</span>
-            <span>G {Math.round(totales.grasa)}/{perfil.grasa}g</span>
-          </div>
+          {totales.kcal === 0 ? (
+            <p className="text-xs mt-2" style={{ color: C.muted }}>
+              Todavía no cargaste nada hoy. Anota lo que comas con "+ Comida" para ver tu progreso de proteína, carbohidratos y grasa.
+            </p>
+          ) : (
+            <div className="flex gap-3 mt-2 text-xs mono" style={{ color: C.muted }}>
+              <span>P {Math.round(totales.prot)}/{perfil.prot}g</span>
+              <span>C {Math.round(totales.carb)}/{perfil.carb}g</span>
+              <span>G {Math.round(totales.grasa)}/{perfil.grasa}g</span>
+            </div>
+          )}
         </div>
       </Panel>
 
