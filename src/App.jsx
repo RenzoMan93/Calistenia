@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Lightbulb, HelpCircle, Star, Trash2, CalendarDays, BookOpen, Volume2, VolumeX } from "lucide-react";
+import { Home, Dumbbell, Apple, TrendingUp, Plus, X, Flame, Settings, Check, Lock, Crown, MessageCircle, Lightbulb, HelpCircle, Star, Trash2, CalendarDays, BookOpen, Volume2, VolumeX, Cast } from "lucide-react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, ReferenceLine, ResponsiveContainer, Tooltip } from "recharts";
 import {
   safeGet,
@@ -1060,8 +1060,8 @@ function ModalRecordatorioRenovacion({ esPremiumActivo, diasPremiumRestantes, di
   const cuando = dias <= 0 ? "hoy" : dias === 1 ? "mañana" : `en ${dias} días`;
   const titulo = esPremiumActivo ? "Tu Premium está por vencer" : "Tu prueba gratis está por terminar";
   const texto = esPremiumActivo
-    ? `Vence ${cuando}. Si no volvés a pagar, pasás al plan gratis y perdés los niveles avanzados, las recetas y tu historial de progreso.`
-    : `Termina ${cuando}. Después pasás al plan gratis (niveles 1 a 3). Activá Premium por ${PRECIO_PREMIUM}/mes para seguir con todo.`;
+    ? `Vence ${cuando}. Si no vuelves a pagar, pasas al plan gratis y pierdes los niveles avanzados, las recetas y tu historial de progreso.`
+    : `Termina ${cuando}. Después pasas al plan gratis (niveles 1 a 3). Activa Premium por ${PRECIO_PREMIUM}/mes para seguir con todo.`;
 
   return (
     <div
@@ -2352,17 +2352,17 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
     const id = setInterval(() => {
       setContadorReps((r) => {
         const nuevo = r + 1;
-        if (vozActiva) hablar(String(nuevo));
+        if (vozActiva) hablar(nuevo >= objetivo ? `${nuevo}, ¡última!` : String(nuevo));
         if (nuevo >= objetivo) {
           clearInterval(id);
-          // Espera a que termine de decir el último número antes de avisar
+          // Espera a que termine de decir "N, ¡última!" antes de avisar
           // "Serie completa": hablar() cancela lo que esté sonando apenas se
-          // le pide una frase nueva, así que un margen corto cortaba el
-          // número final a mitad de camino.
+          // le pide una frase nueva, así que un margen corto cortaba la
+          // frase final a mitad de camino.
           cierreAutoTimeoutRef.current = setTimeout(() => {
             cierreAutoTimeoutRef.current = null;
             completarSerieReps(nuevo);
-          }, 900);
+          }, 1400);
         }
         return nuevo;
       });
@@ -2579,6 +2579,15 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           </div>
         </div>
 
+        {ejercicioActual.sinEquipo && (
+          <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.muted}` }}>
+            <HelpCircle size={14} color={C.muted} className="flex-shrink-0 mt-0.5" />
+            <span className="text-[11px]" style={{ color: C.text }}>
+              <b>¿No tienes el equipo?</b> {ejercicioActual.sinEquipo}
+            </span>
+          </div>
+        )}
+
         <button
           onClick={() => setVerMasConsejos((v) => !v)}
           className="flex items-center gap-1 text-[11px] mono mb-3 mt-2"
@@ -2593,15 +2602,6 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
               <Lightbulb size={14} color={C.food} className="flex-shrink-0 mt-0.5" />
               <span className="text-[11px]" style={{ color: C.text }}>{sugerirDescanso(nivelActual).texto}</span>
             </div>
-
-            {ejercicioActual.sinEquipo && (
-              <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.muted}` }}>
-                <HelpCircle size={14} color={C.muted} className="flex-shrink-0 mt-0.5" />
-                <span className="text-[11px]" style={{ color: C.text }}>
-                  <b>¿No tienes el equipo?</b> {ejercicioActual.sinEquipo}
-                </span>
-              </div>
-            )}
 
             {esVeterano && ejercicioActual.adaptacionVeterano && (
               <div className="flex items-start gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.train}` }}>
@@ -2660,7 +2660,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
 
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs mono" style={{ color: C.muted }}>
-            Serie <span style={{ color: C.train }}>{serieActual}</span> de{" "}
+            Serie <span style={{ color: C.train }}>{Math.min(serieActual, Number(series) || serieActual)}</span> de{" "}
             <input
               type="number"
               min={1}
@@ -2675,7 +2675,15 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           )}
         </div>
 
-        {!modoTiempo ? (
+        {serieActual > Number(series) ? (
+          <div className="flex flex-col items-center gap-2 py-6 mb-3 text-center">
+            <Check size={28} color={C.food} />
+            <p className="text-sm font-medium">¡Terminaste este ejercicio!</p>
+            <p className="text-xs" style={{ color: C.muted }}>
+              Cambia de grupo muscular arriba, o sube el número de series si quieres hacer una más.
+            </p>
+          </div>
+        ) : !modoTiempo ? (
           <div className="flex flex-col items-center gap-3 mb-3">
             <div className="flex gap-2">
               <button
@@ -2904,6 +2912,11 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
                   <div>
                     <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
                     <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
+                    {ej.sinEquipo && (
+                      <div className="text-[11px] mt-1" style={{ color: C.food }}>
+                        <b>Sin equipo:</b> {ej.sinEquipo}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -3342,6 +3355,11 @@ function VistaConsejos({ perfil, progresion }) {
                       <div>
                         <div className="text-xs font-medium mb-0.5">{i + 1}. {ej.nombre}</div>
                         <div className="text-[11px]" style={{ color: C.muted }}>{ej.tip}</div>
+                        {ej.sinEquipo && (
+                          <div className="text-[11px] mt-1" style={{ color: C.food }}>
+                            <b>Sin equipo:</b> {ej.sinEquipo}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -4481,6 +4499,16 @@ const AYUDA_SECCIONES = [
     puntos: [
       `${DIAS_PRUEBA} días de prueba gratis con acceso completo.`,
       `Después, ${PRECIO_PREMIUM}/mes vía Mercado Pago (se renueva solo cada 30 días), o con un código de activación.`,
+    ],
+  },
+  {
+    icon: Cast,
+    color: "food",
+    titulo: "¿Cómo la veo en la tele?",
+    puntos: [
+      "Celular Android: desliza hacia abajo la barra de notificaciones y toca \"Transmitir\" (o en Chrome, los tres puntos → \"Transmitir\"). Necesitas un Chromecast o Smart TV con Chromecast en la misma wifi.",
+      "iPhone: Centro de Control (desliza desde arriba a la derecha) → \"Duplicar pantalla\" (AirPlay), con Apple TV o una tele compatible.",
+      "Computadora con Chrome: los tres puntos → \"Transmitir...\" (o clic derecho en la página). No está disponible en Chrome para Linux.",
     ],
   },
 ];
