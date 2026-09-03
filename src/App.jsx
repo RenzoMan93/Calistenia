@@ -789,6 +789,18 @@ export default function App() {
     return dias;
   })();
 
+  // Racha actual (incluye hoy si ya entrenaste), para mostrarla también en
+  // Hoy y no solo en Progreso.
+  const rachaActual = (() => {
+    if (!semana) return 0;
+    let racha = 0;
+    for (let i = semana.length - 1; i >= 0; i--) {
+      if (semana[i].entreno) racha++;
+      else break;
+    }
+    return racha;
+  })();
+
   // Detecta logros recién desbloqueados (racha, nivel, etc.) para festejarlos
   // en el momento en vez de que el usuario los descubra solo si entra a
   // Progreso. "logrosVistos" (persistido) evita festejar de nuevo algo que
@@ -913,6 +925,7 @@ export default function App() {
             onBloqueado={() => setMostrarPlanes(true)}
             planHoy={planDeHoy()}
             diasSinEntrenar={diasSinEntrenar}
+            rachaActual={rachaActual}
             onIrAEntrenar={(track) => {
               setTrackSugerido(track);
               setTab("entrenamiento");
@@ -1400,11 +1413,13 @@ const NIVEL_OPCIONES = [
 ];
 
 // ---------- HOY ----------
-function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, planHoy, diasSinEntrenar, onIrAEntrenar }) {
+function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, planHoy, diasSinEntrenar, rachaActual, onIrAEntrenar }) {
   const pct = Math.min(totales.kcal / perfil.kcal, 1) * 360;
   const restante = Math.max(perfil.kcal - totales.kcal, 0);
   const [quickComida, setQuickComida] = useState(false);
   const [quickEjercicio, setQuickEjercicio] = useState(false);
+  const [verEntrenoHoy, setVerEntrenoHoy] = useState(false);
+  const [verComidasHoy, setVerComidasHoy] = useState(false);
   const yaEntrenoHoy = registro.entrenamiento.length > 0;
   const gruposHechosHoy = planHoy.tracks
     ? planHoy.tracks.filter((t) => registro.entrenamiento.some((e) => e.track === t))
@@ -1445,115 +1460,131 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
         </Panel>
       ) : (
         <Panel style={{ borderColor: C.train }}>
-          <div className="display text-sm mb-1" style={{ color: C.muted }}>PLAN DE HOY</div>
-          <div className="text-base font-semibold mb-1">Cuerpo completo</div>
-          <p className="text-xs mb-3" style={{ color: C.muted }}>{planHoy.tracks.map((t) => TRACKS[t].nombre).join(" · ")}</p>
+          <div className="flex items-center justify-between mb-1">
+            <div className="display text-sm" style={{ color: C.muted }}>PLAN DE HOY</div>
+            {rachaActual > 0 && (
+              <span className="flex items-center gap-1 text-xs mono" style={{ color: C.train }}>
+                <Flame size={13} color={C.train} /> {rachaActual} día{rachaActual !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+          <div className="text-base font-semibold mb-3">Cuerpo completo</div>
+
+          <div className="flex gap-2 mb-3">
+            {planHoy.tracks.map((t) => {
+              const hecho = gruposHechosHoy.includes(t);
+              return (
+                <button
+                  key={t}
+                  onClick={() => onIrAEntrenar(t)}
+                  className="flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-md active:scale-95 transition-transform"
+                  style={{ background: hecho ? C.trainDim : C.panelAlt, border: `1px solid ${hecho ? C.train : C.border}` }}
+                >
+                  {hecho ? (
+                    <Check size={15} color={C.train} />
+                  ) : (
+                    <span style={{ width: 15, height: 15, borderRadius: "50%", border: `1.5px solid ${C.muted}` }} />
+                  )}
+                  <span className="text-[10px]" style={{ color: hecho ? C.text : C.muted }}>{TRACKS[t].nombre}</span>
+                </button>
+              );
+            })}
+          </div>
+
           {planCompleto ? (
             <div className="flex items-center gap-2 text-sm" style={{ color: C.food }}>
               <Check size={16} /> ¡Completaste los 4 grupos de hoy!
             </div>
           ) : (
+            <button
+              onClick={() => onIrAEntrenar(siguienteGrupo)}
+              className="w-full py-3 rounded-md font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
+              style={{ background: `linear-gradient(135deg, ${C.train}, #7ED321)`, color: C.panel, boxShadow: "0 8px 20px rgba(179,242,61,0.32)" }}
+            >
+              {gruposHechosHoy.length > 0 ? "Seguir entrenando" : "Empezar mi entrenamiento"}
+            </button>
+          )}
+
+          <button
+            onClick={() => setQuickEjercicio(true)}
+            className="w-full flex items-center justify-center gap-1 py-2 rounded-md font-medium text-xs mt-2"
+            style={{ background: "transparent", color: C.train, border: `1px solid ${C.train}` }}
+          >
+            <Plus size={13} /> Agregar un ejercicio puntual
+          </button>
+
+          {registro.entrenamiento.length > 0 && (
             <>
-              {gruposHechosHoy.length > 0 && (
-                <p className="text-xs mb-2" style={{ color: C.food }}>
-                  {gruposHechosHoy.length}/{planHoy.tracks.length} grupos hechos hoy
-                </p>
+              <FilaColapsable icon={Dumbbell} color={C.train} titulo="Ver entrenamiento de hoy" abierto={verEntrenoHoy} onClick={() => setVerEntrenoHoy((v) => !v)} />
+              {verEntrenoHoy && (
+                <div className="flex flex-col gap-2 -mt-2 mb-1">
+                  {registro.entrenamiento.map((e) => (
+                    <FilaItem key={e.id} texto={`${e.ejercicio}`} sub={e.tipo === "tiempo" ? `${e.segundos}s sostenidos` : `${e.series}x${e.reps}`} onQuitar={() => onQuitarEjercicio(e.id)} />
+                  ))}
+                </div>
               )}
-              <button
-                onClick={() => onIrAEntrenar(siguienteGrupo)}
-                className="w-full py-3 rounded-md font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
-                style={{ background: `linear-gradient(135deg, ${C.train}, #7ED321)`, color: C.panel, boxShadow: "0 8px 20px rgba(179,242,61,0.32)" }}
-              >
-                {gruposHechosHoy.length > 0 ? "Seguir entrenando" : "Empezar mi entrenamiento"}
-              </button>
             </>
           )}
         </Panel>
       )}
 
-      <Panel style={{ display: "flex", alignItems: "center", gap: 20 }}>
-        <div
-          style={{
-            width: 96,
-            height: 96,
-            borderRadius: "50%",
-            background: `conic-gradient(${C.train} ${pct}deg, ${C.panelAlt} 0deg)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <div style={{ width: 74, height: 74, borderRadius: "50%", background: C.panel }} className="flex flex-col items-center justify-center">
-            <span className="mono text-lg font-semibold">{Math.round(totales.kcal)}</span>
-            <span className="text-[9px]" style={{ color: C.muted }}>kcal</span>
-          </div>
-        </div>
-        <div className="flex-1">
-          <div className="display text-sm" style={{ color: C.muted }}>CALORÍAS DE HOY</div>
-          <div className="text-lg font-semibold mt-1">
-            {restante > 0 ? `Quedan ${Math.round(restante)} kcal` : "Objetivo alcanzado"}
-          </div>
-          {totales.kcal === 0 ? (
-            <p className="text-xs mt-2" style={{ color: C.muted }}>
-              Todavía no cargaste nada hoy. Anota lo que comas con "+ Comida" para ver tu progreso de proteína, carbohidratos y grasa.
-            </p>
-          ) : (
-            <div className="flex gap-3 mt-2 text-xs mono" style={{ color: C.muted }}>
-              <span>P {Math.round(totales.prot)}/{perfil.prot}g</span>
-              <span>C {Math.round(totales.carb)}/{perfil.carb}g</span>
-              <span>G {Math.round(totales.grasa)}/{perfil.grasa}g</span>
+      <Panel style={{ borderColor: C.food }}>
+        <div className="flex items-center mb-3" style={{ gap: 20 }}>
+          <div
+            style={{
+              width: 96,
+              height: 96,
+              borderRadius: "50%",
+              background: `conic-gradient(${C.food} ${pct}deg, ${C.panelAlt} 0deg)`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <div style={{ width: 74, height: 74, borderRadius: "50%", background: C.panel }} className="flex flex-col items-center justify-center">
+              <span className="mono text-lg font-semibold">{Math.round(totales.kcal)}</span>
+              <span className="text-[9px]" style={{ color: C.muted }}>kcal</span>
             </div>
-          )}
+          </div>
+          <div className="flex-1">
+            <div className="display text-sm" style={{ color: C.muted }}>CALORÍAS DE HOY</div>
+            <div className="text-lg font-semibold mt-1">
+              {restante > 0 ? `Quedan ${Math.round(restante)} kcal` : "Objetivo alcanzado"}
+            </div>
+            {totales.kcal === 0 ? (
+              <p className="text-xs mt-2" style={{ color: C.muted }}>
+                Todavía no cargaste nada hoy.
+              </p>
+            ) : (
+              <div className="flex gap-3 mt-2 text-xs mono" style={{ color: C.muted }}>
+                <span>P {Math.round(totales.prot)}/{perfil.prot}g</span>
+                <span>C {Math.round(totales.carb)}/{perfil.carb}g</span>
+                <span>G {Math.round(totales.grasa)}/{perfil.grasa}g</span>
+              </div>
+            )}
+          </div>
         </div>
-      </Panel>
 
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setQuickEjercicio(true)}
-          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-md font-medium text-sm"
-          style={{ background: C.trainDim, color: C.train, border: `1px solid ${C.train}` }}
-        >
-          <Plus size={14} /> Ejercicio
-        </button>
         <button
           onClick={() => setQuickComida(true)}
-          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-md font-medium text-sm"
-          style={{ background: C.foodDim, color: C.food, border: `1px solid ${C.food}` }}
+          className="w-full flex items-center justify-center gap-1 py-2 rounded-md font-medium text-xs"
+          style={{ background: "transparent", color: C.food, border: `1px solid ${C.food}` }}
         >
-          <Plus size={14} /> Comida
+          <Plus size={13} /> Anotar una comida
         </button>
-      </div>
 
-      <Panel>
-        <div className="flex items-center gap-2 mb-3">
-          <Dumbbell size={16} color={C.train} />
-          <span className="display text-sm" style={{ color: C.muted }}>ENTRENAMIENTO DE HOY</span>
-        </div>
-        {registro.entrenamiento.length === 0 ? (
-          <p className="text-sm" style={{ color: C.muted }}>Todavía no registraste ejercicios. Usa el botón "+ Ejercicio" de arriba.</p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {registro.entrenamiento.map((e) => (
-              <FilaItem key={e.id} texto={`${e.ejercicio}`} sub={e.tipo === "tiempo" ? `${e.segundos}s sostenidos` : `${e.series}x${e.reps}`} onQuitar={() => onQuitarEjercicio(e.id)} />
-            ))}
-          </div>
-        )}
-      </Panel>
-
-      <Panel>
-        <div className="flex items-center gap-2 mb-3">
-          <Apple size={16} color={C.food} />
-          <span className="display text-sm" style={{ color: C.muted }}>COMIDAS DE HOY</span>
-        </div>
-        {registro.comidas.length === 0 ? (
-          <p className="text-sm" style={{ color: C.muted }}>Todavía no cargaste comidas. Usa el botón "+ Comida" de arriba.</p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {registro.comidas.map((c) => (
-              <FilaItem key={c.id} texto={c.nombre} sub={`${c.kcal} kcal`} onQuitar={() => onQuitarComida(c.id)} />
-            ))}
-          </div>
+        {registro.comidas.length > 0 && (
+          <>
+            <FilaColapsable icon={Apple} color={C.food} titulo="Ver comidas de hoy" abierto={verComidasHoy} onClick={() => setVerComidasHoy((v) => !v)} />
+            {verComidasHoy && (
+              <div className="flex flex-col gap-2 -mt-2 mb-1">
+                {registro.comidas.map((c) => (
+                  <FilaItem key={c.id} texto={c.nombre} sub={`${c.kcal} kcal`} onQuitar={() => onQuitarComida(c.id)} />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </Panel>
 
