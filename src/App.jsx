@@ -2841,7 +2841,14 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
         <Panel key={key}>
           <div className="flex items-center justify-between mb-1">
             <span className="display text-sm" style={{ color: C.text }}>{track.nombre.toUpperCase()}</span>
-            <span className="text-xs mono" style={{ color: C.muted }}>Nivel {progresion[key]}/{track.ejercicios.length}</span>
+            <div className="flex items-center gap-2">
+              {registro.entrenamiento.some((e) => e.track === key) && (
+                <span className="flex items-center gap-1 text-[10px] mono" style={{ color: C.food }}>
+                  <Check size={11} /> Hoy
+                </span>
+              )}
+              <span className="text-xs mono" style={{ color: C.muted }}>Nivel {progresion[key]}/{track.ejercicios.length}</span>
+            </div>
           </div>
           {progresion[key] < track.ejercicios.length && (
             <div className="mb-3">
