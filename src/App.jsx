@@ -1997,6 +1997,25 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
   });
 }
 
+// Todas las voces en español que ofrece el navegador/celular, para el
+// selector de "Cambiar voz". Varía mucho según el dispositivo: algunos
+// tienen una sola, otros varias con distinto acento.
+function listarVocesEspanol() {
+  try {
+    if (!("speechSynthesis" in window)) return [];
+    return window.speechSynthesis.getVoices().filter((v) => v.lang && v.lang.toLowerCase().startsWith("es"));
+  } catch {
+    return [];
+  }
+}
+
+// Voz elegida a mano por el usuario desde el selector: si está definida,
+// gana por sobre la automática (vozCoach).
+let vozCoachManual = null;
+function fijarVozManual(voz) {
+  vozCoachManual = voz || null;
+}
+
 function hablar(texto) {
   try {
     if (!("speechSynthesis" in window)) return;
@@ -2006,7 +2025,8 @@ function hablar(texto) {
       utt.lang = "es-ES";
       utt.rate = 1.05;
       utt.pitch = 0.75;
-      if (vozCoach) utt.voice = vozCoach;
+      const voz = vozCoachManual || vozCoach;
+      if (voz) utt.voice = voz;
       synth.speak(utt);
     };
     // Cancelar y hablar en el mismo instante deja la síntesis de voz
@@ -2022,6 +2042,62 @@ function hablar(texto) {
   } catch {
     // sin soporte de voz en el navegador; no rompe el resto del entrenamiento
   }
+}
+
+function SelectorVozCoach({ voces, vozElegidaNombre, onElegir, onCerrar }) {
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.7)", zIndex: 90 }}
+      onClick={onCerrar}
+    >
+      <div
+        className="w-full max-w-sm rounded-lg p-4 max-h-[80vh] overflow-y-auto"
+        style={{ background: C.panel, border: `1px solid ${C.border}`, boxShadow: "0 20px 50px rgba(0,0,0,0.45)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-3">
+          <span className="display text-sm" style={{ color: C.muted }}>ELEGIR VOZ DEL COACH</span>
+          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+
+        <button
+          onClick={() => onElegir({ name: "" })}
+          className="w-full text-left rounded px-3 py-2 mb-2 text-sm"
+          style={{
+            background: !vozElegidaNombre ? C.foodDim : C.panelAlt,
+            border: `1px solid ${!vozElegidaNombre ? C.food : C.border}`,
+            color: !vozElegidaNombre ? C.food : C.text,
+          }}
+        >
+          Automática (elegida por la app)
+        </button>
+
+        {voces.length === 0 ? (
+          <p className="text-xs" style={{ color: C.muted }}>
+            Este dispositivo no ofrece más de una voz en español, o todavía no terminó de cargarlas — probá cerrar y volver a abrir esta lista en unos segundos.
+          </p>
+        ) : (
+          voces.map((v) => (
+            <button
+              key={v.name}
+              onClick={() => onElegir(v)}
+              className="w-full text-left rounded px-3 py-2 mb-2 text-sm"
+              style={{
+                background: vozElegidaNombre === v.name ? C.foodDim : C.panelAlt,
+                border: `1px solid ${vozElegidaNombre === v.name ? C.food : C.border}`,
+                color: vozElegidaNombre === v.name ? C.food : C.text,
+              }}
+            >
+              {v.name}
+              <span className="block text-[10px] mt-0.5" style={{ color: C.muted }}>{v.lang}</span>
+            </button>
+          ))
+        )}
+        <p className="text-[10px] mt-1" style={{ color: C.muted }}>Al elegir una, la escuchás enseguida para confirmar.</p>
+      </div>
+    </div>
+  );
 }
 
 const DURACIONES_DESCANSO = [15, 30, 45, 60, 90, 120];
@@ -2177,6 +2253,45 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   // Coach por voz: cuenta las repeticiones y avisa en voz alta para poder
   // entrenar sin tener que mirar el celular en el piso.
   const [vozActiva, setVozActiva] = useState(true);
+  const [vocesDisponibles, setVocesDisponibles] = useState([]);
+  const [vozElegidaNombre, setVozElegidaNombre] = useState(null);
+  const [mostrarSelectorVoz, setMostrarSelectorVoz] = useState(false);
+
+  // Carga la lista de voces en español del dispositivo (puede tardar en
+  // aparecer, por eso también se escucha "voiceschanged") y la preferencia
+  // guardada, si eligió una antes.
+  useEffect(() => {
+    const cargarVoces = () => setVocesDisponibles(listarVocesEspanol());
+    cargarVoces();
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.addEventListener("voiceschanged", cargarVoces);
+      return () => window.speechSynthesis.removeEventListener("voiceschanged", cargarVoces);
+    }
+  }, []);
+
+  useEffect(() => {
+    safeGet("vozCoachElegida").then((nombre) => {
+      if (nombre) setVozElegidaNombre(nombre);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!vozElegidaNombre) {
+      fijarVozManual(null);
+      return;
+    }
+    fijarVozManual(vocesDisponibles.find((v) => v.name === vozElegidaNombre) || null);
+  }, [vozElegidaNombre, vocesDisponibles]);
+
+  const elegirVoz = (voz) => {
+    // Aplica el cambio ya mismo (no esperar al useEffect, que corre recién
+    // en el próximo render) para que la frase de confirmación se escuche
+    // con la voz nueva y no con la anterior.
+    fijarVozManual(voz.name ? voz : null);
+    setVozElegidaNombre(voz.name || "");
+    safeSet("vozCoachElegida", voz.name || "");
+    hablar("Hola, soy tu coach.");
+  };
 
   useEffect(() => {
     setModoTiempo(Boolean(ejercicioActual.porTiempo));
@@ -2301,11 +2416,11 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
       <div className="flex justify-end gap-2 mb-2">
         {vozActiva && (
           <button
-            onClick={() => hablar("Hola, soy tu coach.")}
+            onClick={() => setMostrarSelectorVoz(true)}
             className="text-[11px] mono px-2 py-1 rounded"
             style={{ background: C.panelAlt, color: C.muted, border: `1px solid ${C.border}` }}
           >
-            Probar voz
+            Cambiar voz
           </button>
         )}
         <button
@@ -2317,6 +2432,15 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
           {vozActiva ? "Coach con voz" : "Sin voz"}
         </button>
       </div>
+
+      {mostrarSelectorVoz && (
+        <SelectorVozCoach
+          voces={vocesDisponibles}
+          vozElegidaNombre={vozElegidaNombre}
+          onElegir={elegirVoz}
+          onCerrar={() => setMostrarSelectorVoz(false)}
+        />
+      )}
 
       {contando && (
         <CuentaRegresiva
