@@ -153,9 +153,11 @@ function FiguraTecnica({ figura, size = 56, color }) {
       <polyline points={brazo} fill="none" stroke={trazo} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
       <polyline points={brazo} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
 
-      {/* cabeza, con un pequeño resalte para que no quede plana */}
-      <circle cx={f.cabeza[0]} cy={f.cabeza[1]} r="11" fill={trazo} />
-      <circle cx={f.cabeza[0] - 3} cy={f.cabeza[1] - 3} r="3.5" fill="rgba(255,255,255,0.25)" />
+      {/* cabeza en color claro, bien distinta del cuerpo: es lo que hace que
+          la figura se lea como "una persona" de un vistazo en vez de un
+          garabato de un solo color */}
+      <circle cx={f.cabeza[0]} cy={f.cabeza[1]} r="11" fill={C.text} />
+      <circle cx={f.cabeza[0] - 3} cy={f.cabeza[1] - 3} r="3.5" fill="rgba(0,0,0,0.1)" />
     </svg>
   );
 }
@@ -166,7 +168,13 @@ function FiguraTecnica({ figura, size = 56, color }) {
 // mancha gris. Muestra la posición más reconocible del movimiento (la
 // segunda, si el ejercicio tiene dos).
 function IconoEjercicio({ figuras, size = 56 }) {
-  const figuraKey = figuras?.[figuras.length > 1 ? 1 : 0];
+  // De las dos posiciones del ejercicio, se elige la que se lee mejor como
+  // "una persona": en empuje (flexiones) es la de abajo, con el codo bien
+  // flexionado; en el resto suele ser la de arriba (dominada arriba, sentadilla
+  // abajo), que muestra el cuerpo más "trabajado" en vez de la posición neutra.
+  const esEmpuje = figuras?.[0]?.startsWith("empuje_");
+  const indice = esEmpuje ? 0 : figuras?.length > 1 ? 1 : 0;
+  const figuraKey = figuras?.[indice];
   return (
     <div
       className="flex items-center justify-center flex-shrink-0"
@@ -231,11 +239,11 @@ function FiguraAnimada({ figuras, size = 84, color }) {
         <animate attributeName="points" values={`${puntos(a)};${puntos(b)};${puntos(a)}`} dur={dur} repeatCount="indefinite" />
       </polyline>
 
-      <circle r="11" fill={trazo}>
+      <circle r="11" fill={C.text}>
         <animate attributeName="cx" values={`${a.cabeza[0]};${b.cabeza[0]};${a.cabeza[0]}`} dur={dur} repeatCount="indefinite" />
         <animate attributeName="cy" values={`${a.cabeza[1]};${b.cabeza[1]};${a.cabeza[1]}`} dur={dur} repeatCount="indefinite" />
       </circle>
-      <circle r="3.5" fill="rgba(255,255,255,0.25)">
+      <circle r="3.5" fill="rgba(0,0,0,0.1)">
         <animate attributeName="cx" values={`${a.cabeza[0] - 3};${b.cabeza[0] - 3};${a.cabeza[0] - 3}`} dur={dur} repeatCount="indefinite" />
         <animate attributeName="cy" values={`${a.cabeza[1] - 3};${b.cabeza[1] - 3};${a.cabeza[1] - 3}`} dur={dur} repeatCount="indefinite" />
       </circle>
