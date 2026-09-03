@@ -746,8 +746,22 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (tab === "progreso" && !semana) cargarSemana();
-  }, [tab, semana, cargarSemana]);
+    if (!semana) cargarSemana();
+  }, [semana, cargarSemana]);
+
+  // Días seguidos sin entrenar (sin contar hoy, que recién está por decidirse)
+  // hasta el más reciente en que sí entrenó. Se usa para el aviso en Hoy que
+  // invita a volver en vez de arrancar como si no hubiera pasado nada.
+  const diasSinEntrenar = (() => {
+    if (!semana || !suscripcion) return 0;
+    let dias = 0;
+    for (let i = semana.length - 2; i >= 0; i--) {
+      if (semana[i].fecha < suscripcion.trialStart) break;
+      if (semana[i].entreno) break;
+      dias++;
+    }
+    return dias;
+  })();
 
   const totales = registro.comidas.reduce(
     (acc, c) => ({
@@ -836,6 +850,7 @@ export default function App() {
             accesoPremium={accesoPremium}
             onBloqueado={() => setMostrarPlanes(true)}
             planHoy={planDeHoy()}
+            diasSinEntrenar={diasSinEntrenar}
             onIrAEntrenar={(track) => {
               setTrackSugerido(track);
               setTab("entrenamiento");
@@ -1320,17 +1335,32 @@ const NIVEL_OPCIONES = [
 ];
 
 // ---------- HOY ----------
-function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, planHoy, onIrAEntrenar }) {
+function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, planHoy, diasSinEntrenar, onIrAEntrenar }) {
   const pct = Math.min(totales.kcal / perfil.kcal, 1) * 360;
   const restante = Math.max(perfil.kcal - totales.kcal, 0);
   const [quickComida, setQuickComida] = useState(false);
   const [quickEjercicio, setQuickEjercicio] = useState(false);
+  const yaEntrenoHoy = registro.entrenamiento.length > 0;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
         <span className="text-lg font-semibold">Hola{perfil.nombre ? `, ${perfil.nombre}` : ""} 👋</span>
       </div>
+
+      {!yaEntrenoHoy && diasSinEntrenar > 0 && (
+        <div
+          className="flex items-center gap-2 rounded-lg px-4 py-3 mb-3"
+          style={{ background: C.trainDim, border: `1px solid ${C.train}` }}
+        >
+          <Flame size={16} color={C.train} className="flex-shrink-0" />
+          <span className="text-xs" style={{ color: C.text }}>
+            {diasSinEntrenar === 1
+              ? "Ayer no entrenaste. ¡Arranca hoy y no pierdas el ritmo!"
+              : `Hace ${diasSinEntrenar} días que no entrenas. Tu racha se cortó, pero puedes arrancar de nuevo ahora mismo.`}
+          </span>
+        </div>
+      )}
 
       {planHoy.descanso ? (
         <Panel style={{ textAlign: "center" }}>
