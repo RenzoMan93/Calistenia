@@ -2368,6 +2368,13 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             try { navigator.vibrate?.(300); } catch {}
             reproducirBeep();
             if (vozActiva) hablar("¡Comienza de nuevo!");
+            // Si todavía quedan series, arranca solo la próxima (conteo
+            // automático de reps o el cronómetro, según el modo) sin que
+            // haya que tocar nada.
+            if (serieActual <= Number(series)) {
+              if (!modoTiempo && modoAuto) setAutoCorriendo(true);
+              else if (modoTiempo) setCronoCorriendo(true);
+            }
             return 0;
           }
           const restanteNuevo = prev - 1;
