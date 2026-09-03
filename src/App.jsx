@@ -572,8 +572,6 @@ const PLAN_SEMANAL = {
   6: { descanso: true },
 };
 
-const DIAS_SEMANA_LABEL = { 1: "Lunes", 2: "Martes", 3: "Miércoles", 4: "Jueves", 5: "Viernes" };
-
 function planDeHoy() {
   return PLAN_SEMANAL[new Date().getDay()];
 }
@@ -3098,47 +3096,10 @@ function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, acceso
 
 // ---------- PROGRESO ----------
 // ---------- CONSEJOS ----------
-function PanelPlanSemanal({ progresion }) {
-  return (
-    <Panel>
-      <div className="display text-sm mb-1" style={{ color: C.muted }}>PLAN SEMANAL SUGERIDO</div>
-      <p className="text-[10px] mb-3" style={{ color: C.muted }}>
-        Una idea para no tener que pensar qué entrenar cada día. Es una sugerencia, no una obligación: en Entreno puedes elegir el grupo que quieras, cualquier día.
-      </p>
-      <div className="flex flex-col gap-2">
-        {[1, 2, 3, 4, 5].map((dia) => {
-          const plan = PLAN_SEMANAL[dia];
-          return (
-            <div key={dia} className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
-              <div className="text-xs font-medium mb-1" style={{ color: C.food }}>{DIAS_SEMANA_LABEL[dia]}</div>
-              <div className="flex flex-col gap-0.5">
-                {plan.tracks.map((track) => {
-                  const ej = TRACKS[track].ejercicios[(progresion?.[track] || 1) - 1];
-                  return (
-                    <div key={track} className="text-xs" style={{ color: C.text }}>
-                      <span style={{ color: C.muted }}>{TRACKS[track].nombre}:</span> {ej.nombre}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-        <div className="rounded px-3 py-2" style={{ background: C.panelAlt }}>
-          <div className="text-xs font-medium" style={{ color: C.muted }}>Sábado y domingo</div>
-          <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>Descanso, o entrena igual si tienes ganas.</p>
-        </div>
-      </div>
-    </Panel>
-  );
-}
-
 function VistaConsejos({ perfil, progresion }) {
   const [trackAbierto, setTrackAbierto] = useState(null);
   return (
     <div>
-      <PanelPlanSemanal progresion={progresion} />
-
       <Panel>
         <div className="flex items-center gap-2 mb-1">
           <Lightbulb size={16} color={C.food} />
@@ -4304,7 +4265,6 @@ const AYUDA_SECCIONES = [
     color: "food",
     titulo: "Consejos",
     puntos: [
-      "Plan semanal sugerido: qué entrenar cada día de lunes a viernes, con el ejercicio puntual según tu nivel.",
       "Consejos de nutrición según tu objetivo (bajar, mantener o subir de peso).",
       "Técnica animada de cada ejercicio, con posición inicial y final.",
     ],
