@@ -2893,8 +2893,15 @@ function VistaNutricion({ totales, perfil, registro, onAgregar, onQuitar, acceso
         <span>{Math.round(valor)}g</span>
         <span>{objetivo}g</span>
       </div>
-      <div style={{ height: 6, background: C.panelAlt, borderRadius: 3 }}>
-        <div style={{ width: `${Math.min((valor / objetivo) * 100, 100)}%`, height: 6, background: color, borderRadius: 3 }} />
+      <div style={{ height: 8, background: C.border, borderRadius: 4 }}>
+        <div
+          style={{
+            width: `${Math.max(Math.min((valor / objetivo) * 100, 100), valor > 0 ? 4 : 0)}%`,
+            height: 8,
+            background: color,
+            borderRadius: 4,
+          }}
+        />
       </div>
     </div>
   );
