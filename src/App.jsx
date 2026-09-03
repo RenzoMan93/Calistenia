@@ -554,19 +554,21 @@ const ultimosDias = (n) => {
 const pad2 = (n) => String(n).padStart(2, "0");
 const NOMBRES_MES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-// Split semanal sugerido: cada grupo se entrena 2 veces por semana con al
-// menos 2-3 días de por medio para recuperar, y quedan días de descanso.
-// Sugerencia de rutina semanal: de lunes a viernes siempre hay algo
-// propuesto (repartiendo los 4 grupos musculares a lo largo de la semana),
-// y el fin de semana queda como descanso. Es solo una guía — el usuario
-// puede entrenar el grupo que quiera cualquier día desde la pestaña Entreno.
+// Plan semanal sugerido: cuerpo completo (los 4 grupos musculares) de lunes
+// a viernes, en vez de repartir 1-2 grupos por día. Con un solo ejercicio
+// por grupo la sesión quedaba muy corta (3-8 minutos); entrenando los 4
+// grupos cada día se arma una sesión completa (15-25 minutos según el
+// nivel), sin perder el enfoque de progresión por grupo. Es solo una guía
+// — el usuario puede entrenar el grupo que quiera cualquier día desde la
+// pestaña Entreno.
+const ORDEN_TRACKS = ["empuje", "traccion", "piernas", "core"];
 const PLAN_SEMANAL = {
   0: { descanso: true },
-  1: { tracks: ["empuje", "core"] },
-  2: { tracks: ["traccion", "piernas"] },
-  3: { tracks: ["empuje", "piernas"] },
-  4: { tracks: ["traccion", "core"] },
-  5: { tracks: ["empuje", "traccion"] },
+  1: { tracks: ORDEN_TRACKS },
+  2: { tracks: ORDEN_TRACKS },
+  3: { tracks: ORDEN_TRACKS },
+  4: { tracks: ORDEN_TRACKS },
+  5: { tracks: ORDEN_TRACKS },
   6: { descanso: true },
 };
 
@@ -1389,6 +1391,11 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
   const [quickComida, setQuickComida] = useState(false);
   const [quickEjercicio, setQuickEjercicio] = useState(false);
   const yaEntrenoHoy = registro.entrenamiento.length > 0;
+  const gruposHechosHoy = planHoy.tracks
+    ? planHoy.tracks.filter((t) => registro.entrenamiento.some((e) => e.track === t))
+    : [];
+  const planCompleto = planHoy.tracks && gruposHechosHoy.length >= planHoy.tracks.length;
+  const siguienteGrupo = planHoy.tracks?.find((t) => !gruposHechosHoy.includes(t)) || planHoy.tracks?.[0];
 
   return (
     <div>
@@ -1424,19 +1431,27 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
       ) : (
         <Panel style={{ borderColor: C.train }}>
           <div className="display text-sm mb-1" style={{ color: C.muted }}>PLAN DE HOY</div>
-          <div className="text-base font-semibold mb-3">{planHoy.tracks.map((t) => TRACKS[t].nombre).join(" + ")}</div>
-          {registro.entrenamiento.length > 0 ? (
+          <div className="text-base font-semibold mb-1">Cuerpo completo</div>
+          <p className="text-xs mb-3" style={{ color: C.muted }}>{planHoy.tracks.map((t) => TRACKS[t].nombre).join(" · ")}</p>
+          {planCompleto ? (
             <div className="flex items-center gap-2 text-sm" style={{ color: C.food }}>
-              <Check size={16} /> ¡Ya entrenaste hoy!
+              <Check size={16} /> ¡Completaste los 4 grupos de hoy!
             </div>
           ) : (
-            <button
-              onClick={() => onIrAEntrenar(planHoy.tracks[0])}
-              className="w-full py-3 rounded-md font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
-              style={{ background: `linear-gradient(135deg, ${C.train}, #E8503A)`, color: C.panel, boxShadow: "0 8px 20px rgba(255,107,74,0.32)" }}
-            >
-              Empezar mi entrenamiento
-            </button>
+            <>
+              {gruposHechosHoy.length > 0 && (
+                <p className="text-xs mb-2" style={{ color: C.food }}>
+                  {gruposHechosHoy.length}/{planHoy.tracks.length} grupos hechos hoy
+                </p>
+              )}
+              <button
+                onClick={() => onIrAEntrenar(siguienteGrupo)}
+                className="w-full py-3 rounded-md font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
+                style={{ background: `linear-gradient(135deg, ${C.train}, #E8503A)`, color: C.panel, boxShadow: "0 8px 20px rgba(255,107,74,0.32)" }}
+              >
+                {gruposHechosHoy.length > 0 ? "Seguir entrenando" : "Empezar mi entrenamiento"}
+              </button>
+            </>
           )}
         </Panel>
       )}
