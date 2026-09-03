@@ -801,6 +801,20 @@ export default function App() {
     return racha;
   })();
 
+  // El logro incompleto más cercano a desbloquearse, para mostrar un
+  // empujón concreto en Hoy ("A 1 día de...") en vez de que los logros solo
+  // se vean festejados o escondidos en Progreso.
+  const proximoLogro = (() => {
+    if (!semana) return null;
+    const diasEntrenados = semana.filter((d) => d.entreno).length;
+    const nivelMaximo = Math.max(...Object.values(progresion || {}));
+    const ctx = { racha: rachaActual, diasEntrenados, nivelMaximo, progresion };
+    const incompletos = LOGROS_DEF.filter((l) => !l.cumple(ctx));
+    if (incompletos.length === 0) return null;
+    const mejor = [...incompletos].sort((a, b) => b.progreso(ctx) - a.progreso(ctx))[0];
+    return { nombre: mejor.nombre, falta: mejor.falta(ctx) };
+  })();
+
   // Detecta logros recién desbloqueados (racha, nivel, etc.) para festejarlos
   // en el momento en vez de que el usuario los descubra solo si entra a
   // Progreso. "logrosVistos" (persistido) evita festejar de nuevo algo que
@@ -926,6 +940,7 @@ export default function App() {
             planHoy={planDeHoy()}
             diasSinEntrenar={diasSinEntrenar}
             rachaActual={rachaActual}
+            proximoLogro={proximoLogro}
             onIrAEntrenar={(track) => {
               setTrackSugerido(track);
               setTab("entrenamiento");
@@ -1413,7 +1428,7 @@ const NIVEL_OPCIONES = [
 ];
 
 // ---------- HOY ----------
-function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, planHoy, diasSinEntrenar, rachaActual, onIrAEntrenar }) {
+function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio, onAgregarComida, onAgregarEjercicio, progresion, accesoPremium, onBloqueado, planHoy, diasSinEntrenar, rachaActual, proximoLogro, onIrAEntrenar }) {
   const pct = Math.min(totales.kcal / perfil.kcal, 1) * 360;
   const restante = Math.max(perfil.kcal - totales.kcal, 0);
   const [quickComida, setQuickComida] = useState(false);
@@ -1490,6 +1505,15 @@ function VistaHoy({ totales, perfil, registro, onQuitarComida, onQuitarEjercicio
               );
             })}
           </div>
+
+          {proximoLogro && (
+            <div className="flex items-center gap-2 rounded px-3 py-2 mb-3" style={{ background: C.panelAlt, border: `1px dashed ${C.food}` }}>
+              <Crown size={13} color={C.food} className="flex-shrink-0" />
+              <span className="text-[11px]" style={{ color: C.text }}>
+                A <b>{proximoLogro.falta}</b> de "{proximoLogro.nombre}"
+              </span>
+            </div>
+          )}
 
           {planCompleto ? (
             <div className="flex items-center gap-2 text-sm" style={{ color: C.food }}>
@@ -3650,14 +3674,52 @@ function VistaProgreso({ semana, perfil, progresion, accesoPremium, onBloqueado,
   );
 }
 
+// Cada logro suma, además del chequeo booleano ("cumple"), qué tan cerca
+// está (0 a 1, "progreso") y una frase corta de cuánto falta ("falta") — se
+// usa para mostrar en Hoy el logro más próximo a desbloquear, no solo
+// festejar los que ya se cumplieron.
 const LOGROS_DEF = [
-  { id: "racha3", nombre: "Racha de 3 días", desc: "Entrenaste 3 días seguidos", cumple: (ctx) => ctx.racha >= 3 },
-  { id: "semana", nombre: "Semana perfecta", desc: "Entrenaste los 7 días de la semana", cumple: (ctx) => ctx.diasEntrenados >= 7 },
-  { id: "nivel3", nombre: "Salió de principiante", desc: "Llegaste al nivel 3 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 3 },
-  { id: "nivel5", nombre: "Nivel avanzado", desc: "Llegaste al nivel 5 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 5 },
-  { id: "nivel8", nombre: "Casi experto", desc: "Llegaste al nivel 8 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 8 },
-  { id: "nivel10", nombre: "Nivel máximo", desc: "Llegaste al nivel 10 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 10 },
-  { id: "todoterreno", nombre: "Todo terreno", desc: "Nivel 2 o más en los 4 grupos", cumple: (ctx) => Object.values(ctx.progresion || {}).every((n) => n >= 2) },
+  {
+    id: "racha3", nombre: "Racha de 3 días", desc: "Entrenaste 3 días seguidos", cumple: (ctx) => ctx.racha >= 3,
+    progreso: (ctx) => Math.min(ctx.racha / 3, 1),
+    falta: (ctx) => `${3 - ctx.racha} día${3 - ctx.racha !== 1 ? "s" : ""}`,
+  },
+  {
+    id: "semana", nombre: "Semana perfecta", desc: "Entrenaste los 7 días de la semana", cumple: (ctx) => ctx.diasEntrenados >= 7,
+    progreso: (ctx) => Math.min(ctx.diasEntrenados / 7, 1),
+    falta: (ctx) => `${7 - ctx.diasEntrenados} día${7 - ctx.diasEntrenados !== 1 ? "s" : ""}`,
+  },
+  {
+    id: "nivel3", nombre: "Salió de principiante", desc: "Llegaste al nivel 3 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 3,
+    progreso: (ctx) => Math.min(ctx.nivelMaximo / 3, 1),
+    falta: (ctx) => `${3 - ctx.nivelMaximo} nivel${3 - ctx.nivelMaximo !== 1 ? "es" : ""}`,
+  },
+  {
+    id: "nivel5", nombre: "Nivel avanzado", desc: "Llegaste al nivel 5 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 5,
+    progreso: (ctx) => Math.min(ctx.nivelMaximo / 5, 1),
+    falta: (ctx) => `${5 - ctx.nivelMaximo} nivel${5 - ctx.nivelMaximo !== 1 ? "es" : ""}`,
+  },
+  {
+    id: "nivel8", nombre: "Casi experto", desc: "Llegaste al nivel 8 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 8,
+    progreso: (ctx) => Math.min(ctx.nivelMaximo / 8, 1),
+    falta: (ctx) => `${8 - ctx.nivelMaximo} nivel${8 - ctx.nivelMaximo !== 1 ? "es" : ""}`,
+  },
+  {
+    id: "nivel10", nombre: "Nivel máximo", desc: "Llegaste al nivel 10 en algún grupo", cumple: (ctx) => ctx.nivelMaximo >= 10,
+    progreso: (ctx) => Math.min(ctx.nivelMaximo / 10, 1),
+    falta: (ctx) => `${10 - ctx.nivelMaximo} nivel${10 - ctx.nivelMaximo !== 1 ? "es" : ""}`,
+  },
+  {
+    id: "todoterreno", nombre: "Todo terreno", desc: "Nivel 2 o más en los 4 grupos", cumple: (ctx) => Object.values(ctx.progresion || {}).every((n) => n >= 2),
+    progreso: (ctx) => {
+      const niveles = Object.values(ctx.progresion || {});
+      return niveles.length ? niveles.filter((n) => n >= 2).length / niveles.length : 0;
+    },
+    falta: (ctx) => {
+      const faltantes = Object.values(ctx.progresion || {}).filter((n) => n < 2).length;
+      return `${faltantes} grupo${faltantes !== 1 ? "s" : ""}`;
+    },
+  },
 ];
 
 // Festejo en el momento de desbloquear un logro (en vez de que el usuario lo
