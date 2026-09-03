@@ -2249,6 +2249,10 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
   const [contando, setContando] = useState(false);
   const nivelActual = progresion[trackSel];
   const ejercicioActual = TRACKS[trackSel].ejercicios[nivelActual - 1];
+  // Próximo grupo muscular según el orden del plan de cuerpo completo, para
+  // ofrecer un botón directo al terminar un ejercicio (no cambia de grupo
+  // solo, el usuario decide si lo toca).
+  const siguienteTrack = ORDEN_TRACKS[ORDEN_TRACKS.indexOf(trackSel) + 1] || null;
 
   const toggleTips = (key) => setTipsAbiertos((prev) => ({ ...prev, [key]: !prev[key] }));
 
@@ -2680,8 +2684,17 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             <Check size={28} color={C.food} />
             <p className="text-sm font-medium">¡Terminaste este ejercicio!</p>
             <p className="text-xs" style={{ color: C.muted }}>
-              Cambia de grupo muscular arriba, o sube el número de series si quieres hacer una más.
+              O sube el número de series arriba si quieres hacer una más.
             </p>
+            {siguienteTrack && (
+              <button
+                onClick={() => setTrackSel(siguienteTrack)}
+                className="mt-2 px-5 py-2.5 rounded-md font-medium text-sm"
+                style={{ background: C.train, color: C.panel }}
+              >
+                Siguiente: {TRACKS[siguienteTrack].nombre} →
+              </button>
+            )}
           </div>
         ) : !modoTiempo ? (
           <div className="flex flex-col items-center gap-3 mb-3">
