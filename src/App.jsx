@@ -2122,6 +2122,19 @@ function hablar(texto) {
   }
 }
 
+// Frases variadas para que el coach no diga siempre lo mismo en los mismos
+// momentos (arranque, fin de serie, fin de descanso) — no cambia la voz en
+// sí (eso depende del dispositivo), pero ayuda a que se sienta menos
+// robótico y más como alguien alentando de verdad.
+const FRASES_ARRANQUE = ["¡A entrenar!", "¡Vamos!", "¡Dale que se puede!", "¡A darle!"];
+const FRASES_SERIE_COMPLETA = ["¡Bien ahí!", "¡Así se hace!", "¡Excelente serie!", "¡Vamos bien!"];
+const FRASES_REANUDAR = ["¡Comienza de nuevo!", "¡Dale, arrancamos!", "¡Vamos con todo!", "¡Una vuelta más!"];
+const FRASES_ANIMO_REP = ["¡vamos!", "¡dale!", "¡así!", "¡fuerza!", "¡seguí!"];
+
+function elegirAlAzar(opciones) {
+  return opciones[Math.floor(Math.random() * opciones.length)];
+}
+
 function SelectorVozCoach({ voces, vozElegidaNombre, onElegir, onCerrar }) {
   return (
     <div
@@ -2278,7 +2291,7 @@ function CuentaRegresiva({ onTerminar, vozActiva }) {
   const [n, setN] = useState(3);
 
   useEffect(() => {
-    if (vozActiva) hablar(n > 0 ? String(n) : "¡A entrenar!");
+    if (vozActiva) hablar(n > 0 ? String(n) : elegirAlAzar(FRASES_ARRANQUE));
     if (n <= 0) {
       const t = setTimeout(onTerminar, 600);
       return () => clearTimeout(t);
@@ -2417,7 +2430,11 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
     const id = setInterval(() => {
       setContadorReps((r) => {
         const nuevo = r + 1;
-        if (vozActiva) hablar(nuevo >= objetivo ? `${nuevo}, ¡última!` : String(nuevo));
+        if (vozActiva) {
+          if (nuevo >= objetivo) hablar(`${nuevo}, ¡última!`);
+          else if (nuevo % 3 === 0) hablar(`${nuevo}, ${elegirAlAzar(FRASES_ANIMO_REP)}`);
+          else hablar(String(nuevo));
+        }
         if (nuevo >= objetivo) {
           clearInterval(id);
           // Espera a que termine de decir "N, ¡última!" antes de avisar
@@ -2480,7 +2497,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
             setCorriendo(false);
             try { navigator.vibrate?.(300); } catch {}
             reproducirBeep();
-            if (vozActiva) hablar("¡Comienza de nuevo!");
+            if (vozActiva) hablar(elegirAlAzar(FRASES_REANUDAR));
             // Si todavía quedan series, arranca solo la próxima (conteo
             // automático de reps o el cronómetro, según el modo) sin que
             // haya que tocar nada. Lee los refs (no el closure) porque este
@@ -2515,7 +2532,7 @@ function VistaEntrenamiento({ progresion, progresoSeries, setNivel, registro, on
     setDescansoTotal(duracion);
     setDescansoRestante(duracion);
     setCorriendo(true);
-    if (vozActiva) hablar(`Serie completa. Descansa ${duracion} segundos.`);
+    if (vozActiva) hablar(`${elegirAlAzar(FRASES_SERIE_COMPLETA)} Descansa ${duracion} segundos.`);
   };
 
   // Cierra la serie de repeticiones (a mano con "Serie terminada" o sola
