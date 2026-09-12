@@ -18,7 +18,7 @@ export async function cerrarSesion() {
   await supabase.auth.signOut();
 }
 
-function LoginScreen() {
+function LoginScreen({ soloLogin = false, onCerrar }) {
   const [modo, setModo] = useState("login"); // "login" | "signup" | "recuperar"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,7 +61,12 @@ function LoginScreen() {
         @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600&display=swap');
         .display { font-family: 'Oswald', sans-serif; letter-spacing: 0.02em; }
       `}</style>
-      <div style={{ background: C.panel, border: `1px solid ${C.border}` }} className="rounded-md p-6 w-full max-w-sm">
+      <div style={{ background: C.panel, border: `1px solid ${C.border}`, position: "relative" }} className="rounded-md p-6 w-full max-w-sm">
+        {onCerrar && (
+          <button onClick={onCerrar} style={{ position: "absolute", top: 12, right: 14, color: C.muted }} aria-label="Cerrar">
+            ✕
+          </button>
+        )}
         <h1 className="display text-xl font-bold text-center mb-1">
           CALISTENIA <span style={{ color: C.train }}>/</span> NUTRICIÓN
         </h1>
@@ -118,9 +123,11 @@ function LoginScreen() {
         <div className="flex flex-col items-center gap-1 mt-4 text-xs" style={{ color: C.muted }}>
           {modo === "login" && (
             <>
-              <button onClick={() => setModo("signup")} className="underline">
-                ¿No tienes cuenta? Crea una
-              </button>
+              {!soloLogin && (
+                <button onClick={() => setModo("signup")} className="underline">
+                  ¿No tienes cuenta? Crea una
+                </button>
+              )}
               <button onClick={() => setModo("recuperar")} className="underline">
                 Olvidé mi contraseña
               </button>
@@ -216,18 +223,49 @@ function NuevaContrasenaScreen({ onListo }) {
 }
 
 export default function AuthGate() {
-  const [session, setSession] = useState(undefined); // undefined = cargando, null = sin sesión
+  const [session, setSession] = useState(undefined); // undefined = cargando, null = sin sesión (ni anónima)
   const [recuperando, setRecuperando] = useState(false);
+  const [mostrarLoginExistente, setMostrarLoginExistente] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    let cancelado = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (cancelado) return;
+      if (data.session) {
+        setSession(data.session);
+        return;
+      }
+      // Nadie inició sesión todavía: se crea una cuenta anónima sola, sin
+      // pedirle nada, para que pueda probar la app (entrenar, cargar
+      // comidas) antes de registrarse. El aviso para crear la cuenta real
+      // (y no perder ese progreso) se muestra desde dentro de la app —
+      // ver BannerCuentaAnonima en App.jsx.
+      const { data: anon, error } = await supabase.auth.signInAnonymously();
+      if (cancelado) return;
+      if (error) {
+        // Puede pasar si el proyecto de Supabase no tiene habilitado el
+        // inicio de sesión anónimo: se cae al login/registro de siempre.
+        console.error("signInAnonymously error", error);
+        setSession(null);
+        return;
+      }
+      setSession(anon.session);
+    })();
+
     const { data: listener } = supabase.auth.onAuthStateChange((event, nuevaSesion) => {
       if (event === "PASSWORD_RECOVERY") {
         setRecuperando(true);
       }
+      if (event === "SIGNED_IN") {
+        setMostrarLoginExistente(false);
+      }
       setSession(nuevaSesion);
     });
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      cancelado = true;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   if (session === undefined) {
@@ -242,9 +280,13 @@ export default function AuthGate() {
     return <NuevaContrasenaScreen onListo={() => setRecuperando(false)} />;
   }
 
+  if (mostrarLoginExistente) {
+    return <LoginScreen soloLogin onCerrar={() => setMostrarLoginExistente(false)} />;
+  }
+
   if (!session) {
     return <LoginScreen />;
   }
 
-  return <App />;
+  return <App session={session} onIniciarSesionExistente={() => setMostrarLoginExistente(true)} />;
 }

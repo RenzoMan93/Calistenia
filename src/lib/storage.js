@@ -202,3 +202,15 @@ export async function borrarSugerencia(id) {
   const { error } = await supabase.from("sugerencias").delete().eq("id", id);
   if (error) throw error;
 }
+
+// ---------------------------------------------------------------------------
+// Convertir la cuenta anónima de prueba en una cuenta real — mismo usuario,
+// mismo id, no se pierde nada de lo que ya guardó mientras probaba la app sin
+// registrarse. Requiere confirmar el email si el proyecto tiene esa opción
+// activada (ver AuthGate / auth.jsx).
+// ---------------------------------------------------------------------------
+
+export async function crearCuentaDesdeAnonimo({ email, password }) {
+  const { error } = await supabase.auth.updateUser({ email, password });
+  if (error) throw error;
+}

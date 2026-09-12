@@ -18,6 +18,7 @@ import {
   listarSugerencias,
   crearSugerencia,
   borrarSugerencia,
+  crearCuentaDesdeAnonimo,
 } from "./lib/storage";
 import { cerrarSesion } from "./lib/auth.jsx";
 
@@ -578,7 +579,9 @@ function planDeHoy() {
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
-export default function App() {
+export default function App({ session, onIniciarSesionExistente }) {
+  const esAnonimo = session?.user?.is_anonymous === true;
+  const [mostrarCrearCuenta, setMostrarCrearCuenta] = useState(false);
   const [tab, setTab] = useState("hoy");
   const [trackSugerido, setTrackSugerido] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -914,6 +917,12 @@ export default function App() {
 
       <div className="px-4">
         {storageDisponible === false && <BannerStorage />}
+        {esAnonimo && (
+          <BannerCuentaAnonima
+            onCrearCuenta={() => setMostrarCrearCuenta(true)}
+            onIniciarSesionExistente={onIniciarSesionExistente}
+          />
+        )}
         <BannerPlan
           suscripcion={suscripcion}
           esPremiumActivo={esPremiumActivo}
@@ -994,6 +1003,11 @@ export default function App() {
           onCerrar={() => setEditandoPerfil(false)}
           onVerTerminos={() => setMostrarTerminos(true)}
           onVerAyuda={() => setMostrarAyuda(true)}
+          esAnonimo={esAnonimo}
+          onCrearCuenta={() => {
+            setEditandoPerfil(false);
+            setMostrarCrearCuenta(true);
+          }}
         />
       )}
       {mostrarPlanes && (
@@ -1001,6 +1015,11 @@ export default function App() {
           esPremium={esPremiumActivo}
           diasPremiumRestantes={diasPremiumRestantes}
           diasTrialRestantes={diasTrialRestantes}
+          esAnonimo={esAnonimo}
+          onCrearCuenta={() => {
+            setMostrarPlanes(false);
+            setMostrarCrearCuenta(true);
+          }}
           onPagoConfirmado={revisarSuscripcion}
           onCerrar={() => setMostrarPlanes(false)}
           onVerTerminos={() => setMostrarTerminos(true)}
@@ -1023,6 +1042,7 @@ export default function App() {
       {colaLogros.length > 0 && (
         <ModalLogro logro={colaLogros[0]} onCerrar={() => setColaLogros((cola) => cola.slice(1))} />
       )}
+      {mostrarCrearCuenta && <ModalCrearCuenta onCerrar={() => setMostrarCrearCuenta(false)} />}
 
       {mostrarAdmin && <AdminCodigos onCerrar={() => setMostrarAdmin(false)} />}
       {sugerenciaNivel && (
@@ -1071,6 +1091,108 @@ function Panel({ children, style }) {
       className="rounded-lg p-4 mb-4"
     >
       {children}
+    </div>
+  );
+}
+
+// Se muestra mientras la cuenta es anónima (creada sola al abrir la app por
+// primera vez, sin pedir registro, para que se pueda probar todo antes de
+// comprometerse). El progreso ya se está guardando igual que con una cuenta
+// real, pero queda ligado a este navegador/dispositivo hasta que se confirme
+// un email — si se borran los datos del sitio antes de eso, se pierde.
+function BannerCuentaAnonima({ onCrearCuenta, onIniciarSesionExistente }) {
+  return (
+    <div
+      className="flex items-center justify-between gap-2 rounded-md px-3 py-2 mt-3 text-xs"
+      style={{ background: C.foodDim, border: `1px solid ${C.food}`, color: C.text }}
+    >
+      <span>Estás probando la app sin cuenta. Crea una para no perder tu progreso.</span>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {onIniciarSesionExistente && (
+          <button onClick={onIniciarSesionExistente} className="underline" style={{ color: C.muted }}>
+            Ya tengo cuenta
+          </button>
+        )}
+        <button onClick={onCrearCuenta} className="px-2 py-1 rounded font-medium" style={{ background: C.food, color: C.bg }}>
+          Crear cuenta
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ModalCrearCuenta({ onCerrar }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [cargando, setCargando] = useState(false);
+  const [mensaje, setMensaje] = useState(null);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (cargando) return;
+    setMensaje(null);
+    setCargando(true);
+    try {
+      await crearCuentaDesdeAnonimo({ email, password });
+      setMensaje({ ok: true, texto: "¡Listo! Revisa tu email para confirmar la cuenta. Tu progreso ya quedó guardado ahí." });
+    } catch (err) {
+      setMensaje({ ok: false, texto: err.message || "No se pudo crear la cuenta. Prueba de nuevo." });
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", zIndex: 90 }} onClick={onCerrar}>
+      <div
+        className="w-full max-w-sm rounded-lg p-5"
+        style={{ background: C.panel, border: `1px solid ${C.food}`, boxShadow: "0 20px 50px rgba(0,0,0,0.45)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-1">
+          <span className="display text-sm" style={{ color: C.muted }}>CREAR TU CUENTA</span>
+          <button onClick={onCerrar}><X size={18} color={C.muted} /></button>
+        </div>
+        <p className="text-xs mb-4" style={{ color: C.muted }}>
+          Le sumamos un email y contraseña a lo que ya veniste haciendo: tu progreso, tus comidas y tu entreno no se tocan.
+        </p>
+        {mensaje?.ok ? (
+          <p className="text-sm" style={{ color: C.food }}>{mensaje.texto}</p>
+        ) : (
+          <form onSubmit={submit} className="flex flex-col gap-3">
+            <input
+              type="email"
+              required
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="rounded px-3 py-2 text-sm"
+              style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
+            />
+            <input
+              type="password"
+              required
+              minLength={6}
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="rounded px-3 py-2 text-sm"
+              style={{ background: C.panelAlt, color: C.text, border: `1px solid ${C.border}` }}
+            />
+            <button
+              type="submit"
+              disabled={cargando}
+              className="py-2 rounded font-medium mt-1"
+              style={{ background: C.food, color: C.bg, opacity: cargando ? 0.6 : 1 }}
+            >
+              {cargando ? "Un momento..." : "Crear cuenta"}
+            </button>
+            {mensaje && !mensaje.ok && (
+              <p className="text-xs" style={{ color: C.danger }}>{mensaje.texto}</p>
+            )}
+          </form>
+        )}
+      </div>
     </div>
   );
 }
@@ -1235,7 +1357,7 @@ function ModalSugerenciaNivel({ track, nivelActual, onAceptar, onDescartar }) {
   );
 }
 
-function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPagoConfirmado, onCerrar, onVerTerminos }) {
+function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, esAnonimo, onCrearCuenta, onPagoConfirmado, onCerrar, onVerTerminos }) {
   const [codigo, setCodigo] = useState("");
   const [estado, setEstado] = useState(null);
   const [canjeando, setCanjeando] = useState(false);
@@ -1355,22 +1477,39 @@ function ModalPlanes({ esPremium, diasPremiumRestantes, diasTrialRestantes, onPa
             {esPremium && (
               <div className="text-center text-[10px]" style={{ color: C.muted }}>Puedes renovar antes de que venza:</div>
             )}
-            <button
-              onClick={irAPagar}
-              disabled={pagando}
-              className="block text-center w-full py-3.5 rounded-md font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
-              style={{
-                background: `linear-gradient(135deg, ${C.food}, #E0A83A)`,
-                color: C.bg,
-                opacity: pagando ? 0.6 : 1,
-                boxShadow: "0 8px 22px rgba(255,193,69,0.3)",
-              }}
-            >
-              {pagando ? "Generando link de pago..." : "Pagar con Mercado Pago"}
-            </button>
-            <button onClick={verificarPago} disabled={verificando} className="text-xs mono underline" style={{ color: C.muted }}>
-              {verificando ? "Verificando..." : "Ya pagué, verificar estado"}
-            </button>
+            {esAnonimo ? (
+              <div className="flex flex-col gap-2 rounded-md px-3 py-3" style={{ background: C.panelAlt, border: `1px solid ${C.food}` }}>
+                <span className="text-xs" style={{ color: C.text }}>
+                  Antes de pagar, crea tu cuenta (con email y contraseña) para poder asociar el pago y recuperar tu acceso si cambias de celular.
+                </span>
+                <button
+                  onClick={onCrearCuenta}
+                  className="py-2 rounded-md font-medium text-sm"
+                  style={{ background: C.food, color: C.bg }}
+                >
+                  Crear cuenta
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={irAPagar}
+                  disabled={pagando}
+                  className="block text-center w-full py-3.5 rounded-md font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
+                  style={{
+                    background: `linear-gradient(135deg, ${C.food}, #E0A83A)`,
+                    color: C.bg,
+                    opacity: pagando ? 0.6 : 1,
+                    boxShadow: "0 8px 22px rgba(255,193,69,0.3)",
+                  }}
+                >
+                  {pagando ? "Generando link de pago..." : "Pagar con Mercado Pago"}
+                </button>
+                <button onClick={verificarPago} disabled={verificando} className="text-xs mono underline" style={{ color: C.muted }}>
+                  {verificando ? "Verificando..." : "Ya pagué, verificar estado"}
+                </button>
+              </>
+            )}
             {avisoVerificacion && (
               <p className="text-xs" style={{ color: avisoVerificacion.ok ? C.food : C.danger }}>{avisoVerificacion.texto}</p>
             )}
@@ -4409,7 +4548,7 @@ function Onboarding({ onCompletar, storageDisponible }) {
 }
 
 // ---------- MODAL PERFIL ----------
-function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda }) {
+function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda, esAnonimo, onCrearCuenta }) {
   const [form, setForm] = useState(perfil);
   const [datos, setDatos] = useState({
     peso: perfil.peso || "",
@@ -4568,9 +4707,15 @@ function ModalPerfil({ perfil, onGuardar, onCerrar, onVerTerminos, onVerAyuda })
         <button onClick={onVerTerminos} className="w-full text-center text-[10px] mt-3 underline" style={{ color: C.muted }}>
           Términos y Privacidad
         </button>
-        <button onClick={cerrarSesion} className="w-full text-center text-[10px] mt-2 underline" style={{ color: C.danger }}>
-          Cerrar sesión
-        </button>
+        {esAnonimo ? (
+          <button onClick={onCrearCuenta} className="w-full text-center text-[10px] mt-2 underline" style={{ color: C.food }}>
+            Crear cuenta (no perder tu progreso)
+          </button>
+        ) : (
+          <button onClick={cerrarSesion} className="w-full text-center text-[10px] mt-2 underline" style={{ color: C.danger }}>
+            Cerrar sesión
+          </button>
+        )}
       </div>
     </div>
   );
