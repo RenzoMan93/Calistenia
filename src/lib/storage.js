@@ -5,6 +5,10 @@ import { supabase } from "./supabaseClient";
 // Las claves ("perfil", "progresion", "registro:YYYY-MM-DD", etc.) son las
 // mismas que ya usaba la app; solo cambia dónde viven.
 
+export async function cerrarSesion() {
+  await supabase.auth.signOut();
+}
+
 async function currentUserId() {
   const { data, error } = await supabase.auth.getSession();
   if (error || !data?.session?.user) {

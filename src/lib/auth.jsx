@@ -14,10 +14,6 @@ const C = {
   danger: "#E8503A",
 };
 
-export async function cerrarSesion() {
-  await supabase.auth.signOut();
-}
-
 function LoginScreen({ soloLogin = false, onCerrar }) {
   const [modo, setModo] = useState("login"); // "login" | "signup" | "recuperar"
   const [email, setEmail] = useState("");
