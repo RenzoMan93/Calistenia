@@ -23,8 +23,9 @@ propia (Supabase) — ya no depende de tener cuenta paga de Claude.
 
 ## 2) Correr las migraciones SQL
 
-Abrí el **SQL Editor** de tu proyecto Supabase y pegá el contenido de
-`supabase/migrations/0001_init.sql`, o instalá la CLI de Supabase y corré:
+Abrí el **SQL Editor** de tu proyecto Supabase y pegá, en orden, el contenido
+de cada archivo de `supabase/migrations/` (de `0001_init.sql` a
+`0006_blindar_suscripcion.sql`), o instalá la CLI de Supabase y corré:
 
 ```bash
 supabase link --project-ref <tu-project-ref>
@@ -126,7 +127,7 @@ src/
     storage.js         # safeGet/safeSet + wrappers de las funciones RPC
     auth.jsx            # Pantalla de login/signup + gate de sesión
 supabase/
-  migrations/0001_init.sql   # Esquema completo + RLS + funciones RPC
+  migrations/                # Esquema + RLS + funciones RPC (correr en orden, 0001 → 0006)
   functions/
     mercadopago-create-preference/  # Crea el link de pago
     mercadopago-webhook/            # Activa Premium al confirmar el pago

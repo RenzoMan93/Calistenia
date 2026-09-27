@@ -13,6 +13,7 @@ import {
   adminListarUsuarios,
   adminActivarPremium,
   redeemPremiumCode,
+  iniciarSuscripcion,
   crearPreferenciaPago,
   usuarioActualId,
   listarSugerencias,
@@ -537,7 +538,13 @@ function calcularObjetivoDiario({ peso, altura, edad, sexo, actividad, objetivo 
 
 const NIVELES_ACTIVIDAD_MAP = NIVELES_ACTIVIDAD;
 
-const hoy = () => new Date().toISOString().slice(0, 10);
+const pad2 = (n) => String(n).padStart(2, "0");
+
+// Fecha local (YYYY-MM-DD), no UTC: con toISOString() en Uruguay (UTC-3)
+// después de las 21 h "hoy" pasaba a ser mañana, así que lo que se cargaba de
+// noche quedaba guardado en el día siguiente.
+const isoLocal = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const hoy = () => isoLocal(new Date());
 
 const fechaLegible = (iso) => {
   const d = new Date(iso + "T00:00:00");
@@ -548,11 +555,10 @@ const ultimosDias = (n) => {
   for (let i = n - 1; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    arr.push(d.toISOString().slice(0, 10));
+    arr.push(isoLocal(d));
   }
   return arr;
 };
-const pad2 = (n) => String(n).padStart(2, "0");
 const NOMBRES_MES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
 // Plan semanal sugerido: cuerpo completo (los 4 grupos musculares) de lunes
@@ -640,10 +646,12 @@ export default function App({ session, onIniciarSesionExistente }) {
       // de una logros que ya tenía cumplidos hace rato.
       setLogrosVistos(lv);
 
+      // La suscripción ya no se puede escribir desde el cliente (si no,
+      // cualquiera podía ponerse premiumHasta a mano): la prueba gratis la
+      // arranca el servidor (ver 0006_blindar_suscripcion.sql).
       let susActual = sus;
       if (!susActual) {
-        susActual = { trialStart: fecha, diasBonus: 0, premiumHasta: null };
-        await safeSet("suscripcion", susActual);
+        susActual = (await iniciarSuscripcion()) || { trialStart: fecha, diasBonus: 0, premiumHasta: null };
       }
       setSuscripcion(susActual);
       setOnboarding(onb || { completo: false });
@@ -992,7 +1000,9 @@ export default function App({ session, onIniciarSesionExistente }) {
           />
         )}
         {tab === "consejos" && <VistaConsejos perfil={perfil} progresion={progresion} />}
-        {tab === "sugerencias" && <VistaSugerencias perfil={perfil} />}
+        {tab === "sugerencias" && (
+          <VistaSugerencias perfil={perfil} esAnonimo={esAnonimo} onCrearCuenta={() => setMostrarCrearCuenta(true)} />
+        )}
       </main>
       </div>
 
@@ -3643,7 +3653,7 @@ function hacePoco(fechaIso) {
   return `hace ${diffDias}d`;
 }
 
-function VistaSugerencias({ perfil }) {
+function VistaSugerencias({ perfil, esAnonimo, onCrearCuenta }) {
   const [lista, setLista] = useState(null);
   const [miUserId, setMiUserId] = useState(null);
   const [estrellas, setEstrellas] = useState(5);
@@ -3706,6 +3716,18 @@ function VistaSugerencias({ perfil }) {
             </span>
           </div>
         )}
+        {esAnonimo ? (
+          // Sin cuenta no se puede publicar (lo bloquea también el servidor,
+          // ver 0006_blindar_suscripcion.sql), para evitar spam anónimo.
+          <div className="flex flex-col gap-2">
+            <p className="text-xs" style={{ color: C.muted }}>
+              Para publicar una sugerencia necesitas crear tu cuenta (no pierdes nada de lo que ya cargaste).
+            </p>
+            <button onClick={onCrearCuenta} className="py-2 rounded font-medium" style={{ background: C.food, color: C.bg }}>
+              Crear mi cuenta
+            </button>
+          </div>
+        ) : (
         <form onSubmit={enviar} className="flex flex-col gap-2">
           <SelectorEstrellas valor={estrellas} onCambiar={setEstrellas} />
           <textarea
@@ -3727,6 +3749,7 @@ function VistaSugerencias({ perfil }) {
           </button>
           {mensaje && <p className="text-xs" style={{ color: C.danger }}>{mensaje}</p>}
         </form>
+        )}
       </Panel>
 
       <Panel>

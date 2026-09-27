@@ -142,6 +142,18 @@ export async function adminActivarPremium(email, dias = 30) {
   return data;
 }
 
+// Arranca la prueba gratis del usuario del lado del servidor (la clave
+// "suscripcion" no se puede escribir desde el cliente). Si ya existía, la
+// devuelve tal cual, sin reiniciar la prueba.
+export async function iniciarSuscripcion() {
+  const { data, error } = await supabase.rpc("iniciar_suscripcion");
+  if (error) {
+    console.error("iniciar_suscripcion error", error);
+    return null;
+  }
+  return data;
+}
+
 const MENSAJES_PREMIUM = {
   not_found: "Ese código no existe. Revisá que esté bien escrito.",
   already_used: "Ese código ya fue usado.",
