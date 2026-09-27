@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Crown } from "lucide-react";
 import { C } from "../tema";
 import { PRECIO_PREMIUM } from "../data/planes";
+import { reintentarGuardados, suscribirGuardadosPendientes } from "../lib/storage";
 
 // Se muestra mientras la cuenta es anónima (creada sola al abrir la app por
 // primera vez, sin pedir registro, para que se pueda probar todo antes de
@@ -25,6 +26,55 @@ export function BannerCuentaAnonima({ onCrearCuenta, onIniciarSesionExistente })
           Crear cuenta
         </button>
       </div>
+    </div>
+  );
+}
+
+// Aviso flotante (encima de la barra de pestañas) cuando algo que cargó el
+// usuario no se pudo guardar en el servidor. Se reintenta solo (ver safeSet
+// en lib/storage.js); el botón es para no tener que esperar. Mientras haya
+// cambios sin guardar, cerrar o recargar la pestaña pide confirmación.
+export function AvisoGuardado() {
+  const [sinGuardar, setSinGuardar] = useState(0);
+  const [reintentando, setReintentando] = useState(false);
+
+  useEffect(() => suscribirGuardadosPendientes(setSinGuardar), []);
+
+  useEffect(() => {
+    if (sinGuardar === 0) return;
+    const avisar = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", avisar);
+    return () => window.removeEventListener("beforeunload", avisar);
+  }, [sinGuardar]);
+
+  if (sinGuardar === 0) return null;
+
+  const reintentar = async () => {
+    setReintentando(true);
+    await reintentarGuardados();
+    setReintentando(false);
+  };
+
+  return (
+    <div
+      role="alert"
+      className="fixed left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-xl z-40 flex items-center justify-between gap-3 rounded-md px-3 py-2 text-xs"
+      style={{ bottom: 72, background: C.panelAlt, border: `1px solid ${C.danger}`, color: C.text, boxShadow: "0 6px 16px rgba(0,0,0,0.4)" }}
+    >
+      <span>
+        <span style={{ color: C.danger }}>⚠ No se pudieron guardar tus últimos cambios.</span> Revisa tu conexión; lo seguimos intentando.
+      </span>
+      <button
+        onClick={reintentar}
+        disabled={reintentando}
+        className="px-2 py-1 rounded font-medium flex-shrink-0"
+        style={{ background: C.danger, color: C.text, opacity: reintentando ? 0.6 : 1 }}
+      >
+        {reintentando ? "Guardando..." : "Reintentar"}
+      </button>
     </div>
   );
 }

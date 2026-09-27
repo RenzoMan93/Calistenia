@@ -34,16 +34,93 @@ export async function safeGet(key) {
   }
 }
 
-export async function safeSet(key, value) {
+// Guardado con aviso de errores. Antes, si una escritura fallaba (sin
+// conexión, sesión vencida, Supabase caído) el error solo iba a la consola:
+// el usuario seguía viendo sus datos en pantalla y los perdía al recargar sin
+// enterarse. Ahora:
+// - las escrituras de una misma clave van en fila (nunca llega una vieja
+//   después de una nueva), y si hay varias en espera solo se manda la última;
+// - si falla, el valor queda en "pendientes", la app muestra un aviso (ver
+//   AvisoGuardado) y se reintenta sola al volver la conexión o cada 20 s.
+const colasPorClave = new Map(); // clave -> promesa de la última escritura en fila
+const ultimaVersion = new Map(); // clave -> número de la última escritura pedida
+const pendientes = new Map(); // clave -> último valor que no se pudo guardar
+const oyentesGuardado = new Set();
+let versionActual = 0;
+let reintentoProgramado = null;
+
+function avisarOyentes() {
+  for (const fn of oyentesGuardado) fn(pendientes.size);
+}
+
+function programarReintento() {
+  if (reintentoProgramado || pendientes.size === 0) return;
+  reintentoProgramado = setTimeout(() => {
+    reintentoProgramado = null;
+    reintentarGuardados();
+  }, 20000);
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => reintentarGuardados());
+}
+
+function enFila(key, tarea) {
+  const anterior = colasPorClave.get(key) || Promise.resolve();
+  const actual = anterior.then(tarea, tarea);
+  colasPorClave.set(key, actual);
+  actual.finally(() => {
+    if (colasPorClave.get(key) === actual) colasPorClave.delete(key);
+  });
+  return actual;
+}
+
+async function escribir(key, value) {
   try {
     const userId = await currentUserId();
     const { error } = await supabase
       .from("user_data")
       .upsert({ user_id: userId, key, value }, { onConflict: "user_id,key" });
     if (error) throw error;
+    pendientes.delete(key);
   } catch (e) {
     console.error("storage set error", key, e);
+    pendientes.set(key, value);
+    programarReintento();
   }
+  avisarOyentes();
+}
+
+export function safeSet(key, value) {
+  const version = ++versionActual;
+  ultimaVersion.set(key, version);
+  return enFila(key, async () => {
+    // Ya hay una escritura más nueva de esta clave en fila: se saltea esta
+    // (la nueva guarda el valor actualizado).
+    if (ultimaVersion.get(key) !== version) return;
+    await escribir(key, value);
+  });
+}
+
+// Vuelve a mandar lo que no se pudo guardar. Lee el valor pendiente recién
+// cuando le toca su turno en la fila, así nunca pisa algo más nuevo.
+export function reintentarGuardados() {
+  return Promise.all(
+    [...pendientes.keys()].map((key) =>
+      enFila(key, async () => {
+        if (!pendientes.has(key)) return;
+        await escribir(key, pendientes.get(key));
+      })
+    )
+  );
+}
+
+// Se suscribe a la cantidad de claves sin guardar. Devuelve la función para
+// desuscribirse.
+export function suscribirGuardadosPendientes(fn) {
+  oyentesGuardado.add(fn);
+  fn(pendientes.size);
+  return () => oyentesGuardado.delete(fn);
 }
 
 // Historial de marcas para un ejercicio puntual: recorre los últimos registros
@@ -100,8 +177,14 @@ export async function listRegistroKeysForMonth(monthKey) {
 
 export async function verificarStorage() {
   try {
+    // Escritura directa (sin la fila de reintentos de safeSet): si esto
+    // falla ya lo avisa BannerStorage, no hace falta reintentarlo.
     const marca = String(Date.now());
-    await safeSet("__test_storage__", { marca });
+    const userId = await currentUserId();
+    const { error } = await supabase
+      .from("user_data")
+      .upsert({ user_id: userId, key: "__test_storage__", value: { marca } }, { onConflict: "user_id,key" });
+    if (error) throw error;
     const leido = await safeGet("__test_storage__");
     return Boolean(leido && leido.marca === marca);
   } catch {
