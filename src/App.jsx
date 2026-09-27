@@ -1,24 +1,42 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { Home, Dumbbell, Apple, TrendingUp, Settings, Lightbulb, HelpCircle, Star } from "lucide-react";
 import { safeGet, safeSet, verificarStorage, iniciarSuscripcion } from "./lib/storage";
-import { AdminCodigos } from "./views/AdminCodigos.jsx";
-import { BannerCuentaAnonima, BannerPlan, BannerStorage } from "./components/banners.jsx";
+import { AvisoGuardado, BannerCuentaAnonima, BannerPlan, BannerStorage } from "./components/banners.jsx";
 import { C } from "./tema";
 import { DIAS_PRUEBA, NIVEL_LIMITE_FREE, UMBRAL_SUBIR_NIVEL, premiumActivo } from "./data/planes";
 import { LOGROS_DEF, TRACKS, planDeHoy } from "./data/entrenamiento";
-import { ModalAyuda } from "./views/ModalAyuda.jsx";
 import { ModalCrearCuenta, ModalLogro, ModalPlanes, ModalRecordatorioRenovacion, ModalSugerenciaNivel } from "./components/modales.jsx";
-import { ModalPerfil } from "./views/ModalPerfil.jsx";
-import { ModalTerminos } from "./views/ModalTerminos.jsx";
 import { NavBtn } from "./components/ui.jsx";
-import { Onboarding } from "./views/Onboarding.jsx";
-import { VistaConsejos } from "./views/VistaConsejos.jsx";
-import { VistaEntrenamiento } from "./views/VistaEntrenamiento.jsx";
 import { VistaHoy } from "./views/VistaHoy.jsx";
-import { VistaNutricion } from "./views/VistaNutricion.jsx";
-import { VistaProgreso } from "./views/VistaProgreso.jsx";
-import { VistaSugerencias } from "./views/VistaSugerencias.jsx";
 import { diasEntre, fechaLegible, hoy, uid, ultimosDias } from "./lib/fechas";
+
+// Las pantallas que no se ven al abrir la app se descargan recién cuando se
+// necesitan (cada una en su propio archivo), así la primera carga en el
+// celular es mucho más liviana. Los gráficos (recharts, lo más pesado) solo
+// los usan Entreno y Progreso.
+const vistaDiferida = (cargar, nombre) => {
+  const Componente = lazy(() => cargar().then((m) => ({ default: m[nombre] })));
+  Componente.precargar = cargar;
+  return Componente;
+};
+const VistaEntrenamiento = vistaDiferida(() => import("./views/VistaEntrenamiento.jsx"), "VistaEntrenamiento");
+const VistaNutricion = vistaDiferida(() => import("./views/VistaNutricion.jsx"), "VistaNutricion");
+const VistaProgreso = vistaDiferida(() => import("./views/VistaProgreso.jsx"), "VistaProgreso");
+const VistaConsejos = vistaDiferida(() => import("./views/VistaConsejos.jsx"), "VistaConsejos");
+const VistaSugerencias = vistaDiferida(() => import("./views/VistaSugerencias.jsx"), "VistaSugerencias");
+const Onboarding = vistaDiferida(() => import("./views/Onboarding.jsx"), "Onboarding");
+const ModalPerfil = vistaDiferida(() => import("./views/ModalPerfil.jsx"), "ModalPerfil");
+const ModalAyuda = vistaDiferida(() => import("./views/ModalAyuda.jsx"), "ModalAyuda");
+const ModalTerminos = vistaDiferida(() => import("./views/ModalTerminos.jsx"), "ModalTerminos");
+const AdminCodigos = vistaDiferida(() => import("./views/AdminCodigos.jsx"), "AdminCodigos");
+
+function CargandoVista() {
+  return (
+    <div className="py-10 text-center text-sm" style={{ color: C.muted }}>
+      Cargando...
+    </div>
+  );
+}
 
 export default function App({ session, onIniciarSesionExistente }) {
   const esAnonimo = session?.user?.is_anonymous === true;
@@ -307,6 +325,17 @@ export default function App({ session, onIniciarSesionExistente }) {
     { kcal: 0, prot: 0, carb: 0, grasa: 0 }
   );
 
+  // Una vez abierta la app, las pestañas principales se bajan en segundo
+  // plano: así cambiar de pestaña es instantáneo y, gracias al service
+  // worker, también quedan disponibles sin conexión.
+  useEffect(() => {
+    if (cargando) return;
+    const t = setTimeout(() => {
+      [VistaEntrenamiento, VistaNutricion, VistaProgreso].forEach((v) => v.precargar().catch(() => {}));
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [cargando]);
+
   if (cargando) {
     return (
       <div style={{ background: C.bg, color: C.muted }} className="min-h-screen flex items-center justify-center font-sans">
@@ -316,7 +345,11 @@ export default function App({ session, onIniciarSesionExistente }) {
   }
 
   if (onboarding && !onboarding.completo) {
-    return <Onboarding onCompletar={completarOnboarding} storageDisponible={storageDisponible} />;
+    return (
+      <Suspense fallback={<div style={{ background: C.bg }} className="min-h-screen"><CargandoVista /></div>}>
+        <Onboarding onCompletar={completarOnboarding} storageDisponible={storageDisponible} />
+      </Suspense>
+    );
   }
 
   return (
@@ -377,6 +410,7 @@ export default function App({ session, onIniciarSesionExistente }) {
       </div>
 
       <main className="px-4 mt-4">
+        <Suspense fallback={<CargandoVista />}>
         {tab === "hoy" && (
           <VistaHoy
             totales={totales}
@@ -438,9 +472,11 @@ export default function App({ session, onIniciarSesionExistente }) {
         {tab === "sugerencias" && (
           <VistaSugerencias perfil={perfil} esAnonimo={esAnonimo} onCrearCuenta={() => setMostrarCrearCuenta(true)} />
         )}
+        </Suspense>
       </main>
       </div>
 
+      <Suspense fallback={null}>
       {editandoPerfil && (
         <ModalPerfil
           perfil={perfil}
@@ -490,6 +526,7 @@ export default function App({ session, onIniciarSesionExistente }) {
       {mostrarCrearCuenta && <ModalCrearCuenta onCerrar={() => setMostrarCrearCuenta(false)} />}
 
       {mostrarAdmin && <AdminCodigos onCerrar={() => setMostrarAdmin(false)} />}
+      </Suspense>
       {sugerenciaNivel && (
         <ModalSugerenciaNivel
           track={sugerenciaNivel.track}
@@ -498,6 +535,8 @@ export default function App({ session, onIniciarSesionExistente }) {
           onDescartar={descartarSugerenciaNivel}
         />
       )}
+
+      <AvisoGuardado />
 
       <nav
         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl flex justify-around py-2"
